@@ -21,8 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const audioA = document.getElementById('audioA');
     const audioB = document.getElementById('audioB');
     const previewBtns = document.querySelectorAll('.preview-btn');
-    const toggleRankingsBtn = document.getElementById('toggle-rankings-btn'); // ADD THIS
-    const rankingContainer = document.querySelector('.ranking-container'); // ADD THIS
+    const toggleRankingsBtn = document.getElementById('toggle-rankings-btn');
+    const rankingContainer = document.querySelector('.ranking-container');
 
     // --- CORE LOGIC ---
     function updateElo(winnerRating, loserRating) {
