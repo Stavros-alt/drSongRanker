@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     let currentSongA, currentSongB;
+    let activePreviewTimeout = null; // ADD THIS LINE
     const PREVIEW_DURATION = 10000;
     const PREVIEW_START_TIME = 30;
 
@@ -70,6 +71,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         audioA.src = encodeURI(currentSongA.file);
         audioB.src = encodeURI(currentSongB.file);
+
+        // ADD THESE TWO LINES to force the browser to start loading the audio
+        audioA.load();
+        audioB.load();
     }
 
     function handleChoice(winner) {
@@ -93,17 +98,34 @@ document.addEventListener('DOMContentLoaded', () => {
         updateApp();
     }
 
+    // Replace the old playPreview function with this one
     function playPreview(songKey) {
+        // First, if another preview is scheduled to be paused, cancel that timer.
+        if (activePreviewTimeout) {
+            clearTimeout(activePreviewTimeout);
+        }
+
         const audioEl = (songKey === 'A') ? audioA : audioB;
         const otherAudioEl = (songKey === 'A') ? audioB : audioA;
-        otherAudioEl.pause();
+        otherAudioEl.pause(); // Stop other preview if playing
         
         audioEl.currentTime = PREVIEW_START_TIME;
-        audioEl.play().catch(e => console.error("Audio play failed:", e));
+        
+        // The .play() method returns a promise. We'll use it to handle things gracefully.
+        const playPromise = audioEl.play();
 
-        setTimeout(() => {
-            audioEl.pause();
-        }, PREVIEW_DURATION);
+        if (playPromise !== undefined) {
+            playPromise.then(_ => {
+                // Audio is playing. Now, set the timer to pause it.
+                // Store the ID of this new timer so we can cancel it later if needed.
+                activePreviewTimeout = setTimeout(() => {
+                    audioEl.pause();
+                }, PREVIEW_DURATION);
+            }).catch(error => {
+                // This will catch errors, e.g., if the user hasn't interacted with the page.
+                console.error("Audio playback error:", error);
+            });
+        }
     }
 
     // --- Community Functions ---
