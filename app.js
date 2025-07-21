@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
             rankingList.innerHTML = '';
             data.forEach((song, index) => {
                 const li = document.createElement('li');
-                li.textContent = `${index + 1}. ${song.name}`;
+                li.textContent = song.name;
                 const details = document.createElement('small');
                 details.textContent = ` (Rating: ${Math.round(song.rating)})`;
                 li.appendChild(details);
@@ -152,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         sortedSongs.forEach((song, index) => {
             const li = document.createElement('li');
-            li.textContent = `${index + 1}. ${song.name}`;
+            li.textContent = song.name;
             const details = document.createElement('small');
             details.textContent = `(Rating: ${Math.round(song.rating)})`;
             li.appendChild(details);

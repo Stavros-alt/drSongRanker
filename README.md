@@ -20,6 +20,12 @@ This app uses a pairwise comparison method powered by an Elo rating system. You 
 4.  **Check Your Ranking:** Watch your personalized ranking take shape on the right-hand side of the screen.
 5.  **Repeat!** The more you vote, the more accurate your final list will become. Aim for at least 150-200 comparisons for a solid list.
 
+## Support the Project
+
+This is a free fan-project created for the community. If you enjoy using this tool and want to show your appreciation, you can support its development and help cover potential future costs (like a custom domain).
+
+[![Ko-fi Badge](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/stavros916)
+
 ## For Developers (Running Locally)
 
 If you want to run this project on your own machine:

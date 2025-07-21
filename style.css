@@ -225,3 +225,33 @@ button:hover {
   color: #000;
   border-color: #fff;
 }
+/* === Ko-fi Button Styles === */
+#kofi-link {
+  text-decoration: none; /* Remove the underline from the link */
+}
+
+#kofi-btn {
+  /* Give it a slightly different look to stand out */
+  border-color: #29b6f6; /* Ko-fi's brand blue color is a nice touch */
+  color: #29b6f6;
+  margin-bottom: 10px; /* Add some space below it */
+}
+
+#kofi-btn:hover {
+  background-color: #29b6f6;
+  color: #000;
+}
+
+/* Make sure it fits in the mobile layout */
+@media (max-width: 800px) {
+  #kofi-link, #kofi-btn {
+    width: 90%; /* Match the width of other mobile control buttons */
+  }
+
+  .controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+  }
+}
