@@ -6,7 +6,7 @@ This app uses a pairwise comparison method powered by an Elo rating system. You 
 
 ## Features
 
--   **Full Soundtrack:** Includes all 164 songs from Deltarune Chapters 1 and 2.
+-   **Full Soundtrack:** Includes all 165 songs from Deltarune.
 -   **Elo-Based Ranking:** No tedious drag-and-drop. Just simple "this or that" choices.
 -   **Song Previews:** Not sure which song is which? Each choice includes a "Play Preview" button to jog your memory.
 -   **Saves Your Progress:** All your rankings are saved automatically in your browser. You can close the tab and continue right where you left off at any time.
@@ -14,7 +14,7 @@ This app uses a pairwise comparison method powered by an Elo rating system. You 
 
 ## How to Use
 
-1.  **Open the Tool:** [Click here to access the Deltarune Song Ranker](https://Stavros-alt.github.io/deltarune-song-ranker/)
+1.  **Open the Tool:** [Click here to access the Deltarune Song Ranker](https://Stavros-alt.github.io/drSongRanker/)
 2.  **Start Comparing:** The app will present you with two random songs.
 3.  **Listen and Choose:** Use the "Play Preview" buttons if needed, then click the button for the song you prefer. If you can't decide or don't know the songs, you can select "It's a Tie / Skip".
 4.  **Check Your Ranking:** Watch your personalized ranking take shape on the right-hand side of the screen.
