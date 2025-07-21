@@ -1,3 +1,11 @@
+/* === A Simple CSS Reset === */
+/* This prevents browser inconsistencies and fixes zoom/overflow issues */
+html {
+  box-sizing: border-box;
+}
+*, *:before, *:after {
+  box-sizing: inherit;
+}
 body {
     background-color: #000;
     color: #fff;
@@ -8,9 +16,10 @@ body {
     padding: 20px;
 }
 
+/* === Main Layout === */
 .main-container {
     display: flex;
-    flex-wrap: wrap;
+    justify-content: center;
     gap: 40px;
     width: 100%;
     max-width: 1400px;
@@ -18,7 +27,6 @@ body {
 
 .arena-container {
     flex: 2;
-    min-width: 400px;
     text-align: center;
 }
 
@@ -47,12 +55,16 @@ h1, h2 {
 .song-card {
     border: 2px solid #fff;
     padding: 20px;
-    width: 40%;
-    min-height: 100px;
+    width: 45%;
+    min-height: 120px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+}
+
+.song-card h2 {
+  font-size: 1.5em;
 }
 
 .vs {
@@ -111,57 +123,61 @@ button:hover {
     color: #999;
     margin-left: 10px;
 }
+
 /* =================================== */
 /* === MOBILE RESPONSIVE STYLES === */
 /* =================================== */
 
-/* Apply these styles when the screen is 800px wide or less (tablets/phones) */
+/* This hides the rankings toggle button on desktop where it's not needed */
+@media (min-width: 801px) {
+  #toggle-rankings-btn {
+    display: none;
+  }
+}
+
+/* These styles apply only to screens 800px or less (tablets/phones) */
 @media (max-width: 800px) {
-  .main-container {
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
+  body {
+    padding: 10px; /* Reduce padding on small screens */
   }
 
-  .ranking-container,
+  .main-container {
+    flex-direction: column;
+  }
+
   .arena-container {
-    width: 100%;
-    max-width: 480px; /* Give it a max-width so it doesn't look weird on tablets */
-    flex: none;
+    /* This makes the main container a flexbox to center its children */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
   .ranking-container {
-    margin-top: 20px;
-    /* Hide the ranking list by default on mobile */
-    display: none;
-  }
-
-  /* This class will be toggled by JS to show the list */
-  .ranking-container.visible {
-    display: block;
-  }
-
-  #toggle-rankings-btn {
-    display: block; /* Make the new button visible */
     width: 100%;
-    margin-bottom: 15px;
+    order: 2; /* Make the rankings appear after the arena */
+    display: none; /* Hide by default */
   }
 
-  #ranking-list {
-    max-height: 60vh; /* Give the list a max height so it's scrollable */
-    overflow-y: auto;
+  .ranking-container.visible {
+    display: block; /* Show when toggled */
+    max-height: 70vh;
+  }
+
+  #toggle-rankings-btn,
+  #reset-btn {
+    width: 90%; /* Make control buttons a consistent width */
   }
 
   .arena {
     flex-direction: column;
+    width: 100%;
   }
 
   .song-card {
     width: 90%;
-    min-height: 80px; /* Make cards a bit shorter */
+    min-height: 100px;
   }
   
-  /* Make font smaller in cards to prevent wrapping */
   .song-card h2 {
     font-size: 1.3em;
   }
@@ -175,22 +191,14 @@ button:hover {
     flex-direction: column;
     align-items: center;
     gap: 10px;
+    width: 100%;
   }
 
   .choice-btn {
     width: 90%;
-    text-align: center;
   }
   
-  /* Hide the messy rating details on small screens */
   #ranking-list small {
-    display: none;
-  }
-}
-
-/* Hide the toggle button on desktop, since the list is always visible */
-@media (min-width: 801px) {
-  #toggle-rankings-btn {
-    display: none;
+    display: none; /* Hide messy rating details on mobile */
   }
 }
