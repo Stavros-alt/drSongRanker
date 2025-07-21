@@ -183,8 +183,9 @@ button:hover {
   }
 
   .vs {
-    transform: rotate(90deg);
-    margin: 15px 0;
+    /* We removed the 'transform' property to keep it horizontal */
+    font-size: 1.5em; /* Make it a bit smaller than the desktop version */
+    margin: 10px 0;   /* Adjust margin for better spacing */
   }
   
   .choices {
