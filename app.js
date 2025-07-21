@@ -21,6 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const audioA = document.getElementById('audioA');
     const audioB = document.getElementById('audioB');
     const previewBtns = document.querySelectorAll('.preview-btn');
+    const toggleRankingsBtn = document.getElementById('toggle-rankings-btn'); // ADD THIS
+    const rankingContainer = document.querySelector('.ranking-container'); // ADD THIS
 
     // --- CORE LOGIC ---
     function updateElo(winnerRating, loserRating) {
@@ -167,6 +169,11 @@ document.addEventListener('DOMContentLoaded', () => {
         resetBtn.addEventListener('click', resetState);
         previewBtns.forEach(btn => {
             btn.addEventListener('click', () => playPreview(btn.dataset.song));
+        });
+
+        // ADD THIS NEW EVENT LISTENER
+        toggleRankingsBtn.addEventListener('click', () => {
+            rankingContainer.classList.toggle('visible');
         });
 
         updateApp();
