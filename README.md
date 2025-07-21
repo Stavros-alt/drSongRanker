@@ -6,7 +6,7 @@ This app uses a pairwise comparison method powered by an Elo rating system. You 
 
 ## Features
 
--   **Full Soundtrack:** Includes all 164 songs from Deltarune Chapters 1 and 2.
+-   **Full Soundtrack:** Includes all 165 songs from Deltarune.
 -   **Elo-Based Ranking:** No tedious drag-and-drop. Just simple "this or that" choices.
 -   **Song Previews:** Not sure which song is which? Each choice includes a "Play Preview" button to jog your memory.
 -   **Saves Your Progress:** All your rankings are saved automatically in your browser. You can close the tab and continue right where you left off at any time.
