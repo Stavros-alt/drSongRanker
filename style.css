@@ -111,3 +111,61 @@ button:hover {
     color: #999;
     margin-left: 10px;
 }
+/* =================================== */
+/* === MOBILE RESPONSIVE STYLES === */
+/* =================================== */
+
+/* Apply these styles when the screen is 800px wide or less */
+@media (max-width: 800px) {
+  .main-container {
+    /* Stack the arena and ranking list vertically */
+    flex-direction: column;
+    align-items: center; /* Center them nicely */
+    gap: 20px;
+  }
+
+  .ranking-container,
+  .arena-container {
+    /* Allow both sections to take up more of the screen width */
+    width: 95%;
+    flex: none; /* Reset the flex-grow property */
+  }
+
+  .ranking-container {
+    /* Don't let the ranking list be super tall */
+    height: auto;
+    max-height: 60vh;
+    margin-top: 20px;
+  }
+}
+
+/* Apply these styles for very narrow screens, like phones */
+@media (max-width: 600px) {
+  .arena {
+    /* Stack the two song cards vertically */
+    flex-direction: column;
+  }
+
+  .song-card {
+    /* Let the cards take up most of the width */
+    width: 90%;
+  }
+
+  .vs {
+    /* The "VS" looks weird when cards are stacked, so we'll rotate it and give it some margin */
+    transform: rotate(90deg);
+    margin: 15px 0;
+  }
+
+  .choices {
+    /* Allow choice buttons to stack if needed */
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .choice-btn {
+    width: 90%;
+    text-align: center;
+  }
+}
