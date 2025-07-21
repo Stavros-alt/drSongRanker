@@ -1,6 +1,7 @@
-const SUPABASE_URL = 'https://tsqubxgafnzmxejwknbm.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzcXVieGdhZm56bXhlandrbmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwNzA2ODcsImV4cCI6MjA2ODY0NjY4N30.YY78tWRNQsK6OZREh-8w2fAxiLBbBaG4kZfVYROkirY';
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const SUPABASE_URL = 'https://tsqubxgafnzmxejwknbm.supabase.co'; // Make sure this is filled in
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzcXVieGdhZm56bXhlandrbmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwNzA2ODcsImV4cCI6MjA2ODY0NjY4N30.YY78tWRNQsK6OZREh-8w2fAxiLBbBaG4kZfVYROkirY'; // Make sure this is filled in
+const { createClient } = supabase;
+const supabase_client = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- STATE MANAGEMENT ---
@@ -92,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             // We call a "Remote Procedure Call" (RPC) on the backend
             // This function will handle the Elo logic securely
-            const { error } = await supabase.rpc('handle_vote', {
+            const { error } = await supabase_client.rpc('handle_vote', {
                 winner_id: winnerId,
                 loser_id: loserId
             });
@@ -133,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function displayCommunityRankings() {
         rankingList.innerHTML = '<li>Loading community data...</li>';
         try {
-            const { data, error } = await supabase
+            const { data, error } = await supabase_client
                 .from('songs')
                 .select('name, rating')
                 .order('rating', { ascending: false });
