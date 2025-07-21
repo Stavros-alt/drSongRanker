@@ -14,7 +14,7 @@ This app uses a pairwise comparison method powered by an Elo rating system. You 
 
 ## How to Use
 
-1.  **Open the Tool:** [Click here to access the Deltarune Song Ranker](https://Stavros-alt.github.io/deltarune-song-ranker/)
+1.  **Open the Tool:** [Click here to access the Deltarune Song Ranker](https://Stavros-alt.github.io/drSongRanker/)
 2.  **Start Comparing:** The app will present you with two random songs.
 3.  **Listen and Choose:** Use the "Play Preview" buttons if needed, then click the button for the song you prefer. If you can't decide or don't know the songs, you can select "It's a Tie / Skip".
 4.  **Check Your Ranking:** Watch your personalized ranking take shape on the right-hand side of the screen.
