@@ -203,3 +203,25 @@ button:hover {
     display: none; /* Hide messy rating details on mobile */
   }
 }
+/* === Ranking Toggle Styles === */
+.ranking-header {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.ranking-toggle-btn {
+  flex: 1;
+  padding: 10px;
+  border: 2px solid #555;
+  background-color: #000;
+  color: #fff;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 1em;
+}
+
+.ranking-toggle-btn.active {
+  background-color: #fff;
+  color: #000;
+  border-color: #fff;
+}

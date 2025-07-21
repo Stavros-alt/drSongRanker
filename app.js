@@ -1,3 +1,7 @@
+const SUPABASE_URL = 'https://tsqubxgafnzmxejwknbm.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzcXVieGdhZm56bXhlandrbmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwNzA2ODcsImV4cCI6MjA2ODY0NjY4N30.YY78tWRNQsK6OZREh-8w2fAxiLBbBaG4kZfVYROkirY';
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 document.addEventListener('DOMContentLoaded', () => {
     // --- STATE MANAGEMENT ---
     let state = {
@@ -23,6 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const previewBtns = document.querySelectorAll('.preview-btn');
     const toggleRankingsBtn = document.getElementById('toggle-rankings-btn');
     const rankingContainer = document.querySelector('.ranking-container');
+    const myRankingBtn = document.getElementById('my-ranking-btn'); // ADD THIS
+    const communityRankingBtn = document.getElementById('community-ranking-btn'); // ADD THIS
 
     // --- CORE LOGIC ---
     function updateElo(winnerRating, loserRating) {
@@ -74,9 +80,27 @@ document.addEventListener('DOMContentLoaded', () => {
             winnerSong.comparisons++;
             loserSong.comparisons++;
             state.comparisons++;
+            
+            // ADD THIS ONE LINE to send the vote to the community backend
+            recordCommunityVote(winnerSong.id, loserSong.id);
         }
         
         updateApp();
+    }
+
+    async function recordCommunityVote(winnerId, loserId) {
+        try {
+            // We call a "Remote Procedure Call" (RPC) on the backend
+            // This function will handle the Elo logic securely
+            const { error } = await supabase.rpc('handle_vote', {
+                winner_id: winnerId,
+                loser_id: loserId
+            });
+            if (error) throw error;
+            console.log("Community vote recorded!");
+        } catch (error) {
+            console.error("Error recording community vote:", error.message);
+        }
     }
 
     function playPreview(songKey) {
@@ -104,6 +128,30 @@ document.addEventListener('DOMContentLoaded', () => {
             li.appendChild(details);
             rankingList.appendChild(li);
         });
+    }
+
+    async function displayCommunityRankings() {
+        rankingList.innerHTML = '<li>Loading community data...</li>';
+        try {
+            const { data, error } = await supabase
+                .from('songs')
+                .select('name, rating')
+                .order('rating', { ascending: false });
+
+            if (error) throw error;
+
+            rankingList.innerHTML = ''; // Clear loading message
+            data.forEach((song, index) => {
+                const li = document.createElement('li');
+                li.textContent = `${index + 1}. ${song.name}`;
+                const details = document.createElement('small');
+                details.textContent = ` (Rating: ${Math.round(song.rating)})`;
+                li.appendChild(details);
+                rankingList.appendChild(li);
+            });
+        } catch (error) {
+            rankingList.innerHTML = `<li>Error: ${error.message}</li>`;
+        }
     }
 
     function updateProgress() {
@@ -171,9 +219,16 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.addEventListener('click', () => playPreview(btn.dataset.song));
         });
 
-        // ADD THIS NEW EVENT LISTENER
-        toggleRankingsBtn.addEventListener('click', () => {
-            rankingContainer.classList.toggle('visible');
+        myRankingBtn.addEventListener('click', () => {
+            communityRankingBtn.classList.remove('active');
+            myRankingBtn.classList.add('active');
+            displayRankings(); // The original function for local rankings
+        });
+
+        communityRankingBtn.addEventListener('click', () => {
+            myRankingBtn.classList.remove('active');
+            communityRankingBtn.classList.add('active');
+            displayCommunityRankings(); // The new function
         });
 
         updateApp();

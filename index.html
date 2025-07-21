@@ -35,7 +35,10 @@
         </div>
 
         <div class="ranking-container">
-            <h2>Current Rankings</h2>
+            <div class="ranking-header">
+                <button id="my-ranking-btn" class="ranking-toggle-btn active">My Ranking</button>
+                <button id="community-ranking-btn" class="ranking-toggle-btn">Community</button>
+            </div>
             <ol id="ranking-list"></ol>
         </div>
     </div>
@@ -43,7 +46,8 @@
     <audio id="audioA"></audio>
     <audio id="audioB"></audio>
 
-    <script src="app_song_data.js"></script> 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="app_song_data.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
