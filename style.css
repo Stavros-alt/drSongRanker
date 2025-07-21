@@ -1,0 +1,113 @@
+body {
+    background-color: #000;
+    color: #fff;
+    font-family: 'Courier New', Courier, monospace;
+    display: flex;
+    justify-content: center;
+    margin: 0;
+    padding: 20px;
+}
+
+.main-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
+    width: 100%;
+    max-width: 1400px;
+}
+
+.arena-container {
+    flex: 2;
+    min-width: 400px;
+    text-align: center;
+}
+
+.ranking-container {
+    flex: 1;
+    min-width: 300px;
+    background-color: #111;
+    border: 2px solid #fff;
+    padding: 20px;
+    height: 85vh;
+    overflow-y: auto;
+}
+
+h1, h2 {
+    text-transform: uppercase;
+}
+
+.arena {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin: 20px 0;
+    gap: 20px;
+}
+
+.song-card {
+    border: 2px solid #fff;
+    padding: 20px;
+    width: 40%;
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.vs {
+    font-size: 2em;
+    font-weight: bold;
+}
+
+.choices {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+button {
+    background-color: #000;
+    color: #fff;
+    border: 2px solid #fff;
+    padding: 10px 20px;
+    font-family: inherit;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    margin-top: 5px;
+}
+
+button:hover {
+    background-color: #fff;
+    color: #000;
+}
+
+#progress-indicator {
+    margin-top: 20px;
+    font-size: 1.2em;
+}
+
+.controls {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 2px solid #333;
+}
+
+#ranking-list {
+    list-style-type: decimal;
+    padding-left: 30px;
+}
+
+#ranking-list li {
+    padding: 5px 0;
+    border-bottom: 1px solid #333;
+    word-break: break-word;
+}
+
+#ranking-list small {
+    color: #999;
+    margin-left: 10px;
+}

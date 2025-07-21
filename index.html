@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deltarune Song Ranker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="main-container">
+        <div class="arena-container">
+            <h1>Which song is better?</h1>
+            <div class="arena">
+                <div id="songA" class="song-card">
+                    <h2 id="songA-name"></h2>
+                    <button class="preview-btn" data-song="A">Play Preview</button>
+                </div>
+                <div class="vs">VS</div>
+                <div id="songB" class="song-card">
+                    <h2 id="songB-name"></h2>
+                    <button class="preview-btn" data-song="B">Play Preview</button>
+                </div>
+            </div>
+            <div class="choices">
+                <button id="chooseA-btn" class="choice-btn"></button>
+                <button id="tie-btn" class="choice-btn">It's a Tie / Skip</button>
+                <button id="chooseB-btn" class="choice-btn"></button>
+            </div>
+            <div id="progress-indicator"></div>
+            <div class="controls">
+                <!-- Placeholder for monetization button -->
+                <a id="support-link" href="https://ko-fi.com/" target="_blank" class="support-btn" style="display: none;">
+                    <button>Like this tool? Support it!</button>
+                </a>
+                <button id="reset-btn">Reset All Progress</button>
+            </div>
+        </div>
+
+        <div class="ranking-container">
+            <h2>Current Rankings</h2>
+            <ol id="ranking-list"></ol>
+        </div>
+    </div>
+
+    <audio id="audioA"></audio>
+    <audio id="audioB"></audio>
+
+    <!-- Load the auto-generated song data first -->
+    <script src="app_song_data.js"></script> 
+    <!-- Then load the main application logic -->
+    <script src="app.js"></script>
+</body>
+</html>
