@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     let currentSongA, currentSongB;
+    let previousRanking = [];
     let activePreviewTimeout = null; // ADD THIS LINE
     const PREVIEW_DURATION = 10000;
     const PREVIEW_START_TIME = 30;
@@ -29,6 +30,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- DOM ELEMENTS ---
     const songAName = document.getElementById('songA-name');
     const songBName = document.getElementById('songB-name');
+    const songACard = document.getElementById('songA-card');
+    const songBCard = document.getElementById('songB-card');
+    const arena = document.querySelector('.arena');
     const chooseABtn = document.getElementById('chooseA-btn');
     const chooseBBtn = document.getElementById('chooseB-btn');
     const tieBtn = document.getElementById('tie-btn');
@@ -75,14 +79,37 @@ document.addEventListener('DOMContentLoaded', () => {
         // ADD THESE TWO LINES to force the browser to start loading the audio
         audioA.load();
         audioB.load();
+
+        // Animation logic
+        arena.classList.remove('slide-in');
+        // We use a timeout of 0 to allow the browser to remove the class before re-adding it,
+        // which is necessary to re-trigger the animation.
+        setTimeout(() => {
+            songACard.classList.remove('selected', 'loser');
+            songBCard.classList.remove('selected', 'loser');
+            arena.classList.add('slide-in');
+        }, 0);
     }
 
     function handleChoice(winner) {
         if (!currentSongA || !currentSongB) return;
 
+        // Stop any playing audio
+        audioA.pause();
+        audioB.pause();
+        if (activePreviewTimeout) {
+            clearTimeout(activePreviewTimeout);
+        }
+
         if (winner) {
             const winnerSong = (winner === 'A') ? currentSongA : currentSongB;
             const loserSong = (winner === 'A') ? currentSongB : currentSongA;
+            const winnerCard = (winner === 'A') ? songACard : songBCard;
+            const loserCard = (winner === 'A') ? songBCard : songACard;
+
+            // Apply visual feedback
+            winnerCard.classList.add('selected');
+            loserCard.classList.add('loser');
 
             const { newWinnerRating, newLoserRating } = updateElo(winnerSong.rating, loserSong.rating);
             winnerSong.rating = newWinnerRating;
@@ -95,7 +122,10 @@ document.addEventListener('DOMContentLoaded', () => {
             recordCommunityVote(winnerSong.id, loserSong.id);
         }
         
-        updateApp();
+        // Wait for the animation to play out before updating
+        setTimeout(() => {
+            updateApp();
+        }, 1200); // 1.2 seconds delay
     }
 
     // Replace the old playPreview function with this one
@@ -169,21 +199,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Display and State Functions ---
     function displayRankings() {
-        rankingList.innerHTML = '';
         const sortedSongs = [...state.songs].sort((a, b) => b.rating - a.rating);
-        
+        const newRanking = sortedSongs.map(s => s.id);
+
+        rankingList.innerHTML = ''; // Clear the list before re-populating
+
         sortedSongs.forEach((song, index) => {
             const li = document.createElement('li');
+            li.dataset.songId = song.id;
             li.textContent = song.name;
+            
             const details = document.createElement('small');
-            details.textContent = `(Rating: ${Math.round(song.rating)})`;
+            details.textContent = ` (Rating: ${Math.round(song.rating)})`;
             li.appendChild(details);
+
+            // Check for rank changes
+            const oldIndex = previousRanking.indexOf(song.id);
+            if (oldIndex !== -1) {
+                if (index < oldIndex) {
+                    li.classList.add('rank-up');
+                } else if (index > oldIndex) {
+                    li.classList.add('rank-down');
+                }
+            }
+            
             rankingList.appendChild(li);
         });
+
+        // Update the previous ranking state for the next comparison
+        previousRanking = newRanking;
     }
 
     function updateProgress() {
-        progressIndicator.textContent = `Comparisons Made: ${state.comparisons}`;
+        const totalSongs = state.songs.length;
+        const comparisonsNeeded = totalSongs * 2; // An arbitrary goal for 100%
+        const progressPercentage = Math.min((state.comparisons / comparisonsNeeded) * 100, 100);
+
+        progressBar.style.width = `${progressPercentage}%`;
+        progressText.textContent = `${state.comparisons} Comparisons Made`;
     }
 
     function saveState() {

@@ -11,22 +11,25 @@
         <div class="arena-container">
             <h1>Which song is better?</h1>
             <div class="arena">
-                <div id="songA" class="song-card">
+                <div id="songA-card" class="song-card">
                     <h2 id="songA-name"></h2>
                     <button class="preview-btn" data-song="A">Play Preview</button>
                 </div>
                 <div class="vs">VS</div>
-                <div id="songB" class="song-card">
+                <div id="songB-card" class="song-card">
                     <h2 id="songB-name"></h2>
                     <button class="preview-btn" data-song="B">Play Preview</button>
                 </div>
             </div>
             <div class="choices">
-                <button id="chooseA-btn" class="choice-btn"></button>
+                <button id="chooseA-btn" class="choice-btn">Choose A</button>
                 <button id="tie-btn" class="choice-btn">It's a Tie / Skip</button>
-                <button id="chooseB-btn" class="choice-btn"></button>
+                <button id="chooseB-btn" class="choice-btn">Choose B</button>
             </div>
-            <div id="progress-indicator"></div>
+            <div id="progress-container">
+                <div id="progress-bar"></div>
+                <div id="progress-text"></div>
+            </div>
             <div class="controls">
                 <!-- The new donation button -->
                 <a href="https://ko-fi.com/stavros916" target="_blank" rel="noopener noreferrer" id="kofi-link">
