@@ -37,7 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const chooseBBtn = document.getElementById('chooseB-btn');
     const tieBtn = document.getElementById('tie-btn');
     const resetBtn = document.getElementById('reset-btn');
-    const progressIndicator = document.getElementById('progress-indicator');
+    const progressBar = document.getElementById('progress-bar');
+    const progressText = document.getElementById('progress-text');
     const rankingList = document.getElementById('ranking-list');
     const audioA = document.getElementById('audioA');
     const audioB = document.getElementById('audioB');
@@ -68,8 +69,10 @@ document.addEventListener('DOMContentLoaded', () => {
         currentSongA = song1;
         currentSongB = song2;
 
+        console.log('Presenting pair:', currentSongA.name, 'vs', currentSongB.name);
         songAName.textContent = currentSongA.name;
         songBName.textContent = currentSongB.name;
+        console.log('Song names have been set in the DOM.');
         chooseABtn.textContent = `I prefer ${currentSongA.name}`;
         chooseBBtn.textContent = `I prefer ${currentSongB.name}`;
 
@@ -235,8 +238,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const comparisonsNeeded = totalSongs * 2; // An arbitrary goal for 100%
         const progressPercentage = Math.min((state.comparisons / comparisonsNeeded) * 100, 100);
 
-        progressBar.style.width = `${progressPercentage}%`;
-        progressText.textContent = `${state.comparisons} Comparisons Made`;
     }
 
     function saveState() {
