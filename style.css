@@ -132,6 +132,9 @@ button:hover {
     color: #fff;
     font-weight: bold;
     text-shadow: 1px 1px 2px #000;
+    white-space: nowrap;
+    width: 100%;
+    text-align: center;
 }
 
 .controls {
@@ -250,7 +253,7 @@ button:hover {
   }
 
   #progress-text {
-    font-size: 0.9em;
+    font-size: 0.8em;
     /* Make the text more readable against the bar */
     text-shadow: 0px 0px 4px #000, 0px 0px 4px #000;
   }
