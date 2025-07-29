@@ -15,6 +15,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // This is the corrected initialization. We'll name our client 'supabase' for simplicity.
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+const songToImageMap = {
+  'funGang.jpeg': ["Don't Forget", "Faint Courage", "THE LEGEND", "Empty Town", "My Castle Town", "Field of Hopes and Dreams", "Susie", "Vs. Susie", "Imminent Death"],
+  'spamtenna.jpeg': ["Spamton", "NOW'S YOUR CHANCE TO BE A", "BIG SHOT", "Dialtone", "HEY EVERY !", "Keygen", "Deal Gone Wrong", "A Real Boy!", "It's TV Time!"],
+  'bergentruck.jpeg': ["Flower Shop", "Lost Girl", "Girl Next Door", "Ferris Wheel"],
+  'rouxlsTwerk.jpeg': ["Rouxls Kaard", "It's Pronounced -Rules-", "Ruder Buster"],
+};
+
     // --- STATE MANAGEMENT ---
     let state = {
         songs: [],
@@ -47,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const rankingContainer = document.querySelector('.ranking-container');
     const myRankingBtn = document.getElementById('my-ranking-btn');
     const communityRankingBtn = document.getElementById('community-ranking-btn');
+    const easterEggContainer = document.getElementById('easter-egg-container'); // ADD THIS
 
     // --- CORE LOGIC ---
     function updateElo(winnerRating, loserRating) {
@@ -68,6 +76,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         currentSongA = song1;
         currentSongB = song2;
+
+        checkAndTriggerEasterEgg(currentSongA, currentSongB); // ADD THIS LINE
 
         songAName.textContent = currentSongA.name;
         songBName.textContent = currentSongB.name;
@@ -92,42 +102,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 0);
     }
 
-    function handleChoice(winner) {
-        if (!currentSongA || !currentSongB) return;
+// Replace the old handleChoice with this one
+function handleChoice(winner) {
+    // This is now much simpler. It just updates the data and redraws the UI.
+    if (!currentSongA || !currentSongB) return;
 
-        // Stop any playing audio
-        audioA.pause();
-        audioB.pause();
-        if (activePreviewTimeout) {
-            clearTimeout(activePreviewTimeout);
-        }
+    if (winner) {
+        const winnerSong = (winner === 'A') ? currentSongA : currentSongB;
+        const loserSong = (winner === 'A') ? currentSongB : currentSongA;
 
-        if (winner) {
-            const winnerSong = (winner === 'A') ? currentSongA : currentSongB;
-            const loserSong = (winner === 'A') ? currentSongB : currentSongA;
-            const winnerCard = (winner === 'A') ? songACard : songBCard;
-            const loserCard = (winner === 'A') ? songBCard : songACard;
-
-            // Apply visual feedback
-            winnerCard.classList.add('selected');
-            loserCard.classList.add('loser');
-
-            const { newWinnerRating, newLoserRating } = updateElo(winnerSong.rating, loserSong.rating);
-            winnerSong.rating = newWinnerRating;
-            loserSong.rating = newLoserRating;
-            
-            winnerSong.comparisons++;
-            loserSong.comparisons++;
-            state.comparisons++;
-            
-            recordCommunityVote(winnerSong.id, loserSong.id);
-        }
+        const { newWinnerRating, newLoserRating } = updateElo(winnerSong.rating, loserSong.rating);
+        winnerSong.rating = newWinnerRating;
+        loserSong.rating = newLoserRating;
         
-        // Wait for the animation to play out before updating
-        setTimeout(() => {
-            updateApp();
-        }, 1200); // 1.2 seconds delay
+        winnerSong.comparisons++;
+        loserSong.comparisons++;
+        state.comparisons++;
+        
+        recordCommunityVote(winnerSong.id, loserSong.id);
     }
+    
+    // Directly update the app for the next round. No delays.
+    updateApp();
+}
 
     // Replace the old playPreview function with this one
     function playPreview(songKey) {
@@ -158,6 +155,32 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     }
+
+// Replace the old function with this new version
+function checkAndTriggerEasterEgg(songA, songB) {
+  // "Dice Roll": Only proceed if a random number is below our chance threshold.
+  // 0.25 means a 25% chance for an easter egg to appear.
+  if (Math.random() > 0.05) {
+    return;
+  }
+  
+  if (easterEggContainer.classList.contains('show-easter-egg')) {
+    return;
+  }
+
+  for (const [imageFile, songList] of Object.entries(songToImageMap)) {
+    if (songList.includes(songA.name) || songList.includes(songB.name)) {
+      easterEggContainer.style.backgroundImage = `url(Art/${imageFile})`;
+      easterEggContainer.classList.add('show-easter-egg');
+
+      easterEggContainer.addEventListener('animationend', () => {
+        easterEggContainer.classList.remove('show-easter-egg');
+      }, { once: true });
+      
+      return;
+    }
+  }
+}
 
     // --- Community Functions ---
     async function recordCommunityVote(winnerId, loserId) {

@@ -64,15 +64,6 @@ h1, h2 {
     transition: transform 0.2s ease-in-out, opacity 0.3s ease-in-out, border-color 0.2s;
 }
 
-.song-card.selected {
-    transform: scale(1.05);
-    border-color: #29b6f6; /* A nice highlight color */
-}
-
-.song-card.loser {
-    opacity: 0.4;
-    background-color: #333;
-}
 
 .song-card h2 {
   font-size: 1.5em;
@@ -365,4 +356,40 @@ button:hover {
     transform: translateX(0);
     opacity: 1;
   }
+}
+/* ============================ */
+/* === EASTER EGG STYLES (v2) === */
+/* ============================ */
+
+#easter-egg-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+  
+  /* New additions for a subtler effect */
+  background-size: 25%; /* Makes the image take up 25% of the screen width */
+  background-position: center;
+  background-repeat: no-repeat;
+  
+  /* This will make the image itself semi-transparent */
+  -webkit-backdrop-filter: brightness(60%) blur(3px); /* Safari support */
+  backdrop-filter: brightness(60%) blur(3px);
+}
+
+#easter-egg-container.show-easter-egg {
+  /* New, faster animation */
+  animation: subtle-flash 2.5s ease-out;
+}
+
+/* New, subtler animation definition */
+@keyframes subtle-flash {
+  0% { opacity: 0; transform: scale(1.1); }
+  15% { opacity: 0.7; transform: scale(1); } /* Quick fade-in to 70% opacity */
+  80% { opacity: 0.7; } /* Hold it for a moment */
+  100% { opacity: 0; } /* Fade out */
 }
