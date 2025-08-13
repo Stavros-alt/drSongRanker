@@ -31,6 +31,7 @@ const songToImageMap = {
     let currentSongA, currentSongB;
     let previousRanking = [];
     let activePreviewTimeout = null; // ADD THIS LINE
+    let currentChapterFilter = 'all'; // ADD THIS LINE
     const PREVIEW_DURATION = 10000;
     const PREVIEW_START_TIME = 30;
 
@@ -54,6 +55,7 @@ const songToImageMap = {
     const rankingContainer = document.querySelector('.ranking-container');
     const myRankingBtn = document.getElementById('my-ranking-btn');
     const communityRankingBtn = document.getElementById('community-ranking-btn');
+    const filterBtns = document.querySelectorAll('.filter-btn'); // ADD THIS LINE
     const easterEggContainer = document.getElementById('easter-egg-container'); // ADD THIS
 
     // --- CORE LOGIC ---
@@ -199,16 +201,18 @@ function checkAndTriggerEasterEgg(songA, songB) {
     async function displayCommunityRankings() {
         rankingList.innerHTML = '<li>Loading community data...</li>';
         try {
-            // Using the simplified 'supabase' variable
             const { data, error } = await supabase
                 .from('songs')
-                .select('name, rating')
+                .select('name, id, rating') // Make sure you are selecting 'id'
                 .order('rating', { ascending: false });
 
             if (error) throw error;
+            
+            // Filter the data we received from Supabase
+            const filteredSongs = filterSongsByChapter(data, currentChapterFilter);
 
             rankingList.innerHTML = '';
-            data.forEach((song, index) => {
+            filteredSongs.forEach((song, index) => {
                 const li = document.createElement('li');
                 li.textContent = song.name;
                 const details = document.createElement('small');
@@ -223,35 +227,21 @@ function checkAndTriggerEasterEgg(songA, songB) {
 
     // --- Display and State Functions ---
     function displayRankings() {
-        const sortedSongs = [...state.songs].sort((a, b) => b.rating - a.rating);
-        const newRanking = sortedSongs.map(s => s.id);
+        rankingList.innerHTML = '';
+        
+        // Filter the songs from the state FIRST
+        const filteredSongs = filterSongsByChapter(state.songs, currentChapterFilter);
 
-        rankingList.innerHTML = ''; // Clear the list before re-populating
-
+        const sortedSongs = [...filteredSongs].sort((a, b) => b.rating - a.rating);
+        
         sortedSongs.forEach((song, index) => {
             const li = document.createElement('li');
-            li.dataset.songId = song.id;
-            li.textContent = song.name;
-            
+            li.textContent = song.name; // Removed the number, as requested before
             const details = document.createElement('small');
             details.textContent = ` (Rating: ${Math.round(song.rating)})`;
             li.appendChild(details);
-
-            // Check for rank changes
-            const oldIndex = previousRanking.indexOf(song.id);
-            if (oldIndex !== -1) {
-                if (index < oldIndex) {
-                    li.classList.add('rank-up');
-                } else if (index > oldIndex) {
-                    li.classList.add('rank-down');
-                }
-            }
-            
             rankingList.appendChild(li);
         });
-
-        // Update the previous ranking state for the next comparison
-        previousRanking = newRanking;
     }
 
     function updateProgress() {
@@ -336,6 +326,44 @@ function checkAndTriggerEasterEgg(songA, songB) {
         communityRankingBtn.classList.add('active');
         displayCommunityRankings();
     });
+
+    // Add this with your other event listeners
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Update the state
+            currentChapterFilter = btn.dataset.chapter;
+
+            // Update the active class on buttons
+            filterBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            // Re-render the currently visible list
+            if (myRankingBtn.classList.contains('active')) {
+                displayRankings();
+            } else {
+                displayCommunityRankings();
+            }
+        });
+    });
+
+    function filterSongsByChapter(songs, filter) {
+        if (filter === 'all') {
+            return songs;
+        }
+        // Using a switch statement for clarity
+        switch (filter) {
+            case 'ch1':
+                return songs.filter(s => s.id >= 1 && s.id <= 40);
+            case 'ch2':
+                return songs.filter(s => s.id >= 41 && s.id <= 87);
+            case 'ch3':
+                return songs.filter(s => s.id >= 88 && s.id <= 125);
+            case 'ch4':
+                return songs.filter(s => s.id >= 126 && s.id <= 165);
+            default:
+                return songs;
+        }
+    }
 
     // Start the app
     updateApp();
