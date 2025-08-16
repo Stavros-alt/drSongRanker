@@ -253,6 +253,19 @@ button:hover {
     padding: 2px 4px;
   }
 
+  /* Even more compact filter buttons for very small screens */
+  @media (max-width: 480px) {
+    #ranking-filters {
+      gap: 2px;
+      padding: 2px;
+    }
+
+    .filter-btn {
+      font-size: 0.5em;
+      padding: 1px 3px;
+    }
+  }
+
   #progress-container {
     width: 90%;
   }
