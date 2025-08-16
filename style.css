@@ -11,9 +11,11 @@ body {
     color: #fff;
     font-family: 'Courier New', Courier, monospace;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
     margin: 0;
     padding: 20px;
+    min-height: 100vh;
 }
 
 /* === Main Layout === */
@@ -23,6 +25,7 @@ body {
     gap: 40px;
     width: 100%;
     max-width: 1400px;
+    flex-grow: 1;
 }
 
 .arena-container {
@@ -422,4 +425,24 @@ button:hover {
 .filter-btn:not(.active):hover {
   background-color: #2a2a2a;
   border-color: #666;
+}
+/* ============================ */
+/* === FOOTER OF THE GODS === */
+/* ============================ */
+
+footer {
+  width: 80%;
+  max-width: 800px;
+  margin: 60px auto 20px auto; /* Adds space above and below */
+  padding-top: 20px;
+  border-top: 1px solid #333; /* A nice separating line */
+  flex-shrink: 0; /* Prevent footer from shrinking */
+}
+
+.credits {
+  text-align: center;
+  font-size: 0.8em; /* Smaller than the main text */
+  color: #666; /* Dimmed, not bright white */
+  line-height: 1.5;
+  font-style: italic;
 }
