@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
 const songToImageMap = {
   'funGang.jpeg': ["Don't Forget", "Faint Courage", "THE LEGEND", "Empty Town", "My Castle Town", "Field of Hopes and Dreams", "Susie", "Vs. Susie", "Imminent Death"],
   'spamtenna.jpeg': ["Spamton", "NOW'S YOUR CHANCE TO BE A", "BIG SHOT", "Dialtone", "HEY EVERY !", "Keygen", "Deal Gone Wrong", "A Real Boy!", "It's TV Time!"],
-  'bergentruck.jpeg': ["Flower Shop", "Lost Girl", "Girl Next Door", "Ferris Wheel"],
+  'bergentruck.jpeg': ["Lost Girl", "Girl Next Door", "Ferris Wheel"],
   'rouxlsTwerk.jpeg': ["Rouxls Kaard", "It's Pronounced -Rules-", "Ruder Buster"],
 };
 

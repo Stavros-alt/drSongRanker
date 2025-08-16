@@ -242,6 +242,17 @@ button:hover {
     display: none; /* Hide messy rating details on mobile */
   }
 
+  /* Make filter buttons more compact on mobile */
+  #ranking-filters {
+    gap: 3px;
+    padding: 3px;
+  }
+
+  .filter-btn {
+    font-size: 0.7em;
+    padding: 2px 4px;
+  }
+
   #progress-container {
     width: 90%;
   }
