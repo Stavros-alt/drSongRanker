@@ -250,7 +250,9 @@ button:hover {
 
   .filter-btn {
     font-size: 0.7em;
-    padding: 2px 4px;
+    padding: 4px 8px; /* Keep reasonable padding */
+    font-family: 'Courier New', Courier, monospace; /* Match site's aesthetic */
+    white-space: nowrap; /* Prevent internal wrapping */
   }
 
   /* Even more compact filter buttons for very small screens */
@@ -262,7 +264,24 @@ button:hover {
 
     .filter-btn {
       font-size: 0.5em;
-      padding: 1px 3px;
+      padding: 4px 8px; /* Keep reasonable padding */
+      font-family: 'Courier New', Courier, monospace; /* Match site's aesthetic */
+      white-space: nowrap; /* Prevent internal wrapping */
+    }
+  }
+  
+  /* Even more aggressive styles for very small screens to prevent internal wrapping */
+  @media (max-width: 380px) {
+    #ranking-filters {
+      gap: 1px;
+      padding: 1px;
+    }
+    
+    .filter-btn {
+      font-size: 0.35em; /* Even smaller font size */
+      padding: 4px 8px; /* Keep reasonable padding */
+      white-space: nowrap; /* Prevent internal wrapping */
+      letter-spacing: -0.5px;
     }
   }
 
@@ -433,11 +452,13 @@ button:hover {
   background: transparent;
   border: 1px solid #555;
   color: #888;
-  padding: 4px 8px;
+  padding: 4px 8px; /* More reasonable padding */
   font-size: 0.8em; /* Smaller font size */
   cursor: pointer;
   border-radius: 4px;
   transition: all 0.2s ease;
+  font-family: 'Courier New', Courier, monospace; /* Match site's aesthetic */
+  white-space: nowrap; /* Prevent internal wrapping */
 }
 
 .filter-btn.active {
