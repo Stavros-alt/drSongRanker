@@ -12,8 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return; // Stop execution if supabase is not available
     }
 
-    // This is the corrected initialization. We'll name our client 'supabase' for simplicity.
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    // Initialize Supabase client
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const songToImageMap = {
   'funGang.jpeg': ["Don't Forget", "Faint Courage", "THE LEGEND", "Empty Town", "My Castle Town", "Field of Hopes and Dreams", "Susie", "Vs. Susie", "Imminent Death"],
@@ -122,6 +122,7 @@ function handleChoice(winner) {
         state.comparisons++;
         
         recordCommunityVote(winnerSong.id, loserSong.id);
+        fetchAndDisplayAllTimeStats(); // Update stats after each vote
     }
     
     // Directly update the app for the next round. No delays.
@@ -187,8 +188,7 @@ function checkAndTriggerEasterEgg(songA, songB) {
     // --- Community Functions ---
     async function recordCommunityVote(winnerId, loserId) {
         try {
-            // Using the simplified 'supabase' variable
-            const { error } = await supabase.rpc('handle_vote', {
+            const { error } = await supabaseClient.rpc('handle_vote', {
                 winner_id: winnerId,
                 loser_id: loserId
             });
@@ -198,10 +198,63 @@ function checkAndTriggerEasterEgg(songA, songB) {
         }
     }
 
+    // --- Simplified Stats Functions ---
+    async function handleUniqueVisitor() {
+        if (!localStorage.getItem('hasVisitedDrRanker')) {
+            try {
+                const { error } = await supabaseClient.rpc('increment_visitor_count');
+                if (error) throw error;
+                localStorage.setItem('hasVisitedDrRanker', 'true');
+            } catch (error) {
+                console.error("Error incrementing visitor count:", error.message);
+            }
+        }
+    }
+
+    async function fetchAndDisplayAllTimeStats() {
+        try {
+            // --- Fetch total visitor count ---
+            const { data: visitorData, error: visitorError } = await supabaseClient
+                .from('site_stats')
+                .select('total_visitors')
+                .eq('id', 1)
+                .single();
+
+            // Handle special "no rows found" error code
+            if (visitorError && visitorError.code !== 'PGRST116') {
+                throw visitorError;
+            }
+
+            const visitors = visitorData ? visitorData.total_visitors : 0;
+            const visitorStat = document.getElementById('visitor-stat');
+            if (visitorStat) visitorStat.textContent = `Total Visitors: ${visitors}`;
+
+            // --- Fetch total vote count ---
+            const { data: voteData, error: voteError } = await supabaseClient
+                .rpc('get_total_votes');
+
+            if (voteError) {
+                throw voteError;
+            }
+            
+            // Handle null response for votes
+            const votes = voteData || 0;
+            const voteStat = document.getElementById('vote-stat');
+            if (voteStat) voteStat.textContent = `Total Votes: ${votes}`;
+
+        } catch (error) {
+            console.error("CRITICAL ERROR fetching stats:", error);
+            const visitorStat = document.getElementById('visitor-stat');
+            const voteStat = document.getElementById('vote-stat');
+            if (visitorStat) visitorStat.textContent = "Stats: Error";
+            if (voteStat) voteStat.textContent = "";
+        }
+    }
+
     async function displayCommunityRankings() {
         rankingList.innerHTML = '<li>Loading community data...</li>';
         try {
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('songs')
                 .select('name, id, rating') // Make sure you are selecting 'id'
                 .order('rating', { ascending: false });
@@ -302,6 +355,10 @@ function checkAndTriggerEasterEgg(songA, songB) {
     }
 
     loadState();
+    
+    // Initialize stats
+    handleUniqueVisitor();
+    fetchAndDisplayAllTimeStats();
     
     // Event Listeners
     chooseABtn.addEventListener('click', () => handleChoice('A'));
