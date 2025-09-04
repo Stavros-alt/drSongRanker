@@ -1,5 +1,5 @@
-/* === A Simple CSS Reset === */
-/* This prevents browser inconsistencies and fixes zoom/overflow issues */
+/* === CSS Reset === */
+/* Resets browser inconsistencies and fixes zoom/overflow issues */
 html {
   box-sizing: border-box;
 }
@@ -18,7 +18,8 @@ body {
     min-height: 100vh;
 }
 
-/* === Main Layout === */
+/* === Main Layout Styles === */
+/* Defines the main layout container and components */
 .main-container {
     display: flex;
     justify-content: center;
@@ -43,6 +44,7 @@ body {
     overflow-y: auto;
 }
 /* === Stats Bar Styles === */
+/* Styles the statistics display bar at the top of the page */
 #stats-bar {
   width: 100%;
   text-align: center;
@@ -178,7 +180,8 @@ button:hover {
 }
 
 /* =================================== */
-/* === MOBILE RESPONSIVE STYLES === */
+/* === Mobile Responsive Styles === */
+/* Handles responsive design for mobile and tablet devices */
 /* =================================== */
 
 /* This hides the rankings toggle button on desktop where it's not needed */
@@ -310,6 +313,7 @@ button:hover {
   }
 }
 /* === Ranking Toggle Styles === */
+/* Styles the toggle buttons for showing/hiding rankings */
 .ranking-header {
   display: flex;
   margin-bottom: 10px;
@@ -332,6 +336,7 @@ button:hover {
   border-color: #fff;
 }
 /* === Ko-fi Button Styles === */
+/* Styles the Ko-fi donation button and its states */
 #kofi-link {
   text-decoration: none; /* Remove the underline from the link */
 }
@@ -418,7 +423,8 @@ button:hover {
   }
 }
 /* ============================ */
-/* === EASTER EGG STYLES (v2) === */
+/* === Easter Egg Styles (v2) === */
+/* Handles styles for hidden easter egg effects */
 /* ============================ */
 
 #easter-egg-container {
@@ -454,6 +460,7 @@ button:hover {
   100% { opacity: 0; } /* Fade out */
 }
 /* === Chapter Filter Styles === */
+/* Styles the filter buttons for ranking chapters */
 #ranking-filters {
   display: flex;
   justify-content: center;
@@ -486,7 +493,8 @@ button:hover {
   border-color: #666;
 }
 /* ============================ */
-/* === FOOTER OF THE GODS === */
+/* === Footer Styles === */
+/* Styles the page footer and credits section */
 /* ============================ */
 
 footer {

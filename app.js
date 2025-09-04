@@ -30,8 +30,8 @@ const songToImageMap = {
 
     let currentSongA, currentSongB;
     let previousRanking = [];
-    let activePreviewTimeout = null; // ADD THIS LINE
-    let currentChapterFilter = 'all'; // ADD THIS LINE
+    let activePreviewTimeout = null; 
+    let currentChapterFilter = 'all'; 
     const PREVIEW_DURATION = 10000;
     const PREVIEW_START_TIME = 30;
 
