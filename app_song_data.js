@@ -1,23 +1,3 @@
-/**
- * @file app_song_data.js
- * @author Stavrianos Galben
- * @date 2024-10-26
- * @desc Contains the Deltarune song database with metadata for ranking system.
- */
-
-/**
- * Array of song objects representing the Deltarune soundtrack.
- * This structure is used for the ranking system to track and compare songs.
- *
- * @typedef {Object} Song
- * @property {number} id - Unique identifier for the song
- * @property {string} name - Display name of the song
- * @property {string} file - Path to the audio file
- * @property {number} rating - Initial Elo rating (starts at 1500)
- * @property {number} comparisons - Number of times this song has been compared (starts at 0)
- *
- * @type {Array<Song>}
- */
 const songList = [
     { id: 1, name: "ANOTHER HIM", file: "DELTARUNESoundtrack/./001 ANOTHER HIM.mp3", rating: 1500, comparisons: 0 },
     { id: 2, name: "Beginning", file: "DELTARUNESoundtrack/./002 Beginning.mp3", rating: 1500, comparisons: 0 },
@@ -185,7 +165,3 @@ const songList = [
     { id: 164, name: "AIRWAVES", file: "DELTARUNESoundtrack/./164 AIRWAVES.mp3", rating: 1500, comparisons: 0 },
     { id: 165, name: "Concert for you", file: "DELTARUNESoundtrack/./165 Concert for you.mp3", rating: 1500, comparisons: 0 },
 ];
-// The data is organized in a flat array for easy iteration and comparison.
-// Each song has a unique ID that corresponds to its position in the soundtrack.
-// The rating and comparisons properties are initialized to provide a baseline
-// for the Elo ranking algorithm, which will update these values based on user comparisons.
