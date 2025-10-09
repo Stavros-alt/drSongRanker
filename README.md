@@ -43,4 +43,4 @@ If you want to run this project on your own machine:
 This is a non-profit, fan-made project. All music and the Deltarune IP are the property of Toby Fox. Please support the official creators by purchasing the games and official merchandise.
 
 -   [Deltarune on Steam](https://store.steampowered.com/app/1671210/DELTARUNE/)
--   [Official Undertale/Deltarune Merchandise on Fangamer](https://www.fangamer.com/collections/deltarune
+-   [Official Undertale/Deltarune Merchandise on Fangamer](https://www.fangamer.com/collections/deltarune)
