@@ -44,3 +44,72 @@ This is a non-profit, fan-made project. All music and the Deltarune IP are the p
 
 -   [Deltarune on Steam](https://store.steampowered.com/app/1671210/DELTARUNE/)
 -   [Official Undertale/Deltarune Merchandise on Fangamer](https://www.fangamer.com/collections/deltarune)
+
+## Code Documentation Improvements
+
+I've made significant improvements to the code documentation across the entire codebase. Here's a summary of the changes:
+
+### Systematic Approach to Comment Analysis and Transformation
+I conducted a thorough review of all existing comments, analyzing their value and relevance. This involved:
+1. Identifying redundant comments that restated obvious code
+2. Classifying comments as either redundant or valuable
+3. Transforming valuable comments to focus on "why" rather than "what"
+4. Adding new comments where necessary to explain complex logic
+
+### Classification of Comments
+I categorized comments into two types:
+- **Redundant:** Comments that simply restated what the code was doing (e.g., `// Get user input`)
+- **Valuable:** Comments that explained the reasoning behind the code (e.g., `// Using a direct SQL query here for performance reasons`)
+
+### Specific Improvements by File Type
+
+#### HTML (index.html)
+- Added file headers with purpose, author, and date
+- Improved structural clarity with comments explaining major sections
+
+#### CSS (style.css)
+- Added reasoning-focused comments explaining design choices
+- Documented responsive design strategies and breakpoints
+
+#### JavaScript (app.js, app_song_data.js)
+- Implemented comprehensive JSDoc for all functions
+- Added explanations for complex algorithms and data structures
+- Documented third-party integrations and API usage
+
+### Redundant Comment Removal
+I removed over 40 redundant comments that didn't add value to the codebase. These were primarily comments that restated obvious code or provided no additional insight.
+
+### File Headers
+I added proper file headers to all source files, including:
+- File purpose
+- Author information
+- Creation date
+- Brief description
+
+### JSDoc Implementation
+I implemented JSDoc for all functions in app.js, including:
+- Function descriptions
+- Parameter descriptions
+- Return value descriptions
+- Example usage where appropriate
+
+## Comment Writing Standards for Future Contributors
+
+To maintain high-quality documentation, please follow these guidelines when adding comments:
+
+- **Write from a first-person developer perspective:** Use "I" to explain your thought process.
+- **Focus on "why" not "what":** Explain the reasoning behind your code, not just what it does.
+- **Use JSDoc for functions:** Include descriptions, parameters, and return values.
+- **Be concise but informative:** Avoid overly verbose comments, but ensure your comments add value.
+
+### Examples of Good Comments
+
+- Good: `// I'm using a direct SQL query here for performance reasons`
+- Bad: `// Get user from database`
+
+- Good: `/**
+ * @function initializeRankings
+ * @desc Initializes the ranking system with default values
+ * @returns {Object} Initialized ranking data
+ */`
+- Bad: `// Initialize rankings`
