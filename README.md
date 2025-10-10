@@ -11,6 +11,9 @@ This app uses a pairwise comparison method powered by an Elo rating system. You 
 -   **Song Previews:** Not sure which song is which? Each choice includes a "Play Preview" button to jog your memory.
 -   **Saves Your Progress:** All your rankings are saved automatically in your browser. You can close the tab and continue right where you left off at any time.
 -   **Live-Updating List:** Your full ranked list is visible and updates in real-time with every comparison you make.
+-   **Full-Stack Architecture:** This project uses a Supabase backend with a PostgreSQL database to track all user votes and generate a live, global community ranking.
+-   **Dynamic UI:** The front-end is built with vanilla JavaScript and features a reactive UI that updates rankings in real-time.
+-   **Proven Engagement:** The tool has been used by over 300 unique users and has processed more than 6,000 votes.
 
 ## How to Use
 
