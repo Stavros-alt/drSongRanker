@@ -19,13 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const randomColor = accentColors[Math.floor(Math.random() * accentColors.length)];
     document.documentElement.style.setProperty('--accent-color', randomColor);
 
-    const songToImageMap = {
-        'funGang.jpeg': ["Don't Forget", "Faint Courage", "THE LEGEND", "Empty Town", "My Castle Town", "Field of Hopes and Dreams", "Susie", "Vs. Susie", "Imminent Death"],
-        'spamtenna.jpeg': ["Spamton", "NOW'S YOUR CHANCE TO BE A", "BIG SHOT", "Dialtone", "HEY EVERY !", "Keygen", "Deal Gone Wrong", "A Real Boy!", "It's TV Time!"],
-        'bergentruck.jpeg': ["Lost Girl", "Girl Next Door", "Ferris Wheel"],
-        'rouxlsTwerk.jpeg': ["Rouxls Kaard", "It's Pronounced -Rules-", "Ruder Buster"],
-    };
-
     let state = {
         songs: [],
         comparisons: 0,
@@ -58,7 +51,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const myRankingBtn = document.getElementById('my-ranking-btn');
     const communityRankingBtn = document.getElementById('community-ranking-btn');
     const filterBtns = document.querySelectorAll('.filter-btn');
-    const easterEggContainer = document.getElementById('easter-egg-container');
 
     function updateElo(winnerRating, loserRating) {
         const kFactor = 32;
@@ -75,12 +67,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const sortedOpponents = [...state.songs]
             .filter(s => s.id !== song1.id)
             .sort((a, b) => Math.abs(a.rating - song1.rating) - Math.abs(b.rating - song1.rating));
-        const song2 = sortedOpponents[0];
+        // Fuzzy Neighbor Matchmaking: Pick randomly from the top 10 closest opponents
+        // This prevents the same pairs from appearing constantly and makes ranking feel faster.
+        const poolSize = 10;
+        const pool = sortedOpponents.slice(0, poolSize);
+        const song2 = pool[Math.floor(Math.random() * pool.length)];
 
         currentSongA = song1;
         currentSongB = song2;
-
-        checkAndTriggerEasterEgg(currentSongA, currentSongB);
 
         songAName.textContent = currentSongA.name;
         songBName.textContent = currentSongB.name;
@@ -98,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
             songACard.classList.remove('selected', 'loser');
             songBCard.classList.remove('selected', 'loser');
             arena.classList.add('slide-in');
-        }, 0);
+        }, 50);
     }
 
     function handleChoice(winner) {
@@ -152,28 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function checkAndTriggerEasterEgg(songA, songB) {
-        if (Math.random() > 0.05) {
-            return;
-        }
 
-        if (easterEggContainer.classList.contains('show-easter-egg')) {
-            return;
-        }
-
-        for (const [imageFile, songList] of Object.entries(songToImageMap)) {
-            if (songList.includes(songA.name) || songList.includes(songB.name)) {
-                easterEggContainer.style.backgroundImage = `url(Art/${imageFile})`;
-                easterEggContainer.classList.add('show-easter-egg');
-
-                easterEggContainer.addEventListener('animationend', () => {
-                    easterEggContainer.classList.remove('show-easter-egg');
-                }, { once: true });
-
-                return;
-            }
-        }
-    }
 
     async function recordCommunityVote(winnerId, loserId) {
         try {
@@ -456,6 +429,31 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('click', (e) => {
         if (e.target === shareModal) {
             shareModal.style.display = 'none';
+        }
+    });
+
+    // --- Custom Cursor Logic ---
+    const cursor = document.createElement('div');
+    cursor.classList.add('custom-cursor');
+    document.body.appendChild(cursor);
+
+    document.addEventListener('mousemove', (e) => {
+        cursor.style.left = `${e.clientX}px`;
+        cursor.style.top = `${e.clientY}px`;
+    });
+
+    // Add hover effect for interactive elements
+    const interactiveSelectors = 'button, .song-card, .ranking-toggle-btn, .filter-btn, a, input';
+
+    document.body.addEventListener('mouseover', (e) => {
+        if (e.target.closest(interactiveSelectors)) {
+            cursor.classList.add('active');
+        }
+    });
+
+    document.body.addEventListener('mouseout', (e) => {
+        if (e.target.closest(interactiveSelectors)) {
+            cursor.classList.remove('active');
         }
     });
 
