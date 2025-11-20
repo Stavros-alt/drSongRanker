@@ -368,13 +368,15 @@ button:active {
     color: #000;
 }
 
-#ranking-filters {
-    padding: 10px;
+.filter-tabs {
+    padding: 5px 10px;
+    /* Reduced padding to match gap */
     border-bottom: var(--border-width) solid #fff;
     display: flex;
     gap: 5px;
     flex-wrap: wrap;
     justify-content: center;
+    /* Center the tabs */
 }
 
 .filter-btn {
@@ -508,21 +510,7 @@ footer {
         width: 100%;
     }
 
-    .choice-btn {
-        width: 100%;
-    }
-
-    #toggle-rankings-btn {
-        display: block;
-        width: 100%;
-        margin-bottom: 10px;
-    }
 }
-
-@media (min-width: 801px) {
-    #toggle-rankings-btn {
-        display: none;
-    }
 }
 
 /* Animations */
@@ -574,4 +562,134 @@ footer {
 
 ::-webkit-scrollbar-thumb:hover {
     background: var(--accent-color);
+}
+
+/* Music Player Bar */
+#music-player-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: #000;
+    border-top: var(--border-width) solid var(--accent-color);
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1000;
+    box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.8);
+    transition: transform 0.3s ease-in-out;
+}
+
+.ranking-header {
+    display: flex;
+    border-bottom: var(--border-width) solid #fff;
+}
+
+.ranking-toggle-btn {
+    flex: 1;
+    border: none;
+    background: #000;
+    color: #666;
+    padding: 15px 0;
+    border-right: var(--border-width) solid #fff;
+    border-radius: 0;
+    font-family: 'Roboto Mono', monospace;
+    text-transform: uppercase;
+    cursor: none;
+}
+
+.ranking-toggle-btn:last-child {
+    border-right: none;
+}
+
+.ranking-toggle-btn:hover {
+    background: #222;
+    color: #fff;
+}
+
+.ranking-toggle-btn.active {
+    background: var(--accent-color);
+    color: #000;
+}
+
+.ranking-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px;
+    border-bottom: var(--border-width) solid #222;
+}
+
+.action-btn {
+    background: #000;
+    border: var(--border-width) solid #fff;
+    color: #fff;
+    padding: 5px 10px;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 0.8em;
+    cursor: none;
+    text-transform: uppercase;
+}
+
+.action-btn:hover {
+    background: var(--accent-color);
+    color: #000;
+    border-color: var(--accent-color);
+}
+
+#music-player-bar.hidden {
+    transform: translateY(100%);
+}
+
+.player-info {
+    color: #fff;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 1.1em;
+    text-transform: uppercase;
+    margin-left: 20px;
+}
+
+.player-controls {
+    display: flex;
+    gap: 15px;
+    margin-right: 20px;
+}
+
+.player-controls button {
+    background: #000;
+    border: var(--border-width) solid #fff;
+    color: #fff;
+    padding: 5px 15px;
+    font-size: 1.2em;
+    cursor: none;
+    /* Custom cursor handles this */
+    transition: all 0.1s;
+}
+
+@media (hover: hover) {
+    .player-controls button:hover {
+        background: var(--accent-color);
+        color: #000;
+        border-color: var(--accent-color);
+    }
+}
+
+/* Responsive adjustments for player */
+@media (max-width: 600px) {
+    #music-player-bar {
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .player-info {
+        margin-left: 0;
+        text-align: center;
+        font-size: 0.9em;
+    }
+
+    .player-controls {
+        margin-right: 0;
+    }
 }

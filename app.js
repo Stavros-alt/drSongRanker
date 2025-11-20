@@ -220,8 +220,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (error) throw error;
 
-            cachedCommunitySongs = data; // Cache for sharing
-            const filteredSongs = filterSongsByChapter(data, currentChapterFilter);
+            // Merge file paths from local state
+            cachedCommunitySongs = data.map(cSong => {
+                const localSong = state.songs.find(s => s.id === cSong.id);
+                return {
+                    ...cSong,
+                    file: localSong ? localSong.file : ''
+                };
+            });
+
+            const filteredSongs = filterSongsByChapter(cachedCommunitySongs, currentChapterFilter);
 
             rankingList.innerHTML = '';
             filteredSongs.forEach((song, index) => {
@@ -255,12 +263,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateProgress() {
-        const totalSongs = state.songs.length;
-        const comparisonsNeeded = totalSongs * 2;
-        const progressPercentage = Math.min((state.comparisons / comparisonsNeeded) * 100, 100);
+        // Asymptotic Accuracy: 100 * (1 - e^(-comparisons / 100))
+        // Tweaked to 100 divisor for a smoother, more "earned" progression.
+        const accuracy = 100 * (1 - Math.exp(-state.comparisons / 100));
 
-        progressBar.style.width = `${progressPercentage}%`;
-        progressText.textContent = `${state.comparisons} Comparisons Made`;
+        progressBar.style.width = `${accuracy}%`;
+        progressText.textContent = `Ranking Accuracy: ${accuracy.toFixed(1)}%`;
+
+        // Update Personal Vote Counter
+        const personalVoteStat = document.getElementById('personal-vote-stat');
+        if (personalVoteStat) {
+            personalVoteStat.textContent = `YOUR VOTES: ${state.comparisons}`;
+        }
     }
 
     function saveState() {
@@ -358,13 +372,17 @@ document.addEventListener('DOMContentLoaded', () => {
             return songs;
         }
         switch (filter) {
-            case 'ch1':
+            case '1':
+            case 'ch1': // Fallback
                 return songs.filter(s => s.id >= 1 && s.id <= 40);
-            case 'ch2':
+            case '2':
+            case 'ch2': // Fallback
                 return songs.filter(s => s.id >= 41 && s.id <= 87);
-            case 'ch3':
+            case '3':
+            case 'ch3': // Fallback
                 return songs.filter(s => s.id >= 88 && s.id <= 125);
-            case 'ch4':
+            case '4':
+            case 'ch4': // Fallback
                 return songs.filter(s => s.id >= 126 && s.id <= 165);
             default:
                 return songs;
@@ -455,6 +473,93 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target.closest(interactiveSelectors)) {
             cursor.classList.remove('active');
         }
+    });
+
+    // --- Playlist Logic ---
+    const musicPlayerBar = document.getElementById('music-player-bar');
+    const playerSongName = document.getElementById('player-song-name');
+    const playerPrevBtn = document.getElementById('player-prev-btn');
+    const playerPlayBtn = document.getElementById('player-play-btn');
+    const playerNextBtn = document.getElementById('player-next-btn');
+    const playerCloseBtn = document.getElementById('player-close-btn');
+    const playlistAudio = document.getElementById('playlist-audio');
+    const playListBtn = document.getElementById('play-list-btn');
+
+    let playlist = [];
+    let currentPlaylistIndex = 0;
+    let isPlaylistPlaying = false;
+
+    function generateAndStartPlaylist() {
+        // 1. Determine source (My Rank vs Global)
+        let sourceSongs = [];
+        if (communityRankingBtn.classList.contains('active')) {
+            if (cachedCommunitySongs.length > 0) {
+                sourceSongs = [...cachedCommunitySongs];
+            } else {
+                alert("Community data not loaded yet. Please wait.");
+                return;
+            }
+        } else {
+            sourceSongs = [...state.songs].sort((a, b) => b.rating - a.rating);
+        }
+
+        // 2. Apply Filter
+        if (currentChapterFilter !== 'all') {
+            sourceSongs = filterSongsByChapter(sourceSongs, currentChapterFilter);
+        }
+
+        if (sourceSongs.length === 0) {
+            alert("No songs found for this filter.");
+            return;
+        }
+
+        // 3. Start Playlist
+        playlist = sourceSongs;
+        currentPlaylistIndex = 0;
+        musicPlayerBar.classList.remove('hidden');
+        playSongInPlaylist(currentPlaylistIndex);
+    }
+
+    function playSongInPlaylist(index) {
+        if (index < 0 || index >= playlist.length) return;
+
+        currentPlaylistIndex = index;
+        const song = playlist[currentPlaylistIndex];
+
+        playerSongName.textContent = `${index + 1}. ${song.name}`;
+        playlistAudio.src = encodeURI(song.file);
+        playlistAudio.play().then(() => {
+            isPlaylistPlaying = true;
+            playerPlayBtn.textContent = "⏸";
+        }).catch(e => console.error("Playback failed:", e));
+    }
+
+    function togglePlaylistPlay() {
+        if (playlistAudio.paused) {
+            playlistAudio.play();
+            isPlaylistPlaying = true;
+            playerPlayBtn.textContent = "⏸";
+        } else {
+            playlistAudio.pause();
+            isPlaylistPlaying = false;
+            playerPlayBtn.textContent = "⏯";
+        }
+    }
+
+    playListBtn.addEventListener('click', generateAndStartPlaylist);
+
+    playerPrevBtn.addEventListener('click', () => playSongInPlaylist(currentPlaylistIndex - 1));
+    playerNextBtn.addEventListener('click', () => playSongInPlaylist(currentPlaylistIndex + 1));
+
+    playerPlayBtn.addEventListener('click', togglePlaylistPlay);
+
+    playerCloseBtn.addEventListener('click', () => {
+        playlistAudio.pause();
+        musicPlayerBar.classList.add('hidden');
+    });
+
+    playlistAudio.addEventListener('ended', () => {
+        playSongInPlaylist(currentPlaylistIndex + 1);
     });
 
     updateApp();
