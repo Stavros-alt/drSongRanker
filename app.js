@@ -430,7 +430,7 @@ document.addEventListener('DOMContentLoaded', () => {
             html += `<li style="margin-bottom: 5px;">${song.name}</li>`;
         });
         html += '</ol>';
-        html += '<p style="margin-top: 15px; font-size: 0.8em; color: #888;">Ranked at: drSongRanker.github.io</p>';
+        html += '<p style="margin-top: 15px; font-size: 0.8em; color: #888;">Ranked at: stavros-alt.github.io/drSongRanker</p>';
 
         sharePreview.innerHTML = html;
         shareModal.style.display = 'flex';
