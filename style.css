@@ -39,12 +39,13 @@ body {
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
-    cursor: none;
-    /* Hide default cursor */
+    /* cursor: none; Removed global hide */
 }
 
-/* Custom Cursor */
+/* Custom Cursor - Hidden by default */
 .custom-cursor {
+    display: none;
+    /* Hidden by default for mobile safety */
     width: 32px;
     height: 32px;
     background-image: url('Art/soul_cursor.png');
@@ -78,19 +79,12 @@ body {
     }
 }
 
-/* Hide custom cursor on touch devices */
-@media (hover: none) {
+/* Desktop: Enable Custom Cursor */
+@media (hover: hover) and (pointer: fine) {
     .custom-cursor {
-        display: none;
+        display: block;
     }
 
-    body {
-        cursor: auto;
-    }
-}
-
-/* Force hide default cursor on all elements for desktop */
-@media (hover: hover) {
     * {
         cursor: none !important;
     }
