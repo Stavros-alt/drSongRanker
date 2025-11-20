@@ -134,6 +134,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         audioEl.currentTime = PREVIEW_START_TIME;
 
+        // Fix for short songs: If duration is valid and shorter than start time + buffer, start at 0
+        if (!isNaN(audioEl.duration) && audioEl.duration < PREVIEW_START_TIME + 5) {
+            audioEl.currentTime = 0;
+        }
+
         const playPromise = audioEl.play();
 
         if (playPromise !== undefined) {
