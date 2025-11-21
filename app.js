@@ -460,6 +460,14 @@ document.addEventListener('DOMContentLoaded', () => {
         cursor.style.top = `${e.clientY}px`;
     });
 
+    // Add pointermove for robust tracking on hybrid devices (Chromebooks, Surface, etc.)
+    document.addEventListener('pointermove', (e) => {
+        if (e.pointerType === 'mouse' || e.pointerType === 'pen') {
+            cursor.style.left = `${e.clientX}px`;
+            cursor.style.top = `${e.clientY}px`;
+        }
+    });
+
     // Add hover effect for interactive elements
     const interactiveSelectors = 'button, .song-card, .ranking-toggle-btn, .filter-btn, a, input';
 
