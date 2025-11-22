@@ -11,13 +11,85 @@ document.addEventListener('DOMContentLoaded', () => {
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     // --- Dynamic Theme ---
+    // --- Dynamic Theme & Settings ---
     const accentColors = [
         '#00ff9d', // Soft Green
         '#00f2ff', // Soft Cyan
         '#ff00ff'  // Magenta
     ];
-    const randomColor = accentColors[Math.floor(Math.random() * accentColors.length)];
-    document.documentElement.style.setProperty('--accent-color', randomColor);
+
+    function loadTheme() {
+        const savedColor = localStorage.getItem('drSongRankerTheme');
+        if (savedColor && savedColor !== 'random') {
+            document.documentElement.style.setProperty('--accent-color', savedColor);
+        } else {
+            // Default Random
+            const randomColor = accentColors[Math.floor(Math.random() * accentColors.length)];
+            document.documentElement.style.setProperty('--accent-color', randomColor);
+        }
+    }
+    loadTheme();
+
+    // Settings Elements
+    const settingsBtn = document.getElementById('settings-btn');
+    const settingsModal = document.getElementById('settings-modal');
+    const closeSettingsBtn = document.getElementById('close-settings-btn');
+    const colorBtns = document.querySelectorAll('.color-btn:not(.custom-color-label)');
+    const customColorPicker = document.getElementById('custom-theme-picker');
+    const customColorLabel = document.querySelector('.custom-color-label');
+
+    settingsBtn.addEventListener('click', () => {
+        if (settingsModal.style.display === 'flex') {
+            settingsModal.style.display = 'none';
+        } else {
+            settingsModal.style.display = 'flex';
+        }
+    });
+
+    closeSettingsBtn.addEventListener('click', () => {
+        settingsModal.style.display = 'none';
+    });
+
+    colorBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const color = btn.dataset.color;
+            if (color === 'random') {
+                localStorage.setItem('drSongRankerTheme', 'random');
+                const randomColor = accentColors[Math.floor(Math.random() * accentColors.length)];
+                document.documentElement.style.setProperty('--accent-color', randomColor);
+            } else {
+                localStorage.setItem('drSongRankerTheme', color);
+                document.documentElement.style.setProperty('--accent-color', color);
+            }
+
+            // Visual feedback
+            colorBtns.forEach(b => b.classList.remove('active'));
+            customColorLabel.classList.remove('active');
+            btn.classList.add('active');
+        });
+    });
+
+    // Custom Color Logic
+    customColorPicker.addEventListener('input', (e) => {
+        const color = e.target.value;
+        document.documentElement.style.setProperty('--accent-color', color);
+        localStorage.setItem('drSongRankerTheme', color);
+
+        // Update UI
+        colorBtns.forEach(b => b.classList.remove('active'));
+        customColorLabel.classList.add('active');
+        customColorLabel.style.background = color;
+        customColorLabel.style.color = getContrastColor(color); // Helper to ensure text is visible
+    });
+
+    // Helper to decide text color (black or white) based on background
+    function getContrastColor(hexColor) {
+        const r = parseInt(hexColor.substr(1, 2), 16);
+        const g = parseInt(hexColor.substr(3, 2), 16);
+        const b = parseInt(hexColor.substr(5, 2), 16);
+        const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+        return (yiq >= 128) ? 'black' : 'white';
+    }
 
     let state = {
         songs: [],

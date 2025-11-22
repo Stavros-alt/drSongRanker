@@ -30,7 +30,10 @@
 
 <body>
     <div id="stats-bar">
-        <span id="visitor-stat">VISITORS: ...</span>
+        <div class="stats-left">
+            <button id="settings-btn" class="icon-btn">☰</button>
+            <span id="visitor-stat">VISITORS: ...</span>
+        </div>
         <span id="vote-stat">TOTAL VOTES: ...</span>
         <span id="personal-vote-stat" style="color: var(--accent-color);">YOUR VOTES: 0</span>
     </div>
@@ -139,7 +142,35 @@
         </p>
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <!-- Settings Modal -->
+    <div id="settings-modal">
+        <div class="modal-content">
+            <h2>SETTINGS</h2>
+
+            <div class="setting-group">
+                <p>UI Theme Color</p>
+                <div class="color-options">
+                    <button class="color-btn" data-color="#00ff9d" style="background: #00ff9d;"></button>
+                    <!-- Ralsei -->
+                    <button class="color-btn" data-color="#00f2ff" style="background: #00f2ff;"></button> <!-- Kris -->
+                    <button class="color-btn" data-color="#ff00ff" style="background: #ff00ff;"></button> <!-- Susie -->
+                    <button class="color-btn" data-color="random"
+                        style="background: linear-gradient(45deg, #fff, #888); color: #000;">?</button>
+
+                    <!-- Custom Color Picker -->
+                    <label class="color-btn custom-color-label" style="background: #333; color: #fff; cursor: pointer;">
+                        +
+                        <input type="color" id="custom-theme-picker"
+                            style="opacity: 0; position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: pointer;">
+                    </label>
+                </div>
+            </div>
+
+            <button id="close-settings-btn" class="action-btn">Close</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="app_song_data.js"></script>
     <script src="app.js"></script>
 </body>
