@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     // --- Dynamic Theme ---
-    // --- Dynamic Theme & Settings ---
+    // Theme settings
     const accentColors = [
         '#00ff9d', // Soft Green
         '#00f2ff', // Soft Cyan
@@ -124,26 +124,58 @@ document.addEventListener('DOMContentLoaded', () => {
     const communityRankingBtn = document.getElementById('community-ranking-btn');
     const filterBtns = document.querySelectorAll('.filter-btn');
 
-    function updateElo(winnerRating, loserRating) {
-        const kFactor = 32;
+    function updateElo(winnerRating, loserRating, winnerComparisons, loserComparisons) {
+        // Dynamic K-Factor.
+        // Use higher K for first 10 matches to speed up convergence.
+        const getK = (comparisons) => (comparisons < 10) ? 100 : 32;
+
+        const kWinner = getK(winnerComparisons);
+        const kLoser = getK(loserComparisons);
+
         const expectedWin = 1 / (1 + Math.pow(10, (loserRating - winnerRating) / 400));
-        const ratingChange = kFactor * (1 - expectedWin);
+
+        // Calculate changes separately based on each song's K-factor
+        const winnerChange = kWinner * (1 - expectedWin);
+        const loserChange = kLoser * (expectedWin - 1); // expectedLoss = 1 - expectedWin, so (0 - expectedWin) -> actually (score - expected) = (0 - expectedWin)
+
         return {
-            newWinnerRating: winnerRating + ratingChange,
-            newLoserRating: loserRating - ratingChange,
+            newWinnerRating: winnerRating + winnerChange,
+            newLoserRating: loserRating + loserChange, // loserChange is negative
         };
     }
 
     function presentNewPair() {
-        const song1 = state.songs[Math.floor(Math.random() * state.songs.length)];
+        const roll = Math.random();
+        let song1;
+
+        if (roll < 0.6) {
+            // 60% - Uncertainty Matchmaking (Exploration)
+            // Prioritize songs with fewest votes to ensure coverage
+            const sortedByVotes = [...state.songs].sort((a, b) => a.comparisons - b.comparisons);
+            const uncertaintyPoolSize = Math.max(5, Math.floor(state.songs.length * 0.25));
+            const uncertaintyPool = sortedByVotes.slice(0, uncertaintyPoolSize);
+            song1 = uncertaintyPool[Math.floor(Math.random() * uncertaintyPool.length)];
+        } else if (roll < 0.9) {
+            // 30% - Clash of Titans
+            // Match top rated songs against each other.
+            const sortedByRating = [...state.songs].sort((a, b) => b.rating - a.rating);
+            const topPoolSize = Math.min(20, state.songs.length);
+            const topPool = sortedByRating.slice(0, topPoolSize);
+            song1 = topPool[Math.floor(Math.random() * topPool.length)];
+        } else {
+            // 10% - Pure Random (Variety)
+            song1 = state.songs[Math.floor(Math.random() * state.songs.length)];
+        }
+
+        // Pick song2: Find a close match for song1 (Fuzzy Neighbor)
         const sortedOpponents = [...state.songs]
             .filter(s => s.id !== song1.id)
             .sort((a, b) => Math.abs(a.rating - song1.rating) - Math.abs(b.rating - song1.rating));
-        // Fuzzy Neighbor Matchmaking: Pick randomly from the top 10 closest opponents
-        // This prevents the same pairs from appearing constantly and makes ranking feel faster.
-        const poolSize = 10;
-        const pool = sortedOpponents.slice(0, poolSize);
-        const song2 = pool[Math.floor(Math.random() * pool.length)];
+
+        // Fuzzy Neighbor: Pick from top 10 closest
+        const neighborPoolSize = 10;
+        const neighborPool = sortedOpponents.slice(0, neighborPoolSize);
+        const song2 = neighborPool[Math.floor(Math.random() * neighborPool.length)];
 
         currentSongA = song1;
         currentSongB = song2;
@@ -174,7 +206,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const winnerSong = (winner === 'A') ? currentSongA : currentSongB;
             const loserSong = (winner === 'A') ? currentSongB : currentSongA;
 
-            const { newWinnerRating, newLoserRating } = updateElo(winnerSong.rating, loserSong.rating);
+            const { newWinnerRating, newLoserRating } = updateElo(
+                winnerSong.rating,
+                loserSong.rating,
+                winnerSong.comparisons,
+                loserSong.comparisons
+            );
+
             winnerSong.rating = newWinnerRating;
             loserSong.rating = newLoserRating;
 
@@ -335,8 +373,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateProgress() {
-        // Asymptotic Accuracy: 100 * (1 - e^(-comparisons / 100))
-        // Tweaked to 100 divisor for a smoother, more "earned" progression.
+        // Asymptotic Accuracy calculation.
+        // Diminishing returns on percentage as comparisons increase.
         const accuracy = 100 * (1 - Math.exp(-state.comparisons / 100));
 
         progressBar.style.width = `${accuracy}%`;

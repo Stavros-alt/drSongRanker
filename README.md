@@ -1,49 +1,33 @@
 # Deltarune Song Ranker
 
-A simple web tool for ranking every song in the Deltarune soundtrack without the hassle of a manual tier list.
+A tool to rank Deltarune songs.
 
-This app uses a pairwise comparison method powered by an Elo rating system. You are presented with two songs at a time and simply choose which one you prefer. Each choice refines the master ranking, allowing you to quickly and easily discover your definitive favorite tracks.
+It uses an Elo system. You pick one song, the other one loses points. Eventually you get a list.
 
 ## Features
 
--   **Full Soundtrack:** Includes all 165 songs from Deltarune.
--   **Elo-Based Ranking:** No tedious drag-and-drop. Just simple "this or that" choices.
--   **Song Previews:** Not sure which song is which? Each choice includes a "Play Preview" button to jog your memory.
--   **Saves Your Progress:** All your rankings are saved automatically in your browser. You can close the tab and continue right where you left off at any time.
--   **Live-Updating List:** Your full ranked list is visible and updates in real-time with every comparison you make.
--   **Full-Stack Architecture:** This project uses a Supabase backend with a PostgreSQL database to track all user votes and generate a live, global community ranking.
--   **Dynamic UI:** The front-end is built with vanilla JavaScript and features a reactive UI that updates rankings in real-time.
--   **Proven Engagement:** The tool has been used by over 300 unique users and has processed more than 6,000 votes.
+*   **All Songs:** It has the songs.
+*   **Ranking:** It ranks them.
+*   **Previews:** You can listen to them if you forgot what they sound like.
+*   **Saving:** It saves to localStorage. Don't clear your cache if you want to keep it.
+*   **Stats:** It shows how many people used it.
 
-## How to Use
+## Usage
 
-1.  **Open the Tool:** [Click here to access the Deltarune Song Ranker](https://Stavros-alt.github.io/drSongRanker/)
-2.  **Start Comparing:** The app will present you with two random songs.
-3.  **Listen and Choose:** Use the "Play Preview" buttons if needed, then click the button for the song you prefer. If you can't decide or don't know the songs, you can select "It's a Tie / Skip".
-4.  **Check Your Ranking:** Watch your personalized ranking take shape on the right-hand side of the screen.
-5.  **Repeat!** The more you vote, the more accurate your final list will become. Aim for at least 150-200 comparisons for a solid list.
+1.  Click the link.
+2.  Click the song you like more.
+3.  Look at the list on the right.
 
-## Support the Project
+## Local Dev
 
-This is a free fan-project created for the community. If you enjoy using this tool and want to show your appreciation, you can support its development and help cover potential future costs (like a custom domain).
+1.  Clone repo.
+2.  Get MP3s.
+3.  Run server (`python3 -m http.server`).
+4.  Localhost 8000.
 
-[![Ko-fi Badge](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/stavros916)
+## Credits
 
-## For Developers (Running Locally)
+Code by me. Music by Toby Fox.
+Support if you want. Or don't.
 
-If you want to run this project on your own machine:
-
-1.  Clone this repository or download the files.
-2.  Ensure you have all the MP3 files in the `DELTARUNESoundtrack` directory.
-3.  From the project's root directory, run a simple local web server. If you have Python 3, you can use:
-    ```bash
-    python3 -m http.server
-    ```
-4.  Open your browser and navigate to `http://localhost:8000`.
-
-## Credit
-
-This is a non-profit, fan-made project. All music and the Deltarune IP are the property of Toby Fox. Please support the official creators by purchasing the games and official merchandise.
-
--   [Deltarune on Steam](https://store.steampowered.com/app/1671210/DELTARUNE/)
--   [Official Undertale/Deltarune Merchandise on Fangamer](https://www.fangamer.com/collections/deltarune)
+[Ko-fi](https://ko-fi.com/stavros916)

@@ -1,4 +1,4 @@
-/* Deltarune Song Ranker - Battle UI Styles */
+/* Main Styles */
 
 /* Import Roboto Mono for a clean, modern-retro feel */
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
@@ -21,7 +21,7 @@
 
 body {
     background-color: var(--bg-color);
-    /* Battle Grid Background */
+    /* Grid background */
     background-image:
         linear-gradient(var(--grid-line) 1px, transparent 1px),
         linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
@@ -268,7 +268,6 @@ h1 {
     align-items: center;
     text-align: center;
     background: #000;
-    /* Solid black to pop off grid */
     transition: transform 0.1s;
     position: relative;
 }
