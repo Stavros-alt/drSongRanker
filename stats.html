@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deltarune Ranker - Stats Dashboard</title>
+    <link rel="icon" type="image/x-icon" href="Art/favicon.ico">
+    <meta name="darkreader-lock">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        .stats-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .chart-card {
+            background: #000;
+            border: 2px solid #fff;
+            padding: 20px;
+            position: relative;
+        }
+
+        .chart-card h2 {
+            margin-top: 0;
+            border-bottom: 1px solid #fff;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 300px !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="stats-container">
+        <h1>Global Stats Dashboard</h1>
+        <p>Private Analytics View</p>
+
+        <div class="chart-grid">
+            <!-- Chart 1: Rating Distribution -->
+            <div class="chart-card">
+                <h2>Rating Distribution (Bell Curve?)</h2>
+                <canvas id="ratingDistChart"></canvas>
+            </div>
+
+            <!-- Chart 2: Chapter Performance -->
+            <div class="chart-card">
+                <h2>Average Rating by Chapter</h2>
+                <canvas id="chapterChart"></canvas>
+            </div>
+
+            <!-- Chart 3: Top 20 Vote Volume -->
+            <div class="chart-card">
+                <h2>Top 20 Songs: Rating vs Votes</h2>
+                <canvas id="votesChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script src="app_song_data.js"></script>
+    <script src="cursor.js"></script>
+    <script src="stats.js"></script>
+</body>
+
+</html>

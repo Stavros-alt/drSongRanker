@@ -560,38 +560,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- Custom Cursor Logic ---
-    const cursor = document.createElement('div');
-    cursor.classList.add('custom-cursor');
-    document.body.appendChild(cursor);
 
-    document.addEventListener('mousemove', (e) => {
-        cursor.style.left = `${e.clientX}px`;
-        cursor.style.top = `${e.clientY}px`;
-    });
-
-    // Add pointermove for robust tracking on hybrid devices (Chromebooks, Surface, etc.)
-    document.addEventListener('pointermove', (e) => {
-        if (e.pointerType === 'mouse' || e.pointerType === 'pen') {
-            cursor.style.left = `${e.clientX}px`;
-            cursor.style.top = `${e.clientY}px`;
-        }
-    });
-
-    // Add hover effect for interactive elements
-    const interactiveSelectors = 'button, .song-card, .ranking-toggle-btn, .filter-btn, a, input';
-
-    document.body.addEventListener('mouseover', (e) => {
-        if (e.target.closest(interactiveSelectors)) {
-            cursor.classList.add('active');
-        }
-    });
-
-    document.body.addEventListener('mouseout', (e) => {
-        if (e.target.closest(interactiveSelectors)) {
-            cursor.classList.remove('active');
-        }
-    });
 
     // --- Playlist Logic ---
     const musicPlayerBar = document.getElementById('music-player-bar');
