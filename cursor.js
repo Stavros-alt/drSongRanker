@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Custom Cursor Logic ---
+    // Cursor
     const cursor = document.createElement('div');
     cursor.classList.add('custom-cursor');
     document.body.appendChild(cursor);
@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
         cursor.style.top = `${e.clientY}px`;
     });
 
-    // Add pointermove for robust tracking on hybrid devices (Chromebooks, Surface, etc.)
+    // Pointer events
     document.addEventListener('pointermove', (e) => {
         if (e.pointerType === 'mouse' || e.pointerType === 'pen') {
             cursor.style.left = `${e.clientX}px`;
@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Add hover effect for interactive elements
+    // Hover state
     const interactiveSelectors = 'button, .song-card, .ranking-toggle-btn, .filter-btn, a, input, .chart-card';
 
     document.body.addEventListener('mouseover', (e) => {

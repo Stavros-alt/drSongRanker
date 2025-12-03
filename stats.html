@@ -19,9 +19,28 @@
 
         .chart-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
             margin-top: 30px;
+        }
+
+        .col-span-2 {
+            grid-column: span 2;
+        }
+
+        .col-span-3 {
+            grid-column: span 3;
+        }
+
+        @media (max-width: 900px) {
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .col-span-2,
+            .col-span-3 {
+                grid-column: auto;
+            }
         }
 
         .chart-card {
@@ -29,19 +48,33 @@
             border: 2px solid #fff;
             padding: 20px;
             position: relative;
+            display: flex;
+            flex-direction: column;
+            height: 400px;
+            /* Fixed height */
+        }
+
+        .chart-container {
+            flex-grow: 1;
+            min-height: 0;
+            position: relative;
+            width: 100%;
         }
 
         .chart-card h2 {
             margin-top: 0;
             border-bottom: 1px solid #fff;
             padding-bottom: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
+            /* Reduced margin */
             font-size: 1.2em;
+            flex-shrink: 0;
+            /* Don't shrink the title */
         }
 
         canvas {
             width: 100% !important;
-            height: 300px !important;
+            height: 100% !important;
         }
     </style>
 </head>
@@ -52,22 +85,49 @@
         <p>Private Analytics View</p>
 
         <div class="chart-grid">
-            <!-- Chart 1: Rating Distribution -->
+            <!-- Row 1: Tier (1), Top 10 (1), Bottom 10 (1) -->
             <div class="chart-card">
-                <h2>Rating Distribution (Bell Curve?)</h2>
-                <canvas id="ratingDistChart"></canvas>
+                <h2>Tier Distribution</h2>
+                <div class="chart-container">
+                    <canvas id="tierChart"></canvas>
+                </div>
             </div>
 
-            <!-- Chart 2: Chapter Performance -->
+            <div class="chart-card">
+                <h2>Top 10 Highest Rated</h2>
+                <div class="chart-container">
+                    <canvas id="votesChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h2>Bottom 10 Lowest Rated</h2>
+                <div class="chart-container">
+                    <canvas id="bottom10Chart"></canvas>
+                </div>
+            </div>
+
+            <!-- Row 2: Rating Dist (2), Chapter Perf (1) -->
+            <div class="chart-card col-span-2">
+                <h2>Rating Distribution (Bell Curve?)</h2>
+                <div class="chart-container">
+                    <canvas id="ratingDistChart"></canvas>
+                </div>
+            </div>
+
             <div class="chart-card">
                 <h2>Average Rating by Chapter</h2>
-                <canvas id="chapterChart"></canvas>
+                <div class="chart-container">
+                    <canvas id="chapterChart"></canvas>
+                </div>
             </div>
 
-            <!-- Chart 3: Top 20 Vote Volume -->
-            <div class="chart-card">
-                <h2>Top 20 Songs: Rating vs Votes</h2>
-                <canvas id="votesChart"></canvas>
+            <!-- Row 3: The Curve (3) -->
+            <div class="chart-card col-span-3">
+                <h2>The Curve (All Songs Sorted)</h2>
+                <div class="chart-container">
+                    <canvas id="curveChart"></canvas>
+                </div>
             </div>
         </div>
     </div>

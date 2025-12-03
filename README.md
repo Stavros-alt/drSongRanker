@@ -11,6 +11,7 @@ It uses an Elo system. You pick one song, the other one loses points. Eventually
 *   **Previews:** You can listen to them if you forgot what they sound like.
 *   **Saving:** It saves to localStorage. Don't clear your cache if you want to keep it.
 *   **Stats:** It shows how many people used it.
+*   **Charts:** Go to /stats.html to see graphs.
 
 ## Usage
 

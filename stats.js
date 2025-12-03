@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Common Chart Options (Dark World Theme)
+    // Chart options
     Chart.defaults.color = '#fff';
     Chart.defaults.borderColor = '#333';
     Chart.defaults.font.family = "'Roboto Mono', monospace";
@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const songs = await fetchData();
     if (!songs.length) return;
 
-    // --- Chart 1: Rating Distribution ---
+    // Chart 1: Rating Distribution
     const ratings = songs.map(s => Math.round(s.rating));
     const bins = {};
     // Create bins of 50 points (e.g., 1200-1250, 1250-1300)
@@ -53,13 +53,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false, // Fill the 400px height
             plugins: {
                 legend: { display: false }
             }
         }
     });
 
-    // --- Chart 2: Chapter Performance ---
+    // Chart 2: Chapter Performance
     // Helper to map ID to Chapter
     function getChapter(id) {
         if (id <= 40) return 'Ch 1';
@@ -100,6 +101,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             scales: {
                 y: { min: 1200 } // Zoom in to show differences
             },
@@ -109,7 +111,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // --- Chart 3: Top 20 Votes vs Rating ---
+    // Chart 3: Top 10
     const top20 = songs.slice(0, 20);
 
     new Chart(document.getElementById('votesChart'), {
@@ -141,10 +143,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Correction for Chart 3:
-    // Since we likely don't have global 'comparisons' count per song (Elo usually just updates rating),
-    // let's change Chart 3 to "Top 10 Highest Rated Songs" bar chart for clarity.
-    // The Scatter plot is risky without confirmed data.
+    // Switch to bar chart.
 
     const top10 = songs.slice(0, 10);
     const top10Chart = Chart.getChart("votesChart");
@@ -165,11 +164,115 @@ document.addEventListener('DOMContentLoaded', async () => {
         options: {
             indexAxis: 'y', // Horizontal bar
             responsive: true,
+            maintainAspectRatio: false,
             plugins: {
                 legend: { display: false }
             },
             scales: {
                 x: { min: 1400 }
+            }
+        }
+    });
+
+    // Chart 4: Tiers
+    const tiers = { 'S+ (God)': 0, 'S (Elite)': 0, 'A (Great)': 0, 'B (Good)': 0, 'C (Mid)': 0, 'D (Filler)': 0 };
+    songs.forEach(s => {
+        if (s.rating >= 1900) tiers['S+ (God)']++;
+        else if (s.rating >= 1750) tiers['S (Elite)']++;
+        else if (s.rating >= 1600) tiers['A (Great)']++;
+        else if (s.rating >= 1450) tiers['B (Good)']++;
+        else if (s.rating >= 1300) tiers['C (Mid)']++;
+        else tiers['D (Filler)']++;
+    });
+
+    new Chart(document.getElementById('tierChart'), {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(tiers),
+            datasets: [{
+                data: Object.values(tiers),
+                backgroundColor: [
+                    '#ffffff', // S+ (White/Glowing)
+                    '#ff00ff', // S (Magenta)
+                    '#00f2ff', // A (Cyan)
+                    '#00ff9d', // B (Green)
+                    '#ffff00', // C (Yellow)
+                    '#666666'  // D (Grey)
+                ],
+                borderColor: '#000',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            aspectRatio: 1,
+            cutout: '50%',
+            plugins: {
+                legend: { position: 'right', labels: { color: '#fff' } }
+            }
+        }
+    });
+
+    // Chart 5: Bottom 10
+    const bottom10 = [...songs].sort((a, b) => a.rating - b.rating).slice(0, 10);
+
+    new Chart(document.getElementById('bottom10Chart'), {
+        type: 'bar',
+        data: {
+            labels: bottom10.map(s => s.name.substring(0, 15) + '...'),
+            datasets: [{
+                label: 'Rating',
+                data: bottom10.map(s => s.rating),
+                backgroundColor: '#333333', // Dark grey for the losers
+                borderColor: '#666',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { x: { min: 1000 } } // Adjust min to show scale
+        }
+    });
+
+    // Chart 6: Sorted Ratings
+    const allSorted = [...songs].sort((a, b) => b.rating - a.rating);
+
+    new Chart(document.getElementById('curveChart'), {
+        type: 'line',
+        data: {
+            labels: allSorted.map((_, i) => i + 1), // Rank 1 to N
+            datasets: [{
+                label: 'Rating',
+                data: allSorted.map(s => s.rating),
+                borderColor: '#00f2ff',
+                backgroundColor: 'rgba(0, 242, 255, 0.1)',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 0 // Smooth line, no dots
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        title: (context) => `Rank #${context[0].label}`,
+                        label: (context) => {
+                            const song = allSorted[context.dataIndex];
+                            return `${song.name}: ${Math.round(song.rating)}`;
+                        }
+                    }
+                },
+                legend: { display: false }
+            },
+            scales: {
+                x: { title: { display: true, text: 'Rank' } },
+                y: { title: { display: true, text: 'Rating' } }
             }
         }
     });
