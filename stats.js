@@ -174,45 +174,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Chart 4: Tiers
-    const tiers = { 'S+ (God)': 0, 'S (Elite)': 0, 'A (Great)': 0, 'B (Good)': 0, 'C (Mid)': 0, 'D (Filler)': 0 };
-    songs.forEach(s => {
-        if (s.rating >= 1900) tiers['S+ (God)']++;
-        else if (s.rating >= 1750) tiers['S (Elite)']++;
-        else if (s.rating >= 1600) tiers['A (Great)']++;
-        else if (s.rating >= 1450) tiers['B (Good)']++;
-        else if (s.rating >= 1300) tiers['C (Mid)']++;
-        else tiers['D (Filler)']++;
-    });
 
-    new Chart(document.getElementById('tierChart'), {
-        type: 'doughnut',
-        data: {
-            labels: Object.keys(tiers),
-            datasets: [{
-                data: Object.values(tiers),
-                backgroundColor: [
-                    '#ffffff', // S+ (White/Glowing)
-                    '#ff00ff', // S (Magenta)
-                    '#00f2ff', // A (Cyan)
-                    '#00ff9d', // B (Green)
-                    '#ffff00', // C (Yellow)
-                    '#666666'  // D (Grey)
-                ],
-                borderColor: '#000',
-                borderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            aspectRatio: 1,
-            cutout: '50%',
-            plugins: {
-                legend: { position: 'right', labels: { color: '#fff' } }
-            }
-        }
-    });
 
     // Chart 5: Bottom 10
     const bottom10 = [...songs].sort((a, b) => a.rating - b.rating).slice(0, 10);

@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // --- Dynamic Theme ---
+    // Theme
     // Theme settings
     const accentColors = [
         '#00ff9d', // Soft Green
@@ -62,14 +62,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.documentElement.style.setProperty('--accent-color', color);
             }
 
-            // Visual feedback
+            // UI update
             colorBtns.forEach(b => b.classList.remove('active'));
             customColorLabel.classList.remove('active');
             btn.classList.add('active');
         });
     });
 
-    // Custom Color Logic
+    // Custom color
     customColorPicker.addEventListener('input', (e) => {
         const color = e.target.value;
         document.documentElement.style.setProperty('--accent-color', color);
@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
         customColorLabel.style.color = getContrastColor(color); // Helper to ensure text is visible
     });
 
-    // Helper to decide text color (black or white) based on background
+    // Contrast helper
     function getContrastColor(hexColor) {
         const r = parseInt(hexColor.substr(1, 2), 16);
         const g = parseInt(hexColor.substr(3, 2), 16);
@@ -126,7 +126,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateElo(winnerRating, loserRating, winnerComparisons, loserComparisons) {
         // Dynamic K-Factor.
-        // Use higher K for first 10 matches to speed up convergence.
         const getK = (comparisons) => (comparisons < 10) ? 100 : 32;
 
         const kWinner = getK(winnerComparisons);
@@ -149,30 +148,28 @@ document.addEventListener('DOMContentLoaded', () => {
         let song1;
 
         if (roll < 0.6) {
-            // 60% - Uncertainty Matchmaking (Exploration)
-            // Prioritize songs with fewest votes to ensure coverage
+            // 60% chance: low votes.
             const sortedByVotes = [...state.songs].sort((a, b) => a.comparisons - b.comparisons);
             const uncertaintyPoolSize = Math.max(5, Math.floor(state.songs.length * 0.25));
             const uncertaintyPool = sortedByVotes.slice(0, uncertaintyPoolSize);
             song1 = uncertaintyPool[Math.floor(Math.random() * uncertaintyPool.length)];
         } else if (roll < 0.9) {
-            // 30% - Clash of Titans
-            // Match top rated songs against each other.
+            // 30% chance: top rated.
             const sortedByRating = [...state.songs].sort((a, b) => b.rating - a.rating);
             const topPoolSize = Math.min(20, state.songs.length);
             const topPool = sortedByRating.slice(0, topPoolSize);
             song1 = topPool[Math.floor(Math.random() * topPool.length)];
         } else {
-            // 10% - Pure Random (Variety)
+            // 10% chance: random.
             song1 = state.songs[Math.floor(Math.random() * state.songs.length)];
         }
 
-        // Pick song2: Find a close match for song1 (Fuzzy Neighbor)
+        // Pick opponent.
         const sortedOpponents = [...state.songs]
             .filter(s => s.id !== song1.id)
             .sort((a, b) => Math.abs(a.rating - song1.rating) - Math.abs(b.rating - song1.rating));
 
-        // Fuzzy Neighbor: Pick from top 10 closest
+        // Top 10 closest ratings.
         const neighborPoolSize = 10;
         const neighborPool = sortedOpponents.slice(0, neighborPoolSize);
         const song2 = neighborPool[Math.floor(Math.random() * neighborPool.length)];
@@ -373,8 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateProgress() {
-        // Asymptotic Accuracy calculation.
-        // Diminishing returns on percentage as comparisons increase.
+        // Accuracy calc.
         const accuracy = 100 * (1 - Math.exp(-state.comparisons / 100));
 
         progressBar.style.width = `${accuracy}%`;
@@ -499,7 +495,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Sharing Functionality ---
+    // Sharing
     const shareBtn = document.getElementById('share-btn');
     const shareModal = document.getElementById('share-modal');
     const closeShareBtn = document.getElementById('close-share-btn');
@@ -562,7 +558,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-    // --- Playlist Logic ---
+    // Playlist
     const musicPlayerBar = document.getElementById('music-player-bar');
     const playerSongName = document.getElementById('player-song-name');
     const playerPrevBtn = document.getElementById('player-prev-btn');

@@ -20,6 +20,8 @@
         .chart-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
+            grid-auto-flow: dense;
+            /* Fill gaps automatically */
             gap: 20px;
             margin-top: 30px;
         }
@@ -86,12 +88,7 @@
 
         <div class="chart-grid">
             <!-- Row 1: Tier (1), Top 10 (1), Bottom 10 (1) -->
-            <div class="chart-card">
-                <h2>Tier Distribution</h2>
-                <div class="chart-container">
-                    <canvas id="tierChart"></canvas>
-                </div>
-            </div>
+
 
             <div class="chart-card">
                 <h2>Top 10 Highest Rated</h2>

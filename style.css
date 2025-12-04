@@ -1,13 +1,13 @@
 /* Main Styles */
 
-/* Import Roboto Mono for a clean, modern-retro feel */
+/* Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
 
 :root {
     --bg-color: #000000;
     --text-color: #ffffff;
     --accent-color: #00ff9d;
-    /* Default, overridden by JS */
+    /* Defaults */
     --grid-color: #330033;
     --grid-line: #660066;
     --border-width: 3px;
@@ -35,14 +35,14 @@ body {
     padding: 0;
     min-height: 100vh;
     min-height: 100dvh;
-    /* Mobile viewport fix */
+    /* Mobile fix */
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
     /* cursor: none; Removed global hide */
 }
 
-/* Custom Cursor - Hidden by default */
+/* Cursor */
 .custom-cursor {
     display: none;
     /* Hidden by default for mobile safety */
@@ -58,7 +58,7 @@ body {
     transition: transform 0.1s ease, filter 0.1s ease;
 }
 
-/* Pulsing Glow Effect */
+/* Glow animation */
 .custom-cursor.active {
     filter: drop-shadow(0 0 8px #ff0000);
     transform: translate(-50%, -50%) scale(1.2);
@@ -79,7 +79,7 @@ body {
     }
 }
 
-/* Desktop: Enable Custom Cursor */
+/* Desktop cursor */
 @media (hover: hover) and (pointer: fine) {
     .custom-cursor {
         display: block;
@@ -272,7 +272,7 @@ h1 {
     position: relative;
 }
 
-/* Mobile Hover Fix: Only apply hover effects on devices that support it */
+/* Hover support */
 @media (hover: hover) {
     .song-card:hover {
         transform: translate(-4px, -4px);
