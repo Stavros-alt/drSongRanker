@@ -10,7 +10,7 @@
     <link rel="icon" type="image/x-icon" href="Art/favicon.ico">
     <meta name="darkreader-lock">
 
-    <!-- Open Graph / Facebook -->
+    <!-- Meta -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://stavros-alt.github.io/drSongRanker/">
     <meta property="og:title" content="Deltarune Song Ranker">
@@ -96,7 +96,7 @@
         </div>
     </div>
 
-    <!-- Music Player Bar -->
+    <!-- Player -->
     <div id="music-player-bar" class="hidden">
         <div class="player-info">
             <span id="player-song-name">Now Playing...</span>
@@ -110,7 +110,7 @@
         <audio id="playlist-audio"></audio>
     </div>
 
-    <!-- Share Modal -->
+    <!-- Share -->
     <div id="share-modal"
         style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; align-items: center; justify-content: center;">
         <div
@@ -143,7 +143,7 @@
         </p>
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Settings Modal -->
+    <!-- Settings -->
     <div id="settings-modal">
         <div class="modal-content">
             <h2>SETTINGS</h2>
@@ -175,6 +175,23 @@
     <script src="app_song_data.js"></script>
     <script src="cursor.js"></script>
     <script src="app.js"></script>
+    <script>
+        // Konami Code: Up, Up, Down, Down, Left, Right, Left, Right, B, A
+        const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+        let konamiIndex = 0;
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key.toLowerCase() === konamiCode[konamiIndex].toLowerCase()) {
+                konamiIndex++;
+                if (konamiIndex === konamiCode.length) {
+                    window.location.href = 'stats.html';
+                    konamiIndex = 0;
+                }
+            } else {
+                konamiIndex = 0;
+            }
+        });
+    </script>
 </body>
 
 </html>

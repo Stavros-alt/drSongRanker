@@ -87,7 +87,7 @@
         <p>Private Analytics View</p>
 
         <div class="chart-grid">
-            <!-- Row 1: Tier (1), Top 10 (1), Bottom 10 (1) -->
+            <!-- Row 1 -->
 
 
             <div class="chart-card">
@@ -104,9 +104,9 @@
                 </div>
             </div>
 
-            <!-- Row 2: Rating Dist (2), Chapter Perf (1) -->
+            <!-- Row 2 -->
             <div class="chart-card col-span-2">
-                <h2>Rating Distribution (Bell Curve?)</h2>
+                <h2>Rating Distribution</h2>
                 <div class="chart-container">
                     <canvas id="ratingDistChart"></canvas>
                 </div>
@@ -119,11 +119,28 @@
                 </div>
             </div>
 
-            <!-- Row 3: The Curve (3) -->
+            <!-- Row 3 -->
             <div class="chart-card col-span-3">
                 <h2>The Curve (All Songs Sorted)</h2>
                 <div class="chart-container">
                     <canvas id="curveChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Row 4 -->
+            <div class="chart-card col-span-2">
+                <h2>Chronological Quality (ID vs Rating)</h2>
+                <div class="chart-container">
+                    <canvas id="chronoChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Standard Deviation -->
+            <div class="chart-card">
+                <h2>Controversy Index (Std Dev)</h2>
+                <div
+                    style="display: flex; justify-content: center; align-items: center; height: 100%; font-size: 4em; font-weight: bold; color: var(--accent-color);">
+                    <span id="stdDevDisplay">...</span>
                 </div>
             </div>
         </div>

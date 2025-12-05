@@ -239,4 +239,45 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    // Chart 7: Chronological Quality (Scatter)
+    new Chart(document.getElementById('chronoChart'), {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Songs',
+                data: songs.map(s => ({ x: s.id, y: s.rating })),
+                backgroundColor: '#ff00ff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: (context) => {
+                            const song = songs.find(s => s.id === context.raw.x);
+                            return `${song.name}: ${Math.round(context.raw.y)}`;
+                        }
+                    }
+                },
+                legend: { display: false }
+            },
+            scales: {
+                x: { title: { display: true, text: 'Song ID (Chronological)' } },
+                y: { title: { display: true, text: 'Rating' } }
+            }
+        }
+    });
+
+    // Metric: Standard Deviation
+    const mean = songs.reduce((sum, s) => sum + s.rating, 0) / songs.length;
+    const variance = songs.reduce((sum, s) => sum + Math.pow(s.rating - mean, 2), 0) / songs.length;
+    const stdDev = Math.sqrt(variance);
+
+    const stdDevDisplay = document.getElementById('stdDevDisplay');
+    if (stdDevDisplay) {
+        stdDevDisplay.textContent = `σ ${stdDev.toFixed(1)}`;
+    }
+
 });
