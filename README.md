@@ -1,34 +1,26 @@
-# Deltarune Song Ranker
+# deltarune song ranker
 
-A tool to rank Deltarune songs.
+ranks songs. uses elo.
 
-It uses an Elo system. You pick one song, the other one loses points. Eventually you get a list.
+## features
 
-## Features
+- ranks things.
+- plays music.
+- saves to localstorage.
+- stats page at /stats.html.
+- trading cards if you click the list.
 
-*   **All Songs:** It has the songs.
-*   **Ranking:** It ranks them.
-*   **Previews:** You can listen to them if you forgot what they sound like.
-*   **Saving:** It saves to localStorage. Don't clear your cache if you want to keep it.
-*   **Stats:** It shows how many people used it.
-*   **Charts:** Go to /stats.html to see graphs.
+## usage
 
-## Usage
+click the one you like.
 
-1.  Click the link.
-2.  Click the song you like more.
-3.  Look at the list on the right.
+## dev
 
-## Local Dev
+1. clone.
+2. `python3 -m http.server`.
+3. localhost:8000.
 
-1.  Clone repo.
-2.  Get MP3s.
-3.  Run server (`python3 -m http.server`).
-4.  Localhost 8000.
+## credits
 
-## Credits
-
-Code by me. Music by Toby Fox.
-Support if you want. Or don't.
-
-[Ko-fi](https://ko-fi.com/stavros916)
+code by me. music by toby fox.
+[ko-fi](https://ko-fi.com/stavros916)

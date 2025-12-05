@@ -132,6 +132,44 @@
         </div>
     </div>
 
+    <!-- Trading Card Modal -->
+    <div id="card-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content card-modal-content">
+            <div id="trading-card" class="trading-card">
+                <div class="card-header">
+                    <span id="card-rank" class="card-rank">#1</span>
+                    <span id="card-rating" class="card-rating">RATING: 2400</span>
+                </div>
+                <div class="card-image-container">
+                    <div class="card-image-placeholder">
+                        <img id="card-chapter-icon" src="" alt="Chapter Icon" style="display: none;">
+                    </div>
+                </div>
+                <div class="card-title-container">
+                    <h2 id="card-title">BIG SHOT</h2>
+                </div>
+                <div class="card-stats">
+                    <div class="stat-row">
+                        <span class="stat-label">CHAPTER</span>
+                        <span id="card-chapter" class="stat-value">2</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">RIVAL</span>
+                        <span id="card-rival" class="stat-value">The World Revolving</span>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button id="card-play-btn" class="card-action-btn">▶ PREVIEW</button>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button id="download-card-btn" class="action-btn">DOWNLOAD CARD</button>
+                <button id="close-card-btn" class="action-btn">CLOSE</button>
+            </div>
+        </div>
+    </div>
+
     <audio id="audioA"></audio>
     <audio id="audioB"></audio>
 

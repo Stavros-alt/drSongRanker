@@ -119,18 +119,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         data: {
             datasets: [{
                 label: 'Songs',
-                data: top20.map(s => ({ x: s.rating, y: s.comparisons || 0 })), // Assuming 'comparisons' is tracked in DB? 
-                // Wait, DB might not have 'comparisons' column if it's only local?
-                // Actually, app.js doesn't sync 'comparisons' to DB, only 'rating'.
-                // Ah, the prompt said "Global charts". 
-                // If 'comparisons' isn't in DB, we can't show global vote volume per song.
-                // Let's check app.js recordCommunityVote.
-                // It calls 'handle_vote'. We don't see the schema.
-                // Assuming for now we only have 'rating'.
-                // If we can't get comparisons, maybe we just plot Rating vs Rank (linear check)?
-                // Or just Top 10 Ratings bar chart.
-                // Let's stick to Top 10 Ratings for now if comparisons is missing.
-                // Actually, let's try to fetch it. If it's missing, we'll fallback.
+                data: top20.map(s => ({ x: s.rating, y: s.comparisons || 0 })),
                 backgroundColor: '#ff00ff'
             }]
         },
@@ -239,7 +228,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Chart 7: Chronological Quality (Scatter)
+    // chart 7. scatter.
     new Chart(document.getElementById('chronoChart'), {
         type: 'scatter',
         data: {
@@ -270,7 +259,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Metric: Standard Deviation
+    // math.
     const mean = songs.reduce((sum, s) => sum + s.rating, 0) / songs.length;
     const variance = songs.reduce((sum, s) => sum + Math.pow(s.rating - mean, 2), 0) / songs.length;
     const stdDev = Math.sqrt(variance);

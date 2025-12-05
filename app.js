@@ -645,5 +645,124 @@ document.addEventListener('DOMContentLoaded', () => {
         playSongInPlaylist(currentPlaylistIndex + 1);
     });
 
+    // card stuff
+    const cardModal = document.getElementById('card-modal');
+    const closeCardBtn = document.getElementById('close-card-btn');
+    const downloadCardBtn = document.getElementById('download-card-btn');
+    const tradingCard = document.getElementById('trading-card');
+    const cardPlayBtn = document.getElementById('card-play-btn');
+
+    // dom nodes
+    const cardRank = document.getElementById('card-rank');
+    const cardRating = document.getElementById('card-rating');
+    const cardChapterIcon = document.getElementById('card-chapter-icon');
+    const cardTitle = document.getElementById('card-title');
+    const cardChapter = document.getElementById('card-chapter');
+    const cardRival = document.getElementById('card-rival');
+
+    let currentCardSong = null;
+
+    function getChapterInfo(id) {
+        if (id <= 40) return { num: '1', icon: 'Art/Chapter_1_icon.png' };
+        if (id <= 87) return { num: '2', icon: 'Art/Chapter_2_icon.png' };
+        if (id <= 125) return { num: '3', icon: 'Art/Chapter_3_icon.png' };
+        return { num: '4', icon: 'Art/Chapter_4_icon.png' };
+    }
+
+    function openCardModal(song, rank, rivalName) {
+        currentCardSong = song;
+
+        // fill it in
+        cardRank.textContent = `#${rank}`;
+        cardRating.textContent = `RATING: ${Math.round(song.rating)}`;
+        cardTitle.textContent = song.name;
+
+        const chapterInfo = getChapterInfo(song.id);
+        cardChapter.textContent = chapterInfo.num;
+
+        // update image
+        cardChapterIcon.src = chapterInfo.icon;
+        cardChapterIcon.style.display = 'block';
+
+        cardRival.textContent = rivalName || "None";
+
+        // make it shiny if they win
+        tradingCard.classList.remove('rank-gold', 'rank-silver', 'rank-bronze', 'rank-standard');
+        if (rank === 1) tradingCard.classList.add('rank-gold');
+        else if (rank <= 3) tradingCard.classList.add('rank-silver');
+        else if (rank <= 10) tradingCard.classList.add('rank-bronze');
+        else tradingCard.classList.add('rank-standard');
+
+        cardModal.style.display = 'flex';
+    }
+
+    // clicks
+    rankingList.addEventListener('click', (e) => {
+        const li = e.target.closest('li');
+        if (!li) return;
+
+        // check tab
+        const isCommunity = communityRankingBtn.classList.contains('active');
+        const sourceData = isCommunity ? cachedCommunitySongs : state.songs;
+
+        // figure out what they clicked
+        const filteredSongs = filterSongsByChapter(sourceData, currentChapterFilter);
+        const sortedSongs = [...filteredSongs].sort((a, b) => b.rating - a.rating);
+
+        // list index matches sorted array
+        let index = 0;
+        let sibling = li.previousElementSibling;
+        while (sibling) {
+            index++;
+            sibling = sibling.previousElementSibling;
+        }
+
+        const song = sortedSongs[index];
+        const rank = index + 1;
+        const rival = (index > 0) ? sortedSongs[index - 1].name : "CHAMPION";
+
+        if (song) {
+            openCardModal(song, rank, rival);
+        }
+    });
+
+    closeCardBtn.addEventListener('click', () => {
+        cardModal.style.display = 'none';
+        if (activePreviewTimeout) clearTimeout(activePreviewTimeout);
+        audioA.pause();
+        audioB.pause();
+    });
+
+    cardPlayBtn.addEventListener('click', () => {
+        if (currentCardSong) {
+            // hacking the preview player
+            audioA.src = encodeURI(currentCardSong.file);
+            playPreview('A');
+        }
+    });
+
+    downloadCardBtn.addEventListener('click', () => {
+        html2canvas(tradingCard, {
+            backgroundColor: null, // Transparent
+            scale: 2
+        }).then(canvas => {
+            const link = document.createElement('a');
+            // Use ID to ensure safe filename
+            link.download = `dr_card_${currentCardSong.id}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }).catch(err => {
+            console.error("Card generation failed:", err);
+            alert("Could not generate card image.");
+        });
+    });
+
+    // close it
+    window.addEventListener('click', (e) => {
+        if (e.target === cardModal) {
+            cardModal.style.display = 'none';
+        }
+    });
+
     updateApp();
 });

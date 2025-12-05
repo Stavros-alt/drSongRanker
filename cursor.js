@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Cursor
+    // cursor
     const cursor = document.createElement('div');
     cursor.classList.add('custom-cursor');
     document.body.appendChild(cursor);
@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
         cursor.style.top = `${e.clientY}px`;
     });
 
-    // Pointer events
+    // pointer stuff
     document.addEventListener('pointermove', (e) => {
         if (e.pointerType === 'mouse' || e.pointerType === 'pen') {
             cursor.style.left = `${e.clientX}px`;
@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Hover state
+    // hover
     const interactiveSelectors = 'button, .song-card, .ranking-toggle-btn, .filter-btn, a, input, .chart-card';
 
     document.body.addEventListener('mouseover', (e) => {
