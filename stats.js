@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Chart options
+    // chart options. why is this api like this?
     Chart.defaults.color = '#fff';
     Chart.defaults.borderColor = '#333';
     Chart.defaults.font.family = "'Roboto Mono', monospace";
@@ -26,10 +26,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const songs = await fetchData();
     if (!songs.length) return;
 
-    // Chart 1: Rating Distribution
+    // chart 1: rating distribution.
+    // basic bar chart. nothing fancy.
     const ratings = songs.map(s => Math.round(s.rating));
     const bins = {};
-    // Create bins of 50 points (e.g., 1200-1250, 1250-1300)
+    // buckets of 50. don't ask why 50.
     ratings.forEach(r => {
         const bin = Math.floor(r / 50) * 50;
         bins[bin] = (bins[bin] || 0) + 1;
@@ -53,20 +54,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false, // Fill the 400px height
+            maintainAspectRatio: false, // fill the space
             plugins: {
                 legend: { display: false }
             }
         }
     });
 
-    // Chart 2: Chapter Performance
-    // Helper to map ID to Chapter
+    // chart 2: chapter stats.
+    // this switch statement is ugly but it works.
     function getChapter(id) {
         if (id <= 40) return 'Ch 1';
         if (id <= 87) return 'Ch 2';
         if (id <= 125) return 'Ch 3';
-        return 'Ch 4'; // Assuming up to 165
+        return 'Ch 4'; // i guess?
     }
 
     const chapterStats = {
@@ -111,7 +112,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Chart 3: Top 10
+    // chart 3: top 10. the winners.
+    // whatever.
     const top20 = songs.slice(0, 20);
 
     new Chart(document.getElementById('votesChart'), {
@@ -132,8 +134,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Switch to bar chart.
-
+    // switch to bar chart because scatter looked weird.
     const top10 = songs.slice(0, 10);
     const top10Chart = Chart.getChart("votesChart");
     if (top10Chart) top10Chart.destroy();
@@ -165,7 +166,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 
-    // Chart 5: Bottom 10
+    // chart 5: bottom 10. the losers.
     const bottom10 = [...songs].sort((a, b) => a.rating - b.rating).slice(0, 10);
 
     new Chart(document.getElementById('bottom10Chart'), {
@@ -175,7 +176,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             datasets: [{
                 label: 'Rating',
                 data: bottom10.map(s => s.rating),
-                backgroundColor: '#333333', // Dark grey for the losers
+                backgroundColor: '#333333', // dark grey like my soul
                 borderColor: '#666',
                 borderWidth: 1
             }]
@@ -189,7 +190,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Chart 6: Sorted Ratings
+    // chart 6: the curve. pretty lines.
     const allSorted = [...songs].sort((a, b) => b.rating - a.rating);
 
     new Chart(document.getElementById('curveChart'), {
@@ -228,7 +229,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // chart 7. scatter.
+    // chart 7. scatter. dots everywhere.
     new Chart(document.getElementById('chronoChart'), {
         type: 'scatter',
         data: {
@@ -259,10 +260,116 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // math.
+    // math. don't look at this part.
     const mean = songs.reduce((sum, s) => sum + s.rating, 0) / songs.length;
     const variance = songs.reduce((sum, s) => sum + Math.pow(s.rating - mean, 2), 0) / songs.length;
     const stdDev = Math.sqrt(variance);
+
+    // chart 8: radar chart.
+    // honestly i just added this because it looks cool.
+    const chapterAverages = chData;
+    // raw data is fine. whatever.
+
+    new Chart(document.getElementById('radarChart'), {
+        type: 'radar',
+        data: {
+            labels: chLabels,
+            datasets: [{
+                label: 'Avg Rating',
+                data: chapterAverages,
+                backgroundColor: 'rgba(0, 255, 157, 0.2)',
+                borderColor: '#00ff9d',
+                pointBackgroundColor: '#fff',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: '#00ff9d'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    angleLines: { color: '#333' },
+                    grid: { color: '#333' },
+                    pointLabels: { color: '#fff', font: { size: 14 } },
+                    suggestedMin: 1300 // Focus on the differences
+                }
+            },
+            plugins: { legend: { display: false } }
+        }
+    });
+
+    // chart 9: tier list. pie charts are bad but the client wanted it.
+    const tiers = { 'S+': 0, 'S': 0, 'A': 0, 'B': 0, 'C': 0, 'D': 0 };
+    songs.forEach(s => {
+        if (s.rating >= 1600) tiers['S+']++;
+        else if (s.rating >= 1550) tiers['S']++;
+        else if (s.rating >= 1500) tiers['A']++;
+        else if (s.rating >= 1450) tiers['B']++;
+        else if (s.rating >= 1400) tiers['C']++;
+        else tiers['D']++;
+    });
+
+    new Chart(document.getElementById('tierChart'), {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(tiers),
+            datasets: [{
+                data: Object.values(tiers),
+                backgroundColor: [
+                    '#ff00ff', // S+ Magenta
+                    '#00f2ff', // S Cyan
+                    '#00ff9d', // A Green
+                    '#ffff00', // B Yellow
+                    '#ff8800', // C Orange
+                    '#ff0000'  // D Red
+                ],
+                borderColor: '#000',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'right', labels: { color: '#fff' } }
+            }
+        }
+    });
+
+    // chart 10: name length vs rating. 
+    // does a longer name mean a better song? probably not.
+    new Chart(document.getElementById('nameLengthChart'), {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Songs',
+                data: songs.map(s => ({ x: s.name.length, y: s.rating })),
+                backgroundColor: '#ffff00'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: (context) => {
+                            const song = songs.find(s => s.name.length === context.raw.x && s.rating === context.raw.y);
+                            // Handle collisions (approximate)
+                            return `${song ? song.name : 'Song'}: ${Math.round(context.raw.y)}`;
+                        }
+                    }
+                },
+                legend: { display: false }
+            },
+            scales: {
+                x: { title: { display: true, text: 'Name Length (Chars)' } },
+                y: { title: { display: true, text: 'Rating' } }
+            }
+        }
+    });
 
     const stdDevDisplay = document.getElementById('stdDevDisplay');
     if (stdDevDisplay) {

@@ -1,26 +1,24 @@
 # deltarune song ranker
 
-ranks songs. uses elo.
+this performs an elo sort on songs. i don't know why i made this.
 
 ## features
 
-- ranks things.
+- ranks songs.
 - plays music.
-- saves to localstorage.
-- stats page at /stats.html.
-- trading cards if you click the list.
+- shows stats.
+- uses localstorage because databases are expensive.
 
 ## usage
 
-click the one you like.
+just click the buttons. it's not hard.
 
 ## dev
 
-1. clone.
-2. `python3 -m http.server`.
-3. localhost:8000.
+1. `python3 -m http.server`
+2. go to localhost:8000.
 
 ## credits
 
-code by me. music by toby fox.
-[ko-fi](https://ko-fi.com/stavros916)
+code by me.
+music by toby fox.

@@ -10,12 +10,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // Theme
-    // Theme settings
+
+    // theme, because apparently default white isnt good enough.
+    // whatever.
     const accentColors = [
-        '#00ff9d', // Soft Green
-        '#00f2ff', // Soft Cyan
-        '#ff00ff'  // Magenta
+        '#00ff9d', // green i guess
+        '#00f2ff', // cyan
+        '#ff00ff'  // pink. why not.
     ];
 
     function loadTheme() {
@@ -30,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     loadTheme();
 
-    // Settings Elements
+    // settings ui stuff. i hate dom manipulation.
     const settingsBtn = document.getElementById('settings-btn');
     const settingsModal = document.getElementById('settings-modal');
     const closeSettingsBtn = document.getElementById('close-settings-btn');
@@ -69,7 +70,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Custom color
+    // custom color logic.
+    // if this breaks, just refresh the page.
     customColorPicker.addEventListener('input', (e) => {
         const color = e.target.value;
         document.documentElement.style.setProperty('--accent-color', color);
@@ -125,7 +127,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const filterBtns = document.querySelectorAll('.filter-btn');
 
     function updateElo(winnerRating, loserRating, winnerComparisons, loserComparisons) {
-        // Dynamic K-Factor.
+        // dynamic k-factor. math is hard.
+        // if this is wrong, blame wikipedia.
         const getK = (comparisons) => (comparisons < 10) ? 100 : 32;
 
         const kWinner = getK(winnerComparisons);
@@ -164,7 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
             song1 = state.songs[Math.floor(Math.random() * state.songs.length)];
         }
 
-        // Pick opponent.
+        // pick the next victim. i mean song.
         const sortedOpponents = [...state.songs]
             .filter(s => s.id !== song1.id)
             .sort((a, b) => Math.abs(a.rating - song1.rating) - Math.abs(b.rating - song1.rating));
@@ -235,7 +238,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         audioEl.currentTime = PREVIEW_START_TIME;
 
-        // Fix for short songs: If duration is valid and shorter than start time + buffer, start at 0
+        // stupid fix for short songs.
+        // if the song is shorter than the start time, just start at 0.
+        // i don't know why i have to do this manually.
         if (!isNaN(audioEl.duration) && audioEl.duration < PREVIEW_START_TIME + 5) {
             audioEl.currentTime = 0;
         }
@@ -267,34 +272,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function handleUniqueVisitor() {
-        if (!localStorage.getItem('hasVisitedDrRanker')) {
-            try {
-                const { error } = await supabaseClient.rpc('increment_visitor_count');
-                if (error) throw error;
-                localStorage.setItem('hasVisitedDrRanker', 'true');
-            } catch (error) {
-                console.error("Error incrementing visitor count:", error.message);
-            }
-        }
-    }
+
 
     async function fetchAndDisplayAllTimeStats() {
         try {
-            const { data: visitorData, error: visitorError } = await supabaseClient
-                .from('site_stats')
-                .select('total_visitors')
-                .eq('id', 1)
-                .single();
-
-            if (visitorError && visitorError.code !== 'PGRST116') {
-                throw visitorError;
-            }
-
-            const visitors = visitorData ? visitorData.total_visitors : 0;
-            const visitorStat = document.getElementById('visitor-stat');
-            if (visitorStat) visitorStat.textContent = `Total Visitors: ${visitors}`;
-
             const { data: voteData, error: voteError } = await supabaseClient
                 .rpc('get_total_votes');
 
@@ -308,9 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (error) {
             console.error("CRITICAL ERROR fetching stats:", error);
-            const visitorStat = document.getElementById('visitor-stat');
             const voteStat = document.getElementById('vote-stat');
-            if (visitorStat) visitorStat.textContent = "Stats: Error";
             if (voteStat) voteStat.textContent = "";
         }
     }
@@ -327,7 +306,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (error) throw error;
 
-            // Merge file paths from local state
+            // merge local file paths.
+            // this is probably slow but it works on my machine.
             cachedCommunitySongs = data.map(cSong => {
                 const localSong = state.songs.find(s => s.id === cSong.id);
                 return {
@@ -440,7 +420,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loadState();
 
-    handleUniqueVisitor();
+
     fetchAndDisplayAllTimeStats();
 
     chooseABtn.addEventListener('click', () => handleChoice('A'));
@@ -503,7 +483,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Sharing
+    // sharing is caring. or whatever.
     const shareBtn = document.getElementById('share-btn');
     const shareModal = document.getElementById('share-modal');
     const closeShareBtn = document.getElementById('close-share-btn');
@@ -548,7 +528,7 @@ document.addEventListener('DOMContentLoaded', () => {
     downloadShareBtn.addEventListener('click', () => {
         html2canvas(sharePreview, {
             backgroundColor: "#000000",
-            scale: 2 // Higher resolution
+            scale: 2 // make it look less bad
         }).then(canvas => {
             const link = document.createElement('a');
             link.download = 'deltarune-ranking.png';
@@ -581,7 +561,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let isPlaylistPlaying = false;
 
     function generateAndStartPlaylist() {
-        // 1. Determine source (My Rank vs Global)
+        // 1. source. my rank or global. don't care.
         let sourceSongs = [];
         if (communityRankingBtn.classList.contains('active')) {
             if (cachedCommunitySongs.length > 0) {
@@ -594,7 +574,7 @@ document.addEventListener('DOMContentLoaded', () => {
             sourceSongs = [...state.songs].sort((a, b) => b.rating - a.rating);
         }
 
-        // 2. Apply Filter
+        // 2. apply filter because users are picky.
         if (currentChapterFilter !== 'all') {
             sourceSongs = filterSongsByChapter(sourceSongs, currentChapterFilter);
         }
@@ -604,7 +584,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // 3. Start Playlist
+        // 3. start playlist. finally.
         playlist = sourceSongs;
         currentPlaylistIndex = 0;
         musicPlayerBar.classList.remove('hidden');
