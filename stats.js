@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // chart options. why is this api like this?
+    // chart options. making this look decent is impossible.
     Chart.defaults.color = '#fff';
     Chart.defaults.borderColor = '#333';
     Chart.defaults.font.family = "'Roboto Mono', monospace";
@@ -27,10 +27,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!songs.length) return;
 
     // chart 1: rating distribution.
-    // basic bar chart. nothing fancy.
+    // just a bar chart. move along.
     const ratings = songs.map(s => Math.round(s.rating));
     const bins = {};
-    // buckets of 50. don't ask why 50.
+    // buckets of 50. arbitrary number, whatever.
     ratings.forEach(r => {
         const bin = Math.floor(r / 50) * 50;
         bins[bin] = (bins[bin] || 0) + 1;
@@ -62,12 +62,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // chart 2: chapter stats.
-    // this switch statement is ugly but it works.
+    // yes, this switch is ugly. i don't care.
     function getChapter(id) {
         if (id <= 40) return 'Ch 1';
         if (id <= 87) return 'Ch 2';
         if (id <= 125) return 'Ch 3';
-        return 'Ch 4'; // i guess?
+        return 'Ch 4'; // sure.
     }
 
     const chapterStats = {
@@ -112,8 +112,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // chart 3: top 10. the winners.
-    // whatever.
+    // chart 3: top 10.
+    // big numbers.
     const top20 = songs.slice(0, 20);
 
     new Chart(document.getElementById('votesChart'), {
@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // switch to bar chart because scatter looked weird.
+    // scatter was ugly. bars are less ugly.
     const top10 = songs.slice(0, 10);
     const top10Chart = Chart.getChart("votesChart");
     if (top10Chart) top10Chart.destroy();
@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 
-    // chart 5: bottom 10. the losers.
+    // chart 5: bottom 10. garbage.
     const bottom10 = [...songs].sort((a, b) => a.rating - b.rating).slice(0, 10);
 
     new Chart(document.getElementById('bottom10Chart'), {
@@ -176,7 +176,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             datasets: [{
                 label: 'Rating',
                 data: bottom10.map(s => s.rating),
-                backgroundColor: '#333333', // dark grey like my soul
+                backgroundColor: '#333333', // dark like this code base
                 borderColor: '#666',
                 borderWidth: 1
             }]
@@ -190,7 +190,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // chart 6: the curve. pretty lines.
+    // chart 6: the curve. line go up.
     const allSorted = [...songs].sort((a, b) => b.rating - a.rating);
 
     new Chart(document.getElementById('curveChart'), {
@@ -204,7 +204,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 backgroundColor: 'rgba(0, 242, 255, 0.1)',
                 fill: true,
                 tension: 0.4,
-                pointRadius: 0 // Smooth line, no dots
+                pointRadius: 0 // smooth it out.
             }]
         },
         options: {
@@ -229,7 +229,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // chart 7. scatter. dots everywhere.
+    // chart 7. scatter. complete chaos.
     new Chart(document.getElementById('chronoChart'), {
         type: 'scatter',
         data: {
@@ -260,15 +260,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // math. don't look at this part.
+    // math. i think this is right.
     const mean = songs.reduce((sum, s) => sum + s.rating, 0) / songs.length;
     const variance = songs.reduce((sum, s) => sum + Math.pow(s.rating - mean, 2), 0) / songs.length;
     const stdDev = Math.sqrt(variance);
 
     // chart 8: radar chart.
-    // honestly i just added this because it looks cool.
+    // useless but looks cool.
     const chapterAverages = chData;
-    // raw data is fine. whatever.
+    // raw data, whatever.
 
     new Chart(document.getElementById('radarChart'), {
         type: 'radar',
@@ -300,7 +300,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // chart 9: tier list. pie charts are bad but the client wanted it.
+    // chart 9: tier list. pie charts are awful.
     const tiers = { 'S+': 0, 'S': 0, 'A': 0, 'B': 0, 'C': 0, 'D': 0 };
     songs.forEach(s => {
         if (s.rating >= 1600) tiers['S+']++;
@@ -339,7 +339,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // chart 10: name length vs rating. 
-    // does a longer name mean a better song? probably not.
+    // does length matter? probably not.
     new Chart(document.getElementById('nameLengthChart'), {
         type: 'scatter',
         data: {
@@ -357,7 +357,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     callbacks: {
                         label: (context) => {
                             const song = songs.find(s => s.name.length === context.raw.x && s.rating === context.raw.y);
-                            // Handle collisions (approximate)
+                            // close enough.
                             return `${song ? song.name : 'Song'}: ${Math.round(context.raw.y)}`;
                         }
                     }

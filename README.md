@@ -1,24 +1,24 @@
-# deltarune song ranker
+# drSongRanker
 
-this performs an elo sort on songs. i don't know why i made this.
+ranks deltarune songs with elo.
 
 ## features
 
-- ranks songs.
-- plays music.
-- shows stats.
-- uses localstorage because databases are expensive.
+- ranks stuff.
+- plays audio.
+- stats dashboard that took way too long to make.
+- uses supabase now. don't look at the schemas.
 
 ## usage
 
-just click the buttons. it's not hard.
+click the buttons.
 
 ## dev
 
-1. `python3 -m http.server`
-2. go to localhost:8000.
+serve it locally.
+`python3 -m http.server`
 
 ## credits
 
-code by me.
-music by toby fox.
+me.
+toby fox (music).
