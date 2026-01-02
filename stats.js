@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // just a bar chart. move along.
     const ratings = songs.map(s => Math.round(s.rating));
     const bins = {};
-    // buckets of 50. arbitrary number, whatever.
+    // buckets of 50. whatever.
     ratings.forEach(r => {
         const bin = Math.floor(r / 50) * 50;
         bins[bin] = (bins[bin] || 0) + 1;
@@ -61,8 +61,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // chart 2: chapter stats.
-    // yes, this switch is ugly. i don't care.
+    // Chapters. whatever.
     function getChapter(id) {
         if (id <= 40) return 'Ch 1';
         if (id <= 87) return 'Ch 2';
@@ -104,7 +103,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             responsive: true,
             maintainAspectRatio: false,
             scales: {
-                y: { min: 1200 } // Zoom in to show differences
+                y: { min: 1200 }
             },
             plugins: {
                 legend: { display: false }
@@ -112,8 +111,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // chart 3: top 10.
-    // big numbers.
+    // top 10. big numbers.
     const top20 = songs.slice(0, 20);
 
     new Chart(document.getElementById('votesChart'), {
@@ -134,7 +132,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // scatter was ugly. bars are less ugly.
+    // scatter was a mess. bars are slightly less of a mess.
     const top10 = songs.slice(0, 10);
     const top10Chart = Chart.getChart("votesChart");
     if (top10Chart) top10Chart.destroy();
@@ -166,7 +164,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 
-    // chart 5: bottom 10. garbage.
+    // bottom 10. actual garbage.
     const bottom10 = [...songs].sort((a, b) => a.rating - b.rating).slice(0, 10);
 
     new Chart(document.getElementById('bottom10Chart'), {
@@ -190,7 +188,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // chart 6: the curve. line go up.
+    // the curve. line goes up. i hope.
     const allSorted = [...songs].sort((a, b) => b.rating - a.rating);
 
     new Chart(document.getElementById('curveChart'), {
@@ -204,7 +202,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 backgroundColor: 'rgba(0, 242, 255, 0.1)',
                 fill: true,
                 tension: 0.4,
-                pointRadius: 0 // smooth it out.
+                pointRadius: 0
             }]
         },
         options: {
@@ -229,7 +227,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // chart 7. scatter. complete chaos.
+    // scatter. complete chaos.
     new Chart(document.getElementById('chronoChart'), {
         type: 'scatter',
         data: {
@@ -260,13 +258,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // math. i think this is right.
-    const mean = songs.reduce((sum, s) => sum + s.rating, 0) / songs.length;
-    const variance = songs.reduce((sum, s) => sum + Math.pow(s.rating - mean, 2), 0) / songs.length;
-    const stdDev = Math.sqrt(variance);
 
-    // chart 8: radar chart.
-    // useless but looks cool.
+    // radar chart. useless but users like shapes.
     const chapterAverages = chData;
     // raw data, whatever.
 
@@ -300,7 +293,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // chart 9: tier list. pie charts are awful.
+    // tier list. pie charts are awful.
     const tiers = { 'S+': 0, 'S': 0, 'A': 0, 'B': 0, 'C': 0, 'D': 0 };
     songs.forEach(s => {
         if (s.rating >= 1600) tiers['S+']++;
@@ -338,42 +331,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // chart 10: name length vs rating. 
-    // does length matter? probably not.
-    new Chart(document.getElementById('nameLengthChart'), {
-        type: 'scatter',
-        data: {
-            datasets: [{
-                label: 'Songs',
-                data: songs.map(s => ({ x: s.name.length, y: s.rating })),
-                backgroundColor: '#ffff00'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: (context) => {
-                            const song = songs.find(s => s.name.length === context.raw.x && s.rating === context.raw.y);
-                            // close enough.
-                            return `${song ? song.name : 'Song'}: ${Math.round(context.raw.y)}`;
-                        }
-                    }
-                },
-                legend: { display: false }
-            },
-            scales: {
-                x: { title: { display: true, text: 'Name Length (Chars)' } },
-                y: { title: { display: true, text: 'Rating' } }
-            }
-        }
-    });
 
-    const stdDevDisplay = document.getElementById('stdDevDisplay');
-    if (stdDevDisplay) {
-        stdDevDisplay.textContent = `σ ${stdDev.toFixed(1)}`;
-    }
 
 });

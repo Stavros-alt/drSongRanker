@@ -11,8 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 
-    // theme, because apparently default white isnt good enough.
-    // whatever.
+    // theme. apparently default white is too boring. whatever.
     const accentColors = [
         '#00ff9d', // green i guess
         '#00f2ff', // cyan
@@ -70,21 +69,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // custom color logic.
-    // if this breaks, just refresh the page.
+    // picker. i don't know why this needs a change event AND an input event.
+    // whatever.
     customColorPicker.addEventListener('input', (e) => {
         const color = e.target.value;
         document.documentElement.style.setProperty('--accent-color', color);
         localStorage.setItem('drSongRankerTheme', color);
 
-        // Update UI
         colorBtns.forEach(b => b.classList.remove('active'));
         customColorLabel.classList.add('active');
         customColorLabel.style.background = color;
-        customColorLabel.style.color = getContrastColor(color); // Helper to ensure text is visible
+        customColorLabel.style.color = getContrastColor(color);
     });
 
-    // Contrast helper
+    // math. i'm done with this.
     function getContrastColor(hexColor) {
         const r = parseInt(hexColor.substr(1, 2), 16);
         const g = parseInt(hexColor.substr(3, 2), 16);
@@ -126,9 +124,58 @@ document.addEventListener('DOMContentLoaded', () => {
     const communityRankingBtn = document.getElementById('community-ranking-btn');
     const filterBtns = document.querySelectorAll('.filter-btn');
 
+    // suggestion box. i don't even know why i'm taking requests.
+    const suggestBtn = document.getElementById('suggest-btn');
+    const suggestionModal = document.getElementById('suggestion-modal');
+    const closeSuggestionBtn = document.getElementById('close-suggestion-btn');
+    const submitSuggestionBtn = document.getElementById('submit-suggestion-btn');
+    const suggestionText = document.getElementById('suggestion-text');
+
+    suggestBtn.addEventListener('click', () => {
+        suggestionModal.style.display = 'flex';
+    });
+
+    closeSuggestionBtn.addEventListener('click', () => {
+        suggestionModal.style.display = 'none';
+    });
+
+    submitSuggestionBtn.addEventListener('click', async () => {
+        const content = suggestionText.value.trim();
+        if (!content) {
+            alert("Maybe actually type something first?");
+            return;
+        }
+
+        submitSuggestionBtn.disabled = true;
+        submitSuggestionBtn.textContent = "SENDING...";
+
+        try {
+            const { error } = await supabaseClient
+                .from('feature_suggestions')
+                .insert([{ content: content }]);
+
+            if (error) throw error;
+
+            alert("Got it. I'll look at it whenever I have time.");
+            suggestionText.value = '';
+            suggestionModal.style.display = 'none';
+        } catch (err) {
+            console.error("Suggestion failed:", err);
+            alert("Great, even the suggestion box is broken. Try again later.");
+        } finally {
+            submitSuggestionBtn.disabled = false;
+            submitSuggestionBtn.textContent = "SUBMIT";
+        }
+    });
+
+    window.addEventListener('click', (e) => {
+        if (e.target === suggestionModal) {
+            suggestionModal.style.display = 'none';
+        }
+    });
+
     function updateElo(winnerRating, loserRating, winnerComparisons, loserComparisons) {
-        // dynamic k-factor. math is hard.
-        // if this is wrong, blame wikipedia.
+        // dynamic k-factor because elo is a mess.
         const getK = (comparisons) => (comparisons < 10) ? 100 : 32;
 
         const kWinner = getK(winnerComparisons);
@@ -136,17 +183,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const expectedWin = 1 / (1 + Math.pow(10, (loserRating - winnerRating) / 400));
 
-        // Calculate changes separately based on each song's K-factor
         const winnerChange = kWinner * (1 - expectedWin);
-        const loserChange = kLoser * (expectedWin - 1); // expectedLoss = 1 - expectedWin, so (0 - expectedWin) -> actually (score - expected) = (0 - expectedWin)
+        const loserChange = kLoser * (expectedWin - 1);
 
         return {
             newWinnerRating: winnerRating + winnerChange,
-            newLoserRating: loserRating + loserChange, // loserChange is negative
+            newLoserRating: loserRating + loserChange,
         };
     }
 
     function presentNewPair() {
+        // pick two songs and hope for the best.
         const roll = Math.random();
         let song1;
 
@@ -167,7 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
             song1 = state.songs[Math.floor(Math.random() * state.songs.length)];
         }
 
-        // pick the next victim. i mean song.
+        // pick the next victim.
         const sortedOpponents = [...state.songs]
             .filter(s => s.id !== song1.id)
             .sort((a, b) => Math.abs(a.rating - song1.rating) - Math.abs(b.rating - song1.rating));
@@ -238,9 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         audioEl.currentTime = PREVIEW_START_TIME;
 
-        // stupid fix for short songs.
-        // if the song is shorter than the start time, just start at 0.
-        // i don't know why i have to do this manually.
+        // stupid fix for short songs. i shouldn't have to do this.
         if (!isNaN(audioEl.duration) && audioEl.duration < PREVIEW_START_TIME + 5) {
             audioEl.currentTime = 0;
         }
@@ -306,8 +351,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (error) throw error;
 
-            // merge local file paths.
-            // this is probably slow but it works on my machine.
+            // merging paths. probably slow.
             cachedCommunitySongs = data.map(cSong => {
                 const localSong = state.songs.find(s => s.id === cSong.id);
                 return {
@@ -358,7 +402,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateProgress() {
-        // Accuracy calc.
+        // math. again.
         const accuracy = 100 * (1 - Math.exp(-state.comparisons / 100));
 
         progressBar.style.width = `${accuracy}%`;
@@ -483,7 +527,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // sharing is caring. or whatever.
+    // sharing is caring. or whatever. i'm tired.
     const shareBtn = document.getElementById('share-btn');
     const shareModal = document.getElementById('share-modal');
     const closeShareBtn = document.getElementById('close-share-btn');
@@ -528,7 +572,6 @@ document.addEventListener('DOMContentLoaded', () => {
     downloadShareBtn.addEventListener('click', () => {
         html2canvas(sharePreview, {
             backgroundColor: "#000000",
-            scale: 2 // make it look less bad
         }).then(canvas => {
             const link = document.createElement('a');
             link.download = 'deltarune-ranking.png';
@@ -537,7 +580,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Close modal on outside click
+    // close modal on outside click because users are like that.
     window.addEventListener('click', (e) => {
         if (e.target === shareModal) {
             shareModal.style.display = 'none';
@@ -546,7 +589,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-    // Playlist
+    // playlist. because picking a song is apparently hard.
     const musicPlayerBar = document.getElementById('music-player-bar');
     const playerSongName = document.getElementById('player-song-name');
     const playerPrevBtn = document.getElementById('player-prev-btn');
@@ -561,7 +604,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let isPlaylistPlaying = false;
 
     function generateAndStartPlaylist() {
-        // 1. source. my rank or global. don't care.
+        // 1. source. my rank or global. i don't care.
         let sourceSongs = [];
         if (communityRankingBtn.classList.contains('active')) {
             if (cachedCommunitySongs.length > 0) {
@@ -633,7 +676,7 @@ document.addEventListener('DOMContentLoaded', () => {
         playSongInPlaylist(currentPlaylistIndex + 1);
     });
 
-    // search
+    // search. as if scrolling is too much work.
     const rankingSearch = document.getElementById('ranking-search');
     rankingSearch.addEventListener('input', (e) => {
         const searchTerm = e.target.value.toLowerCase();
