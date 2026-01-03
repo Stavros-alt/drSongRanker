@@ -1,24 +1,23 @@
 # drSongRanker
 
-ranks deltarune songs with elo. it works. don't touch the code.
+Elo-based ranking for Deltarune music. It works, so don't touch the code. I'm already handling enough egress issues as it is.
 
-## features
+## Features
 
-- ranks stuff.
-- plays audio.
-- stats dashboard that took way too long to make.
-- uses supabase. don't look at the schemas.
+- Ranks songs using Elo.
+- Stats dashboard (uses Chart.js, which was a nightmare to configure).
+- Global database sync via Supabase.
 
-## usage
+## Setup
 
-click the buttons.
-
-## dev
-
-serve it locally.
+Don't overcomplicate it. Use a local server.
 `python3 -m http.server`
 
-## credits
+## Note
 
-me.
-toby fox (music).
+I don't have time for feature requests. If it's broken, it's probably Supabase's fault.
+
+## Credits
+
+- Toby Fox (Audio/IP)
+- Me (Everything else)

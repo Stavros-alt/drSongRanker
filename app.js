@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 
-    // theme. apparently default white is too boring. whatever.
+    // theme stuff. i don't care if it's pink or green.
     const accentColors = [
         '#00ff9d', // green i guess
         '#00f2ff', // cyan
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (savedColor && savedColor !== 'random') {
             document.documentElement.style.setProperty('--accent-color', savedColor);
         } else {
-            // Default Random
+            // default. because who cares.
             const randomColor = accentColors[Math.floor(Math.random() * accentColors.length)];
             document.documentElement.style.setProperty('--accent-color', randomColor);
         }
@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.documentElement.style.setProperty('--accent-color', color);
             }
 
-            // UI update
+            // updating the dom is suffering.
             colorBtns.forEach(b => b.classList.remove('active'));
             customColorLabel.classList.remove('active');
             btn.classList.add('active');
@@ -100,6 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let previousRanking = [];
     let activePreviewTimeout = null;
     let currentChapterFilter = 'all';
+    let votesSinceLastRefresh = 0; // stop hammering the api
     const PREVIEW_DURATION = 10000;
     const PREVIEW_START_TIME = 30;
 
@@ -175,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function updateElo(winnerRating, loserRating, winnerComparisons, loserComparisons) {
-        // dynamic k-factor because elo is a mess.
+        // why is elo so convoluted.
         const getK = (comparisons) => (comparisons < 10) ? 100 : 32;
 
         const kWinner = getK(winnerComparisons);
@@ -193,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function presentNewPair() {
-        // pick two songs and hope for the best.
+        // picking two songs. don't ask about the distribution.
         const roll = Math.random();
         let song1;
 
@@ -214,12 +215,12 @@ document.addEventListener('DOMContentLoaded', () => {
             song1 = state.songs[Math.floor(Math.random() * state.songs.length)];
         }
 
-        // pick the next victim.
+        // next victim.
         const sortedOpponents = [...state.songs]
             .filter(s => s.id !== song1.id)
             .sort((a, b) => Math.abs(a.rating - song1.rating) - Math.abs(b.rating - song1.rating));
 
-        // Top 10 closest ratings.
+        // neighbors. whatever.
         const neighborPoolSize = 10;
         const neighborPool = sortedOpponents.slice(0, neighborPoolSize);
         const song2 = neighborPool[Math.floor(Math.random() * neighborPool.length)];
@@ -268,7 +269,24 @@ document.addEventListener('DOMContentLoaded', () => {
             state.comparisons++;
 
             recordCommunityVote(winnerSong.id, loserSong.id);
-            fetchAndDisplayAllTimeStats();
+
+            // only fetch total votes every 15 personal votes. my egress is crying.
+            votesSinceLastRefresh++;
+            if (votesSinceLastRefresh >= 15) {
+                fetchAndDisplayAllTimeStats();
+                votesSinceLastRefresh = 0;
+            } else {
+                // just increment locally for now so the user sees something change.
+                const voteStat = document.getElementById('vote-stat');
+                if (voteStat) {
+                    const currentText = voteStat.textContent || "";
+                    const match = currentText.match(/\d+/);
+                    if (match) {
+                        const newTotal = parseInt(match[0]) + 1;
+                        voteStat.textContent = `Total Votes: ${newTotal}`;
+                    }
+                }
+            }
         }
 
         updateApp();
@@ -285,7 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         audioEl.currentTime = PREVIEW_START_TIME;
 
-        // stupid fix for short songs. i shouldn't have to do this.
+        // fix for short songs because they're special apparently.
         if (!isNaN(audioEl.duration) && audioEl.duration < PREVIEW_START_TIME + 5) {
             audioEl.currentTime = 0;
         }
@@ -351,7 +369,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (error) throw error;
 
-            // merging paths. probably slow.
+            // paths. whatever.
             cachedCommunitySongs = data.map(cSong => {
                 const localSong = state.songs.find(s => s.id === cSong.id);
                 return {
@@ -402,13 +420,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateProgress() {
-        // math. again.
+        // math. i'm done.
         const accuracy = 100 * (1 - Math.exp(-state.comparisons / 100));
 
         progressBar.style.width = `${accuracy}%`;
         progressText.textContent = `Ranking Accuracy: ${accuracy.toFixed(1)}%`;
 
-        // Update Personal Vote Counter
+        // counter.
         const personalVoteStat = document.getElementById('personal-vote-stat');
         if (personalVoteStat) {
             personalVoteStat.textContent = `YOUR VOTES: ${state.comparisons}`;
@@ -527,7 +545,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // sharing is caring. or whatever. i'm tired.
+    // sharing. i'm tired.
     const shareBtn = document.getElementById('share-btn');
     const shareModal = document.getElementById('share-modal');
     const closeShareBtn = document.getElementById('close-share-btn');
@@ -580,7 +598,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // close modal on outside click because users are like that.
+    // close on click. users find things hard.
     window.addEventListener('click', (e) => {
         if (e.target === shareModal) {
             shareModal.style.display = 'none';
@@ -589,7 +607,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-    // playlist. because picking a song is apparently hard.
+    // playlist.
     const musicPlayerBar = document.getElementById('music-player-bar');
     const playerSongName = document.getElementById('player-song-name');
     const playerPrevBtn = document.getElementById('player-prev-btn');
@@ -604,7 +622,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let isPlaylistPlaying = false;
 
     function generateAndStartPlaylist() {
-        // 1. source. my rank or global. i don't care.
+        // source.
         let sourceSongs = [];
         if (communityRankingBtn.classList.contains('active')) {
             if (cachedCommunitySongs.length > 0) {
@@ -617,7 +635,7 @@ document.addEventListener('DOMContentLoaded', () => {
             sourceSongs = [...state.songs].sort((a, b) => b.rating - a.rating);
         }
 
-        // 2. apply filter because users are picky.
+        // picky users.
         if (currentChapterFilter !== 'all') {
             sourceSongs = filterSongsByChapter(sourceSongs, currentChapterFilter);
         }
@@ -627,7 +645,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // 3. start playlist. finally.
+        // finally.
         playlist = sourceSongs;
         currentPlaylistIndex = 0;
         musicPlayerBar.classList.remove('hidden');
@@ -676,7 +694,7 @@ document.addEventListener('DOMContentLoaded', () => {
         playSongInPlaylist(currentPlaylistIndex + 1);
     });
 
-    // search. as if scrolling is too much work.
+    // search.
     const rankingSearch = document.getElementById('ranking-search');
     rankingSearch.addEventListener('input', (e) => {
         const searchTerm = e.target.value.toLowerCase();
