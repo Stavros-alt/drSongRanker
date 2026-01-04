@@ -94,6 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let state = {
         songs: [],
         comparisons: 0,
+        history: null // i guess we only need to go back once.
     };
 
     let currentSongA, currentSongB;
@@ -124,6 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const myRankingBtn = document.getElementById('my-ranking-btn');
     const communityRankingBtn = document.getElementById('community-ranking-btn');
     const filterBtns = document.querySelectorAll('.filter-btn');
+    const undoBtn = document.getElementById('undo-btn');
 
     // suggestion box. i don't even know why i'm taking requests.
     const suggestBtn = document.getElementById('suggest-btn');
@@ -245,10 +247,20 @@ document.addEventListener('DOMContentLoaded', () => {
             songBCard.classList.remove('selected', 'loser');
             arena.classList.add('slide-in');
         }, 50);
+
+        // enable if there's history. it's not hard.
+        if (undoBtn) undoBtn.disabled = !state.history;
     }
 
     function handleChoice(winner) {
         if (!currentSongA || !currentSongB) return;
+
+        // save history before we mess it up.
+        state.history = {
+            songA: { id: currentSongA.id, rating: currentSongA.rating, comparisons: currentSongA.comparisons },
+            songB: { id: currentSongB.id, rating: currentSongB.rating, comparisons: currentSongB.comparisons },
+            totalComparisons: state.comparisons
+        };
 
         if (winner) {
             const winnerSong = (winner === 'A') ? currentSongA : currentSongB;
@@ -462,8 +474,50 @@ document.addEventListener('DOMContentLoaded', () => {
         if (confirm("Are you sure you want to reset all progress? This cannot be undone.")) {
             localStorage.removeItem('drSongRankerState');
             initializeNewState();
+            state.history = null;
             updateApp();
         }
+    }
+
+    function undoVote() {
+        if (!state.history) return;
+
+        // find the victims.
+        const songA = state.songs.find(s => s.id === state.history.songA.id);
+        const songB = state.songs.find(s => s.id === state.history.songB.id);
+
+        if (songA && songB) {
+            songA.rating = state.history.songA.rating;
+            songA.comparisons = state.history.songA.comparisons;
+            songB.rating = state.history.songB.rating;
+            songB.comparisons = state.history.songB.comparisons;
+            state.comparisons = state.history.totalComparisons;
+
+            // go back to the scene of the crime.
+            currentSongA = songA;
+            currentSongB = songB;
+        }
+
+        state.history = null; // one time use. don't get greedy.
+
+        // update rankings and progress, but DON'T pick new songs.
+        if (myRankingBtn.classList.contains('active')) {
+            displayRankings();
+        }
+        updateProgress();
+        saveState();
+
+        // refresh the display manually. i hate this.
+        songAName.textContent = currentSongA.name;
+        songBName.textContent = currentSongB.name;
+        chooseABtn.textContent = `I prefer ${currentSongA.name}`;
+        chooseBBtn.textContent = `I prefer ${currentSongB.name}`;
+        audioA.src = encodeURI(currentSongA.file);
+        audioB.src = encodeURI(currentSongB.file);
+        audioA.load();
+        audioB.load();
+
+        if (undoBtn) undoBtn.disabled = true;
     }
 
     function updateApp() {
@@ -488,6 +542,7 @@ document.addEventListener('DOMContentLoaded', () => {
     chooseABtn.addEventListener('click', () => handleChoice('A'));
     chooseBBtn.addEventListener('click', () => handleChoice('B'));
     tieBtn.addEventListener('click', () => handleChoice(null));
+    undoBtn.addEventListener('click', undoVote);
     resetBtn.addEventListener('click', resetState);
     previewBtns.forEach(btn => {
         btn.addEventListener('click', () => playPreview(btn.dataset.song));
