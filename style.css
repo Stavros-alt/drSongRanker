@@ -975,3 +975,237 @@ footer {
         box-sizing: border-box;
     }
 }
+
+/* Hidden NES Controller */
+#nes-controller-overlay {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 320px;
+    height: 140px;
+    background: #000;
+    border: var(--border-width) solid #fff;
+    z-index: 4000;
+    box-shadow: 10px 10px 0 rgba(0, 0, 0, 0.5);
+    /* Hard shadow */
+}
+
+/* Decoration line for NES feel */
+#nes-controller-overlay::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 30px;
+    background: #111;
+    z-index: -1;
+    transform: translateY(-50%);
+    border-top: 1px solid #333;
+    border-bottom: 1px solid #333;
+}
+
+.nes-dpad {
+    position: absolute;
+    top: 30px;
+    left: 20px;
+    width: 90px;
+    height: 90px;
+}
+
+.nes-btn {
+    position: absolute;
+    background: #000;
+    border: 2px solid #fff;
+    color: #fff;
+    font-size: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    font-family: 'Roboto Mono', monospace;
+    transition: all 0.05s;
+    padding: 0;
+    /* CRITICAL FIX: Reset global button padding */
+}
+
+.nes-btn:active {
+    background: var(--accent-color);
+    color: #000;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 10px var(--accent-color);
+}
+
+/* D-Pad Positioning */
+#btn-up {
+    top: 0;
+    left: 30px;
+    width: 30px;
+    height: 30px;
+    border-bottom: none;
+}
+
+#btn-left {
+    top: 30px;
+    left: 0;
+    width: 30px;
+    height: 30px;
+    border-right: none;
+}
+
+#btn-right {
+    top: 30px;
+    left: 60px;
+    width: 30px;
+    height: 30px;
+    border-left: none;
+}
+
+#btn-down {
+    top: 60px;
+    left: 30px;
+    width: 30px;
+    height: 30px;
+    border-top: none;
+}
+
+.dpad-center {
+    position: absolute;
+    top: 30px;
+    left: 30px;
+    width: 30px;
+    height: 30px;
+    background: #000;
+    border: none;
+    /* Just a gap filler */
+}
+
+/* Start / Select Visuals */
+.nes-middle {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 15px;
+}
+
+.nes-pill {
+    width: 40px;
+    height: 12px;
+    background: #000;
+    border: 2px solid #fff;
+    border-radius: 6px;
+    position: relative;
+    opacity: 0.5;
+    /* Visual only */
+}
+
+.nes-pill::after {
+    content: attr(data-label);
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 8px;
+    color: #fff;
+    font-family: 'Roboto Mono';
+    letter-spacing: 1px;
+}
+
+/* Action Buttons */
+.nes-actions {
+    position: absolute;
+    top: 45px;
+    right: 20px;
+    width: 90px;
+    height: 50px;
+}
+
+#btn-b,
+#btn-a {
+    width: 40px;
+    /* Slightly larger circles */
+    height: 40px;
+    border-radius: 50%;
+    background: #000;
+    border: 2px solid #fff;
+    color: #fff;
+    font-family: 'Roboto Mono';
+    font-weight: bold;
+    box-shadow: none;
+    line-height: 40px;
+    /* Vertically center text */
+}
+
+#btn-b:active,
+#btn-a:active {
+    transform: scale(0.9);
+    background: var(--accent-color);
+    color: #000;
+    border-color: var(--accent-color);
+}
+
+#btn-b {
+    top: 15px;
+    left: 0;
+}
+
+#btn-a {
+    top: 0;
+    left: 50px;
+}
+
+#close-nes {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: #000;
+    color: #fff;
+    border: 2px solid #fff;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 4px 4px 0 rgba(50, 0, 50, 0.5);
+    padding: 0;
+    font-size: 14px;
+    z-index: 5000;
+    font-family: 'Roboto Mono';
+}
+
+#close-nes:hover {
+    background: #f00;
+    border-color: #f00;
+}
+
+.secret-btn {
+    background: transparent;
+    border: none;
+    color: #222;
+    /* Almost invisible against black, but clickable */
+    width: 60px;
+    /* Small area */
+    margin: 10px auto 0 auto;
+    /* Centered */
+    padding: 5px;
+    font-size: 0.8em;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    display: block;
+    letter-spacing: 2px;
+}
+
+.secret-btn:hover {
+    color: #fff;
+    text-shadow: 0 0 5px #fff;
+    transform: scale(1.1);
+}

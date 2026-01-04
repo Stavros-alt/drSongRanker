@@ -17,6 +17,19 @@ Don't overcomplicate it. Use a local server.
 
 I don't have time for feature requests. If it's broken, it's probably Supabase's fault.
 
+## Exporting Playlists
+
+You can export your rankings to Spotify, YouTube, or Apple Music.
+
+1.  Click **Export Playlist** -> **Copy Text**.
+2.  Go to [TuneMyMusic](https://www.tunemymusic.com/transfer).
+3.  Select **"From Text"** (or "Free Text").
+4.  Paste the list.
+5.  Select your destination (Spotify/YouTube/etc).
+6.  Done.
+
+*Note: I use specific search strings (e.g., forcing the "Chapter 1" album for "Rude Buster") to avoid remixes. It works 100% of the time on Spotify. If it breaks on Apple Music or YouTube, that's not my problem.*
+
 ## Credits
 
 - Toby Fox (Audio/IP)

@@ -159,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (error) throw error;
 
-            alert("Got it. I'll look at it whenever I have time.");
+            alert("Got it. Go to the Discord to campaign for your idea.");
             suggestionText.value = '';
             suggestionModal.style.display = 'none';
         } catch (err) {
@@ -176,6 +176,8 @@ document.addEventListener('DOMContentLoaded', () => {
             suggestionModal.style.display = 'none';
         }
     });
+
+    // Submissions are enabled. Go to Discord.
 
     function updateElo(winnerRating, loserRating, winnerComparisons, loserComparisons) {
         // why is elo so convoluted.
@@ -671,6 +673,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const playerCloseBtn = document.getElementById('player-close-btn');
     const playlistAudio = document.getElementById('playlist-audio');
     const playListBtn = document.getElementById('play-list-btn');
+    const exportListBtn = document.getElementById('export-list-btn');
+    const exportModal = document.getElementById('export-modal');
+    const closeExportBtn = document.getElementById('close-export-btn');
+    const exportM3UBtn = document.getElementById('export-m3u-btn');
+    const exportTextBtn = document.getElementById('export-text-btn');
 
     let playlist = [];
     let currentPlaylistIndex = 0;
@@ -743,6 +750,102 @@ document.addEventListener('DOMContentLoaded', () => {
     playerCloseBtn.addEventListener('click', () => {
         playlistAudio.pause();
         musicPlayerBar.classList.add('hidden');
+    });
+
+    // Export. i'm literally doing your job for you.
+    exportListBtn.addEventListener('click', () => {
+        exportModal.style.display = 'flex';
+    });
+
+    closeExportBtn.addEventListener('click', () => {
+        exportModal.style.display = 'none';
+    });
+
+    window.addEventListener('click', (e) => {
+        if (e.target === exportModal) {
+            exportModal.style.display = 'none';
+        }
+    });
+
+    exportM3UBtn.addEventListener('click', () => {
+        let sourceSongs = [];
+        if (communityRankingBtn.classList.contains('active')) {
+            sourceSongs = cachedCommunitySongs;
+        } else {
+            sourceSongs = [...state.songs].sort((a, b) => b.rating - a.rating);
+        }
+
+        if (currentChapterFilter !== 'all') {
+            sourceSongs = filterSongsByChapter(sourceSongs, currentChapterFilter);
+        }
+
+        if (sourceSongs.length === 0) {
+            alert("Nothing to export. Maybe vote once?");
+            return;
+        }
+
+        let m3uContent = "#EXTM3U\n";
+        sourceSongs.forEach(song => {
+            // we use the local path. if you moved your files, that's a you problem.
+            m3uContent += `#EXTINF:-1,${song.name}\n${song.file}\n`;
+        });
+
+        const blob = new Blob([m3uContent], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `deltarune_playlist_${currentChapterFilter}.m3u`;
+        a.click();
+        URL.revokeObjectURL(url);
+        exportModal.style.display = 'none';
+    });
+
+    exportTextBtn.addEventListener('click', () => {
+        let sourceSongs = [];
+        if (communityRankingBtn.classList.contains('active')) {
+            sourceSongs = cachedCommunitySongs;
+        } else {
+            sourceSongs = [...state.songs].sort((a, b) => b.rating - a.rating);
+        }
+
+        if (currentChapterFilter !== 'all') {
+            sourceSongs = filterSongsByChapter(sourceSongs, currentChapterFilter);
+        }
+
+        if (sourceSongs.length === 0) {
+            alert("No songs, no list. Logic is hard, I know.");
+            return;
+        }
+
+        const textList = sourceSongs.map(s => {
+            let songName = s.name;
+            // special cases for quirky search engines.
+            if (songName === "AIRWAVES") songName = "Air Waves";
+            if (songName === "A DARK ZONE") songName = "A Dark Zone";
+
+            // Remix protection: Use the full official album name for these tracks.
+            if (songName === "Rude Buster" || songName === "Before the Story") {
+                return `${songName} - Toby Fox DELTARUNE Chapter 1 (Original Game Soundtrack)`;
+            }
+            if (songName === "My Castle Town") {
+                return `${songName} - Toby Fox DELTARUNE Chapter 2 OST`;
+            }
+
+            let chapterSuffix = "";
+            if (s.id <= 40) chapterSuffix = " (Chapter 1)";
+            else if (s.id <= 87 || s.id === 38 || s.id === 40) chapterSuffix = " (Chapter 2)";
+            else if (s.id <= 125) chapterSuffix = " (Chapter 3)";
+            else if (s.id <= 165) chapterSuffix = " (Chapter 4)";
+
+            return `${songName} - Toby Fox Deltarune OST${chapterSuffix}`;
+        }).join('\n');
+        navigator.clipboard.writeText(textList).then(() => {
+            alert("Copied to clipboard. Paste it into Spotify/YouTube tools and leave me alone.");
+            exportModal.style.display = 'none';
+        }).catch(err => {
+            console.error("Clipboard failed:", err);
+            alert("Clipboard failed. My life is suffering.");
+        });
     });
 
     playlistAudio.addEventListener('ended', () => {
