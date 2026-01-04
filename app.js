@@ -533,7 +533,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return songs.filter(s => s.id >= 1 && s.id <= 40);
             case '2':
             case 'ch2': // Fallback
-                return songs.filter(s => s.id >= 41 && s.id <= 87);
+                return songs.filter(s => (s.id >= 41 && s.id <= 87) || s.id === 38 || s.id === 40);
             case '3':
             case 'ch3': // Fallback
                 return songs.filter(s => s.id >= 88 && s.id <= 125);

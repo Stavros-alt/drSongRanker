@@ -76,11 +76,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     songs.forEach(s => {
-        const ch = getChapter(s.id);
-        if (chapterStats[ch]) {
-            chapterStats[ch].sum += s.rating;
-            chapterStats[ch].count++;
+        const chapters = [];
+        if (s.id <= 40) chapters.push('Ch 1');
+        // fine. they go in ch 2 too.
+        if ((s.id >= 41 && s.id <= 87) || s.id === 38 || s.id === 40) {
+            if (!chapters.includes('Ch 2')) chapters.push('Ch 2');
         }
+        if (s.id >= 88 && s.id <= 125) chapters.push('Ch 3');
+        if (s.id >= 126) chapters.push('Ch 4');
+
+        chapters.forEach(ch => {
+            if (chapterStats[ch]) {
+                chapterStats[ch].sum += s.rating;
+                chapterStats[ch].count++;
+            }
+        });
     });
 
     const chLabels = Object.keys(chapterStats);
