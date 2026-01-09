@@ -38,11 +38,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const customColorPicker = document.getElementById('custom-theme-picker');
     const customColorLabel = document.querySelector('.custom-color-label');
 
-    settingsBtn.addEventListener('click', () => {
+    settingsBtn.addEventListener('click', (e) => {
         if (settingsModal.style.display === 'flex') {
             settingsModal.style.display = 'none';
         } else {
             settingsModal.style.display = 'flex';
+        }
+    });
+
+    // close settings if you click anywhere else. why do i have to handle this manually.
+    window.addEventListener('click', (e) => {
+        if (settingsModal.style.display === 'flex' &&
+            !settingsModal.contains(e.target) &&
+            !settingsBtn.contains(e.target)) {
+            settingsModal.style.display = 'none';
         }
     });
 
@@ -177,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Submissions are enabled. Go to Discord.
+    // submissions are enabled. go bother people on discord.
 
     function updateElo(winnerRating, loserRating, winnerComparisons, loserComparisons) {
         // why is elo so convoluted.
@@ -203,19 +212,19 @@ document.addEventListener('DOMContentLoaded', () => {
         let song1;
 
         if (roll < 0.6) {
-            // 60% chance: low votes.
+            // 60% chance for some low vote songs i guess.
             const sortedByVotes = [...state.songs].sort((a, b) => a.comparisons - b.comparisons);
             const uncertaintyPoolSize = Math.max(5, Math.floor(state.songs.length * 0.25));
             const uncertaintyPool = sortedByVotes.slice(0, uncertaintyPoolSize);
             song1 = uncertaintyPool[Math.floor(Math.random() * uncertaintyPool.length)];
         } else if (roll < 0.9) {
-            // 30% chance: top rated.
+            // 30% for the top rated ones.
             const sortedByRating = [...state.songs].sort((a, b) => b.rating - a.rating);
             const topPoolSize = Math.min(20, state.songs.length);
             const topPool = sortedByRating.slice(0, topPoolSize);
             song1 = topPool[Math.floor(Math.random() * topPool.length)];
         } else {
-            // 10% chance: random.
+            // 10% pure chaos.
             song1 = state.songs[Math.floor(Math.random() * state.songs.length)];
         }
 
@@ -290,7 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 fetchAndDisplayAllTimeStats();
                 votesSinceLastRefresh = 0;
             } else {
-                // just increment locally for now so the user sees something change.
+                // incrementing locally because the api is too slow/expensive.
                 const voteStat = document.getElementById('vote-stat');
                 if (voteStat) {
                     const currentText = voteStat.textContent || "";
@@ -440,7 +449,7 @@ document.addEventListener('DOMContentLoaded', () => {
         progressBar.style.width = `${accuracy}%`;
         progressText.textContent = `Ranking Accuracy: ${accuracy.toFixed(1)}%`;
 
-        // counter.
+        // vote hoarding counter.
         const personalVoteStat = document.getElementById('personal-vote-stat');
         if (personalVoteStat) {
             personalVoteStat.textContent = `YOUR VOTES: ${state.comparisons}`;
@@ -586,10 +595,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         switch (filter) {
             case '1':
-            case 'ch1': // Fallback
+            case 'ch1': // fallback for when i forget how numbers work
                 return songs.filter(s => s.id >= 1 && s.id <= 40);
             case '2':
-            case 'ch2': // Fallback
+            case 'ch2': // fallback for when i forget how numbers work
                 return songs.filter(s => (s.id >= 41 && s.id <= 87) || s.id === 38 || s.id === 40);
             case '3':
             case 'ch3': // Fallback
@@ -664,7 +673,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-    // playlist.
+    // endless stream of noise.
     const musicPlayerBar = document.getElementById('music-player-bar');
     const playerSongName = document.getElementById('player-song-name');
     const playerPrevBtn = document.getElementById('player-prev-btn');
@@ -684,7 +693,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let isPlaylistPlaying = false;
 
     function generateAndStartPlaylist() {
-        // source.
+        // where is this coming from.
         let sourceSongs = [];
         if (communityRankingBtn.classList.contains('active')) {
             if (cachedCommunitySongs.length > 0) {
@@ -697,7 +706,7 @@ document.addEventListener('DOMContentLoaded', () => {
             sourceSongs = [...state.songs].sort((a, b) => b.rating - a.rating);
         }
 
-        // picky users.
+        // users with too many opinions.
         if (currentChapterFilter !== 'all') {
             sourceSongs = filterSongsByChapter(sourceSongs, currentChapterFilter);
         }
@@ -819,11 +828,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const textList = sourceSongs.map(s => {
             let songName = s.name;
-            // special cases for quirky search engines.
+            // band-aids for bad search results.
             if (songName === "AIRWAVES") songName = "Air Waves";
             if (songName === "A DARK ZONE") songName = "A Dark Zone";
 
-            // Remix protection: Use the full official album name for these tracks.
+            // keep the remixes away from me.
             if (songName === "Rude Buster" || songName === "Before the Story") {
                 return `${songName} - Toby Fox DELTARUNE Chapter 1 (Original Game Soundtrack)`;
             }

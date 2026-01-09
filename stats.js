@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // rating dist. whatever.
     const ratings = songs.map(s => Math.round(s.rating));
     const bins = {};
-    // buckets.
+    // sorting into buckets of sadness.
     ratings.forEach(r => {
         const bin = Math.floor(r / 50) * 50;
         bins[bin] = (bins[bin] || 0) + 1;
@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Chapters.
+    // chapters. manually grouping them because why not.
     function getChapter(id) {
         if (id <= 40) return 'Ch 1';
         if (id <= 87) return 'Ch 2';
@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // big numbers.
+    // random numbers that look professional.
     const top20 = songs.slice(0, 20);
 
     new Chart(document.getElementById('votesChart'), {
@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // mess.
+    // visual clutter.
     const top10 = songs.slice(0, 10);
     const top10Chart = Chart.getChart("votesChart");
     if (top10Chart) top10Chart.destroy();
@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 
-    // the bottom.
+    // the absolute failures.
     const bottom10 = [...songs].sort((a, b) => a.rating - b.rating).slice(0, 10);
 
     new Chart(document.getElementById('bottom10Chart'), {
@@ -197,7 +197,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // the curve.
+    // the slope of despair.
     const allSorted = [...songs].sort((a, b) => b.rating - a.rating);
 
     new Chart(document.getElementById('curveChart'), {
@@ -236,7 +236,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // chaos.
+    // pure unadulterated chaos.
     new Chart(document.getElementById('chronoChart'), {
         type: 'scatter',
         data: {
@@ -301,7 +301,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // tiers.
+    // tiers. everything is probably s anyway.
     const tiers = { 'S+': 0, 'S': 0, 'A': 0, 'B': 0, 'C': 0, 'D': 0 };
     songs.forEach(s => {
         if (s.rating >= 1600) tiers['S+']++;

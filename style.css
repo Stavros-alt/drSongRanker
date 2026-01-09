@@ -1,6 +1,6 @@
-/* Main Styles */
+/* more styles i guess */
 
-/* Fonts */
+/* expensive fonts from google */
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
 
 :root {
@@ -14,14 +14,14 @@
     --ui-font: 'Roboto Mono', monospace;
 }
 
-/* CSS Reset & Base */
+/* resetting things because browsers are inconsistent */
 * {
     box-sizing: border-box;
 }
 
 body {
     background-color: var(--bg-color);
-    /* Grid background */
+    /* pretend this looks like a cool grid */
     background-image:
         linear-gradient(var(--grid-line) 1px, transparent 1px),
         linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
@@ -35,14 +35,14 @@ body {
     padding: 0;
     min-height: 100vh;
     min-height: 100dvh;
-    /* Mobile fix */
+    /* band-aid for tiny screens */
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
     /* cursor: none; Removed global hide */
 }
 
-/* Cursor */
+/* vanity cursor */
 .custom-cursor {
     display: none;
     /* Hidden by default for mobile safety */
@@ -58,7 +58,7 @@ body {
     transition: transform 0.1s ease, filter 0.1s ease;
 }
 
-/* Glow animation */
+/* making things shiny */
 .custom-cursor.active {
     filter: drop-shadow(0 0 8px #ff0000);
     transform: translate(-50%, -50%) scale(1.2);
@@ -79,7 +79,7 @@ body {
     }
 }
 
-/* Desktop cursor */
+/* mouse privilege */
 @media (hover: hover) and (pointer: fine) {
     .custom-cursor {
         display: block;
@@ -90,7 +90,7 @@ body {
     }
 }
 
-/* Main Layout */
+/* holding it all together with duct tape */
 .main-container {
     display: flex;
     flex-direction: row;
@@ -104,7 +104,7 @@ body {
     z-index: 1;
 }
 
-/* Stats Bar */
+/* high scores for ego */
 #stats-bar {
     width: 100%;
     text-align: center;
@@ -141,7 +141,7 @@ body {
     color: var(--accent-color);
 }
 
-/* Settings Popup */
+/* preferences that nobody uses */
 #settings-modal {
     display: none;
     position: absolute;
@@ -227,7 +227,7 @@ body {
     transform: scale(1.1);
 }
 
-/* Arena (Voting Area) */
+/* the ring of death */
 .arena-container {
     flex: 2;
     display: flex;
@@ -272,7 +272,7 @@ h1 {
     position: relative;
 }
 
-/* Hover support */
+/* mouse hovering stuff */
 @media (hover: hover) {
     .song-card:hover {
         transform: translate(-4px, -4px);
