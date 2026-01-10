@@ -287,7 +287,8 @@ h1 {
         box-shadow: 0 0 10px var(--accent-color);
     }
 
-    .preview-btn:hover {
+    .preview-btn:hover,
+    .full-play-btn:hover {
         border-color: var(--accent-color);
         color: var(--accent-color);
         background: #000;
@@ -361,12 +362,21 @@ button:active {
     transform: translate(2px, 2px);
 }
 
-.preview-btn {
+.preview-btn,
+.full-play-btn {
     font-size: 0.8em;
     border: 2px solid #666;
     color: #aaa;
     margin-top: auto;
     padding: 8px 16px;
+    width: 100%;
+}
+
+.card-controls {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    margin-top: auto;
 }
 
 .preview-btn:hover {

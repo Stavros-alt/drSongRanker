@@ -1,3 +1,4 @@
+// list of songs. don't ask me to update it.
 const songList = [
     { id: 1, name: "ANOTHER HIM", file: "DELTARUNESoundtrack/./001 ANOTHER HIM.mp3", rating: 1500, comparisons: 0 },
     { id: 2, name: "Beginning", file: "DELTARUNESoundtrack/./002 Beginning.mp3", rating: 1500, comparisons: 0 },

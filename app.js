@@ -111,6 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let activePreviewTimeout = null;
     let currentChapterFilter = 'all';
     let votesSinceLastRefresh = 0; // stop hammering the api
+    let currentActiveAudio = null; // tracking what's actually making noise.
     const PREVIEW_DURATION = 10000;
     const PREVIEW_START_TIME = 30;
 
@@ -129,6 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const audioA = document.getElementById('audioA');
     const audioB = document.getElementById('audioB');
     const previewBtns = document.querySelectorAll('.preview-btn');
+    const fullPlayBtns = document.querySelectorAll('.full-play-btn');
     const toggleRankingsBtn = document.getElementById('toggle-rankings-btn');
     const rankingContainer = document.querySelector('.ranking-container');
     const myRankingBtn = document.getElementById('my-ranking-btn');
@@ -315,10 +317,20 @@ document.addEventListener('DOMContentLoaded', () => {
         updateApp();
     }
 
-    function playPreview(songKey) {
+    function stopAllMusic() {
         if (activePreviewTimeout) {
             clearTimeout(activePreviewTimeout);
+            activePreviewTimeout = null;
         }
+        audioA.pause();
+        audioB.pause();
+        playlistAudio.pause();
+        isPlaylistPlaying = false;
+        playerPlayBtn.textContent = "⏯"; // show the play icon because everything is dead.
+    }
+
+    function playPreview(songKey) {
+        stopAllMusic();
 
         const audioEl = (songKey === 'A') ? audioA : audioB;
         const otherAudioEl = (songKey === 'A') ? audioB : audioA;
@@ -342,6 +354,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error("Audio playback error:", error);
             });
         }
+    }
+
+    function playFullSong(songKey) {
+        stopAllMusic();
+
+        const audioEl = (songKey === 'A') ? audioA : audioB;
+        const songData = (songKey === 'A') ? currentSongA : currentSongB;
+
+        currentActiveAudio = audioEl;
+        playerSongName.textContent = songData.name;
+
+        // hide prev/next because this isn't a playlist. i'm lazy.
+        playerPrevBtn.style.visibility = 'hidden';
+        playerNextBtn.style.visibility = 'hidden';
+
+        musicPlayerBar.classList.remove('hidden');
+
+        audioEl.currentTime = 0; // back to the start.
+        audioEl.play().then(() => {
+            playerPlayBtn.textContent = "⏸";
+        }).catch(error => {
+            console.error("Full playback error:", error); // great. even this is broken.
+        });
     }
 
 
@@ -556,7 +591,17 @@ document.addEventListener('DOMContentLoaded', () => {
     undoBtn.addEventListener('click', undoVote);
     resetBtn.addEventListener('click', resetState);
     previewBtns.forEach(btn => {
-        btn.addEventListener('click', () => playPreview(btn.dataset.song));
+        btn.addEventListener('click', () => {
+            // stop playlist if previewing. why did i even make a playlist.
+            if (isPlaylistPlaying) {
+                playlistAudio.pause();
+                isPlaylistPlaying = false;
+            }
+            playPreview(btn.dataset.song);
+        });
+    });
+    fullPlayBtns.forEach(btn => {
+        btn.addEventListener('click', () => playFullSong(btn.dataset.song)); // hope they like the whole song.
     });
     toggleRankingsBtn.addEventListener('click', () => {
         rankingContainer.classList.toggle('visible');
@@ -719,6 +764,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // finally.
         playlist = sourceSongs;
         currentPlaylistIndex = 0;
+
+        // show the buttons again.
+        playerPrevBtn.style.visibility = 'visible';
+        playerNextBtn.style.visibility = 'visible';
+
         musicPlayerBar.classList.remove('hidden');
         playSongInPlaylist(currentPlaylistIndex);
     }
@@ -726,25 +776,29 @@ document.addEventListener('DOMContentLoaded', () => {
     function playSongInPlaylist(index) {
         if (index < 0 || index >= playlist.length) return;
 
+        stopAllMusic(); // don't want overlay.
         currentPlaylistIndex = index;
         const song = playlist[currentPlaylistIndex];
 
+        currentActiveAudio = playlistAudio;
         playerSongName.textContent = `${index + 1}. ${song.name}`;
         playlistAudio.src = encodeURI(song.file);
         playlistAudio.play().then(() => {
             isPlaylistPlaying = true;
             playerPlayBtn.textContent = "⏸";
-        }).catch(e => console.error("Playback failed:", e));
+        }).catch(e => console.error("Playback failed:", e)); // skip it? nah.
     }
 
     function togglePlaylistPlay() {
-        if (playlistAudio.paused) {
-            playlistAudio.play();
-            isPlaylistPlaying = true;
+        if (!currentActiveAudio) return;
+
+        if (currentActiveAudio.paused) {
+            currentActiveAudio.play();
+            if (currentActiveAudio === playlistAudio) isPlaylistPlaying = true;
             playerPlayBtn.textContent = "⏸";
         } else {
-            playlistAudio.pause();
-            isPlaylistPlaying = false;
+            currentActiveAudio.pause();
+            if (currentActiveAudio === playlistAudio) isPlaylistPlaying = false;
             playerPlayBtn.textContent = "⏯";
         }
     }
@@ -757,7 +811,7 @@ document.addEventListener('DOMContentLoaded', () => {
     playerPlayBtn.addEventListener('click', togglePlaylistPlay);
 
     playerCloseBtn.addEventListener('click', () => {
-        playlistAudio.pause();
+        stopAllMusic();
         musicPlayerBar.classList.add('hidden');
     });
 
