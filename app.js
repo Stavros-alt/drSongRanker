@@ -334,7 +334,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const audioEl = (songKey === 'A') ? audioA : audioB;
         const otherAudioEl = (songKey === 'A') ? audioB : audioA;
+        const songData = (songKey === 'A') ? currentSongA : currentSongB;
+
         otherAudioEl.pause();
+
+        currentActiveAudio = audioEl;
+        playerSongName.textContent = `${songData.name} (Preview)`;
+
+        // no buttons for previews.
+        playerPrevBtn.style.visibility = 'hidden';
+        playerNextBtn.style.visibility = 'hidden';
+
+        musicPlayerBar.classList.remove('hidden');
 
         audioEl.currentTime = PREVIEW_START_TIME;
 
@@ -347,8 +358,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (playPromise !== undefined) {
             playPromise.then(_ => {
+                playerPlayBtn.textContent = "⏸";
                 activePreviewTimeout = setTimeout(() => {
                     audioEl.pause();
+                    playerPlayBtn.textContent = "⏯";
                 }, PREVIEW_DURATION);
             }).catch(error => {
                 console.error("Audio playback error:", error);
