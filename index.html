@@ -74,6 +74,7 @@
 
                 <button id="toggle-rankings-btn" class="choice-btn">Show Rankings</button>
                 <button id="suggest-btn" class="choice-btn">Suggest Feature</button>
+
                 <a href="https://discord.gg/Y3tSPPxs" target="_blank" rel="noopener noreferrer">
                     <button id="discord-btn" class="choice-btn">Discord</button>
                 </a>
@@ -104,13 +105,27 @@
                 <button id="community-ranking-btn" class="ranking-toggle-btn">Global</button>
             </div>
 
-            <div class="filter-tabs">
-                <button class="filter-btn active" data-chapter="all">All</button>
-                <button class="filter-btn" data-chapter="1">Ch.1</button>
-                <button class="filter-btn" data-chapter="2">Ch.2</button>
-                <button class="filter-btn" data-chapter="3">Ch.3</button>
-                <button class="filter-btn" data-chapter="4">Ch.4</button>
+
+
+            <div class="filter-tabs"
+                style="justify-content: center; display: flex; flex-wrap: nowrap; align-items: center; margin-top: 10px;">
+                <select id="main-filter-select" class="filter-btn active"
+                    style="cursor: pointer; padding-right: 15px; width: auto; flex-grow: 1; max-width: 300px; text-align: center;">
+                    <option value="all">All Songs (Original)</option>
+                    <option value="1">Chapter 1</option>
+                    <option value="2">Chapter 2</option>
+                    <option value="3">Chapter 3</option>
+                    <option value="4">Chapter 4</option>
+                    <optgroup label="Custom Lists" id="custom-lists-optgroup">
+                        <!-- js populates this -->
+                    </optgroup>
+                </select>
+                <button id="edit-list-btn" class="filter-btn" title="Edit Current List"
+                    style="margin-left: 5px; flex-shrink: 0; display: none;">✎</button>
+                <button id="create-list-btn" class="filter-btn" title="Create New List"
+                    style="margin-left: 5px; flex-shrink: 0;">+</button>
             </div>
+
 
             <div class="search-container">
                 <input type="text" id="ranking-search" placeholder="Search songs...">
@@ -164,7 +179,43 @@
         </div>
     </div>
 
+    <!-- custom ranker modal -->
+    <div id="custom-ranker-modal" class="modal">
+        <div class="modal-content" style="max-width: 600px; width: 95%;">
+            <h2>CUSTOM LISTS</h2>
+            <div id="list-manager-container"
+                style="margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px;">
+                <p style="font-size: 0.8em; color: #888;">Manage your custom lists.</p>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <input type="text" id="new-list-name" placeholder="List name..."
+                        style="flex: 1; background: #000; border: 1px solid #444; color: #fff; padding: 5px; font-family: 'Roboto Mono';">
+                    <button id="modal-create-list-btn" class="action-btn" style="padding: 5px 10px;">New</button>
+                </div>
+                <div id="active-lists-pool" style="display: flex; flex-wrap: wrap; gap: 5px;">
+                    <!-- buttons for existing lists -->
+                </div>
+            </div>
+            <div id="list-editor-ui" style="display: none;">
+                <h3 id="editing-list-title" style="font-size: 1em; margin: 10px 0;">Editing: ...</h3>
+                <div class="search-container">
+                    <input type="text" id="custom-search" placeholder="Search songs...">
+                </div>
+                <div id="custom-checklist-container"
+                    style="max-height: 300px; overflow-y: auto; text-align: left; margin: 15px 0; border: 1px solid #333; padding: 10px;">
+                    <!-- checklist -->
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button id="save-custom-btn" class="action-btn" style="display: none;">Save List</button>
+                <button id="delete-list-btn" class="action-btn"
+                    style="display: none; border-color: #500; color: #f55;">Delete</button>
+                <button id="close-custom-btn" class="action-btn">Close</button>
+            </div>
+        </div>
+    </div>
+
     <!-- export stuff i guess -->
+
     <div id="export-modal" class="modal">
         <div class="modal-content" style="max-width: 400px;">
             <h2>EXPORT PLAYLIST</h2>
@@ -186,10 +237,14 @@
 
     <footer>
         <p class="credits">
-            Fan Project. Music & IP © Toby Fox. | <a href="https://github.com/stavros-alt/drSongRanker" target="_blank"
+            Fan Project. Music & IP © Toby Fox. |
+            <a href="stats.html" id="secret-stats-link"
+                style="display: none; color: var(--accent-color); text-decoration: none; margin-right: 10px;">Stats</a>
+            <a href="https://github.com/stavros-alt/drSongRanker" target="_blank"
                 style="color: #666; text-decoration: none;">GitHub</a>
         </p>
     </footer>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- useless settings -->
     <div id="settings-modal">

@@ -100,11 +100,59 @@ document.addEventListener('DOMContentLoaded', () => {
         return (yiq >= 128) ? 'black' : 'white';
     }
 
+    const songList = window.songList || []; // pull from app_song_data.js
+
     let state = {
         songs: [],
         comparisons: 0,
-        history: null // i guess we only need to go back once.
+        history: null,
+        secretsUnlocked: false,
+        activeRankerList: 'all', // all, 1, 2, 3, 4, hidden, or [customListName]
+        customLists: {}, // { "Cool List": [1, 2, 5], ... }
+        currentCustomListName: null // which one are we editing right now
     };
+
+    function saveState() {
+        localStorage.setItem('drSongRankerState', JSON.stringify(state));
+    }
+
+    function loadState() {
+        const saved = localStorage.getItem('drSongRankerState');
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            state.comparisons = parsed.comparisons || 0;
+            state.history = parsed.history || null;
+            // DO NOT load secretsUnlocked from here. It is managed by checkSecretsGlobal() reading from localStorage.
+
+            // merge songs to keep ratings but add new files/metadata
+            const sourceList = window.songList || songList || [];
+            state.songs = sourceList.map(baseSong => {
+                const savedSong = parsed.songs ? parsed.songs.find(s => s.id === baseSong.id) : null;
+                if (savedSong) {
+                    return { ...baseSong, rating: savedSong.rating, comparisons: savedSong.comparisons };
+                }
+                return { ...baseSong };
+            });
+        } else {
+            // fresh start
+            const sourceList = window.songList || songList || [];
+            state.songs = sourceList.map(s => ({ ...s }));
+        }
+
+        // ensure custom lists are loaded if they weren't in state (migration)
+        if (Object.keys(state.customLists).length === 0) {
+            // loadCustomLists(); // deprecated?
+        }
+        populateCustomDropdown();
+
+        // validation: if active list is bogus, reset to all.
+        const validLists = ['all', '1', '2', '3', '4', 'hidden'];
+        if (!validLists.includes(state.activeRankerList) && !state.customLists[state.activeRankerList]) {
+            state.activeRankerList = 'all';
+            currentChapterFilter = 'all';
+            if (activeListSelect) activeListSelect.value = 'all';
+        }
+    }
 
     let currentSongA, currentSongB;
     let previousRanking = [];
@@ -137,8 +185,220 @@ document.addEventListener('DOMContentLoaded', () => {
     const communityRankingBtn = document.getElementById('community-ranking-btn');
     const filterBtns = document.querySelectorAll('.filter-btn');
     const undoBtn = document.getElementById('undo-btn');
+    function checkSecretsGlobal() {
+        const unlocked = localStorage.getItem('drSongRankerSecretsUnlocked') === 'true';
+        state.secretsUnlocked = unlocked;
+        const statsLink = document.getElementById('secret-stats-link');
+        if (statsLink) {
+            statsLink.style.display = unlocked ? 'inline' : 'none';
+        }
+        const hiddenTab = document.getElementById('hidden-filter-btn');
+        if (hiddenTab) {
+            hiddenTab.style.display = unlocked ? 'inline-block' : 'none';
+        }
+    }
+    checkSecretsGlobal();
+
+    // custom ranker stuff. i'm done with lists.
+    const manageCustomBtn = document.getElementById('manage-custom-btn');
+    const customRankerModal = document.getElementById('custom-ranker-modal');
+    const closeCustomBtn = document.getElementById('close-custom-btn');
+    const saveCustomBtn = document.getElementById('save-custom-btn');
+    const deleteListBtn = document.getElementById('delete-list-btn');
+    const customSearch = document.getElementById('custom-search');
+    const customChecklistContainer = document.getElementById('custom-checklist-container');
+    const newListInput = document.getElementById('new-list-name');
+    const createListBtn = document.getElementById('create-list-btn');
+    const editListBtn = document.getElementById('edit-list-btn');
+    const listEditorUi = document.getElementById('list-editor-ui');
+    const editingListTitle = document.getElementById('editing-list-title');
+
+    // Load custom lists from storage
+    function loadCustomLists() {
+        const saved = localStorage.getItem('drSongRankerCustomLists');
+        if (saved) {
+            state.customLists = JSON.parse(saved);
+        } else {
+            // migration from old format ONLY if new format doesn't exist
+            const oldList = localStorage.getItem('drSongRankerCustomSelection');
+            if (oldList) {
+                state.customLists = { "Default": JSON.parse(oldList) };
+                localStorage.setItem('drSongRankerCustomLists', JSON.stringify(state.customLists));
+                // Remove the old key so we don't migrate again if the user deletes "Default"
+                localStorage.removeItem('drSongRankerCustomSelection');
+            } else {
+                state.customLists = {}; // Initialize empty if nothing exists
+            }
+        }
+        populateCustomDropdown();
+    }
+    loadCustomLists();
+
+    // Unified Create List Logics
+    if (createListBtn) {
+        createListBtn.addEventListener('click', () => {
+            const name = prompt("Enter a name for your new custom list:");
+            if (!name) return;
+
+            if (state.customLists[name] || ['all', 'all_plus', 'hidden', '1', '2', '3', '4'].includes(name)) {
+                alert("List name already exists or is reserved!");
+                return;
+            }
+
+            state.customLists[name] = [];
+            state.currentCustomListName = name;
+            saveListsToStorage();
+
+            populateCustomDropdown(); // Ensure dropdown has it
+
+            // auto-select
+            const mainFilterSelect = document.getElementById('main-filter-select');
+            if (mainFilterSelect) {
+                mainFilterSelect.value = name;
+                // dispatch change manually to trigger UI updates
+                mainFilterSelect.dispatchEvent(new Event('change'));
+            }
+
+            // Open Editor Immediately
+            showListEditor(name);
+        });
+    }
+
+    if (editListBtn) {
+        editListBtn.addEventListener('click', () => {
+            const currentObj = document.getElementById('main-filter-select');
+            if (currentObj && state.customLists[currentObj.value]) {
+                state.currentCustomListName = currentObj.value;
+                showListEditor(currentObj.value);
+            }
+        });
+    }
+
+    function showListEditor(name) {
+        customRankerModal.style.display = 'flex'; // FORCE OPEN
+        listEditorUi.style.display = 'block';
+        saveCustomBtn.style.display = 'inline-block';
+        deleteListBtn.style.display = 'inline-block';
+        editingListTitle.textContent = `Editing: ${name}`;
+        populateCustomChecklist(state.customLists[name]);
+    }
+
+    function saveListsToStorage() {
+        localStorage.setItem('drSongRankerCustomLists', JSON.stringify(state.customLists));
+    }
+
+    // manageCustomBtn is dead. Long live the dropdown.
+    /* 
+    manageCustomBtn.addEventListener('click', () => {
+        checkSecretsGlobal();
+        customRankerModal.style.display = 'flex';
+        renderListsPool();
+    });
+    */
+
+    closeCustomBtn.addEventListener('click', () => {
+        customRankerModal.style.display = 'none';
+        listEditorUi.style.display = 'none';
+        saveCustomBtn.style.display = 'none';
+        deleteListBtn.style.display = 'none';
+        state.currentCustomListName = null;
+    });
+
+    saveCustomBtn.addEventListener('click', () => {
+        const name = state.currentCustomListName;
+        if (!name) return;
+
+        const checked = Array.from(customChecklistContainer.querySelectorAll('input:checked'))
+            .map(input => parseInt(input.dataset.id));
+
+        state.customLists[name] = checked;
+        saveListsToStorage();
+
+        // Visual feedback
+        const originalText = saveCustomBtn.textContent;
+        saveCustomBtn.textContent = "Saved!";
+        saveCustomBtn.style.backgroundColor = "var(--accent-color)";
+        saveCustomBtn.style.color = "#000";
+        setTimeout(() => {
+            saveCustomBtn.textContent = originalText;
+            saveCustomBtn.style.backgroundColor = "";
+            saveCustomBtn.style.color = "";
+        }, 1500);
+
+        if (state.activeRankerList === name) {
+            presentNewPair();
+            if (myRankingBtn.classList.contains('active')) {
+                displayRankings();
+            }
+        }
+    });
+
+    deleteListBtn.addEventListener('click', () => {
+        const name = state.currentCustomListName;
+        if (!name || !confirm(`Delete list "${name}"?`)) return;
+
+        delete state.customLists[name];
+        saveListsToStorage();
+        state.currentCustomListName = null;
+
+        // Hide modal
+        customRankerModal.style.display = 'none';
+
+        // Refresh dropdown
+        populateCustomDropdown();
+
+        // Reset selection to 'all'
+        const mainFilterSelect = document.getElementById('main-filter-select');
+        if (mainFilterSelect) {
+            mainFilterSelect.value = 'all';
+            mainFilterSelect.dispatchEvent(new Event('change'));
+        }
+    });
+
+
+    function populateCustomChecklist(selectedIds = []) {
+        customChecklistContainer.innerHTML = '';
+
+        // all songs. no mercy.
+        songList.forEach(song => {
+            // hidden tracks only show if unlocked or if we're specifically editing a list that had them
+            if (song.hidden && !state.secretsUnlocked && !selectedIds.includes(song.id)) return;
+
+            const div = document.createElement('div');
+            div.className = 'checklist-item';
+
+            // Allow clicking the row to toggle
+            div.addEventListener('click', (e) => {
+                if (e.target !== checkbox) {
+                    checkbox.checked = !checkbox.checked;
+                }
+            });
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.dataset.id = song.id;
+            checkbox.checked = selectedIds.includes(song.id);
+
+            const label = document.createElement('label');
+            label.textContent = song.name;
+            if (song.hidden) label.style.color = 'var(--accent-color)';
+
+            div.appendChild(checkbox);
+            div.appendChild(label);
+            customChecklistContainer.appendChild(div);
+        });
+    }
+
+    customSearch.addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase();
+        Array.from(customChecklistContainer.children).forEach(div => {
+            const name = div.querySelector('label').textContent.toLowerCase();
+            div.style.display = name.includes(term) ? 'flex' : 'none';
+        });
+    });
 
     // suggestion box. i don't even know why i'm taking requests.
+
     const suggestBtn = document.getElementById('suggest-btn');
     const suggestionModal = document.getElementById('suggestion-modal');
     const closeSuggestionBtn = document.getElementById('close-suggestion-btn');
@@ -208,32 +468,100 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
+    function getFilteredSongs() {
+        const query = rankingSearch.value.toLowerCase();
+        const filter = state.activeRankerList;
+
+        let pool = state.songs;
+
+        if (filter === 'all') {
+            // normal OST only. no secrets.
+            pool = pool.filter(s => !s.hidden);
+        } else if (filter === 'all_plus') {
+            // show me everything (if unlocked)
+            return state.secretsUnlocked ? pool : pool.filter(s => !s.hidden);
+        } else if (filter === '1' || filter === '2' || filter === '3' || filter === '4') {
+            const ch = parseInt(filter);
+            return pool.filter(s => (!s.hidden || state.secretsUnlocked) && getChaptersForSong(s).includes(ch));
+        } else if (filter === 'hidden') {
+            return state.secretsUnlocked ? pool.filter(s => s.hidden) : [];
+        } else {
+            // assuming it's a custom list name
+            const ids = state.customLists[filter] || [];
+            return pool.filter(s => ids.includes(s.id) && (!s.hidden || state.secretsUnlocked));
+        }
+
+        return pool.filter(s => s.name.toLowerCase().includes(query));
+    }
+
+    function getChaptersForSong(song) {
+        const ch = [];
+        if (song.id <= 40) ch.push(1);
+        if ((song.id >= 41 && song.id <= 87) || song.id === 38 || song.id === 40) {
+            ch.push(2);
+        }
+        if (song.id >= 88 && song.id <= 125) ch.push(3);
+        if (song.id >= 126 && song.id <= 200) ch.push(4);
+        return ch;
+    }
+
     function presentNewPair() {
+        // we only rank what we're told to. i'm not a mind reader.
+        const pool = getFilteredSongs();
+        // if we are in 'hidden' mode, obviously we want to see them.
+        let availableSongs = pool;
+        if (state.activeRankerList !== 'hidden') {
+            availableSongs = pool.filter(s => !s.hidden || state.secretsUnlocked);
+        }
+
+        if (!availableSongs || availableSongs.length < 2) {
+            songAName.textContent = "NOT ENOUGH SONGS";
+            songBName.textContent = "IN THIS LIST";
+
+            chooseABtn.disabled = true;
+            chooseBBtn.disabled = true;
+            tieBtn.disabled = true;
+            return;
+        }
+
+        chooseABtn.disabled = false;
+        chooseBBtn.disabled = false;
+        tieBtn.disabled = false;
+
         // picking two songs. don't ask about the distribution.
         const roll = Math.random();
         let song1;
 
+        if (availableSongs.length < 2) {
+            // well this is awkward.
+            songAName.textContent = "Not enough songs";
+            songBName.textContent = "in this list.";
+            return;
+        }
+
         if (roll < 0.6) {
             // 60% chance for some low vote songs i guess.
-            const sortedByVotes = [...state.songs].sort((a, b) => a.comparisons - b.comparisons);
-            const uncertaintyPoolSize = Math.max(5, Math.floor(state.songs.length * 0.25));
+            const sortedByVotes = [...availableSongs].sort((a, b) => a.comparisons - b.comparisons);
+            const uncertaintyPoolSize = Math.max(5, Math.floor(availableSongs.length * 0.25));
             const uncertaintyPool = sortedByVotes.slice(0, uncertaintyPoolSize);
             song1 = uncertaintyPool[Math.floor(Math.random() * uncertaintyPool.length)];
         } else if (roll < 0.9) {
             // 30% for the top rated ones.
-            const sortedByRating = [...state.songs].sort((a, b) => b.rating - a.rating);
-            const topPoolSize = Math.min(20, state.songs.length);
+            const sortedByRating = [...availableSongs].sort((a, b) => b.rating - a.rating);
+            const topPoolSize = Math.min(20, availableSongs.length);
             const topPool = sortedByRating.slice(0, topPoolSize);
             song1 = topPool[Math.floor(Math.random() * topPool.length)];
         } else {
             // 10% pure chaos.
-            song1 = state.songs[Math.floor(Math.random() * state.songs.length)];
+            song1 = availableSongs[Math.floor(Math.random() * availableSongs.length)];
         }
 
         // next victim.
-        const sortedOpponents = [...state.songs]
+        const sortedOpponents = [...availableSongs]
             .filter(s => s.id !== song1.id)
             .sort((a, b) => Math.abs(a.rating - song1.rating) - Math.abs(b.rating - song1.rating));
+
+
 
         // neighbors. whatever.
         const neighborPoolSize = 10;
@@ -315,6 +643,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         updateApp();
+        saveState();
     }
 
     function stopAllMusic() {
@@ -445,7 +774,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const localSong = state.songs.find(s => s.id === cSong.id);
                 return {
                     ...cSong,
-                    file: localSong ? localSong.file : ''
+                    file: localSong ? localSong.file : '',
+                    hidden: localSong ? localSong.hidden : false
                 };
             });
 
@@ -471,9 +801,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function displayRankings() {
         rankingList.innerHTML = '';
+        const timestamp = new Date().toLocaleTimeString();
+        // console.log("Rendering rankings at " + timestamp); 
 
         const filteredSongs = filterSongsByChapter(state.songs, currentChapterFilter);
-
         const sortedSongs = [...filteredSongs].sort((a, b) => b.rating - a.rating);
 
         sortedSongs.forEach((song, index) => {
@@ -484,7 +815,7 @@ document.addEventListener('DOMContentLoaded', () => {
             li.appendChild(nameSpan);
 
             const details = document.createElement('small');
-            details.textContent = ` (Rating: ${Math.round(song.rating)})`;
+            details.textContent = ` (R: ${Math.round(song.rating)})`; // Shortened to check if this change applies
             li.appendChild(details);
             rankingList.appendChild(li);
         });
@@ -504,28 +835,71 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function saveState() {
-        try {
-            localStorage.setItem('drSongRankerState', JSON.stringify(state));
-        } catch (e) {
-            console.error("Could not save state to localStorage:", e);
+
+    function filterSongsByActiveList(songs) {
+        const activeList = state.activeRankerList;
+        if (activeList === 'all') {
+            // prevent hidden songs from showing in All
+            return songs.filter(s => !s.hidden);
         }
+
+        if (activeList === 'hidden') {
+            return songs.filter(s => s.hidden || s.id > 200);
+        }
+
+        if (activeList === 'custom') {
+            const customSelection = JSON.parse(localStorage.getItem('drSongRankerCustomSelection') || '[]');
+            return songs.filter(s => customSelection.includes(s.id));
+        }
+
+        // chapter grouping. math is pain.
+        const ch = parseInt(activeList);
+        return songs.filter(s => {
+            if (ch === 1) return s.id <= 40;
+            if (ch === 2) return (s.id >= 41 && s.id <= 87) || s.id === 38 || s.id === 40;
+            if (ch === 3) return s.id >= 88 && s.id <= 125;
+            if (ch === 4) return s.id >= 126 && s.id <= 165;
+            return false;
+        });
     }
 
-    function loadState() {
-        const savedState = localStorage.getItem('drSongRankerState');
-        if (savedState) {
-            state = JSON.parse(savedState);
-            if (!state.songs || state.songs.length === 0) {
-                initializeNewState();
-            }
-        } else {
-            initializeNewState();
+    // sync the ranking list filters with the active ranker if possible. 
+    // i'm not doing full reactive state, deal with it.
+    function filterSongsByChapter(songs, filter) {
+        if (filter === 'all') {
+            return songs.filter(s => !s.hidden);
         }
+        if (filter === 'all_plus') {
+            return state.secretsUnlocked ? songs : songs.filter(s => !s.hidden);
+        }
+        if (filter === 'hidden') {
+            return state.secretsUnlocked ? songs.filter(s => s.hidden || s.id > 200) : [];
+        }
+
+        // chapters
+        if (['1', '2', '3', '4'].includes(filter)) {
+            const ch = parseInt(filter);
+            return songs.filter(s => {
+                const visible = !s.hidden || state.secretsUnlocked;
+                if (!visible) return false;
+
+                if (ch === 1) return s.id <= 40;
+                if (ch === 2) return (s.id >= 41 && s.id <= 87) || s.id === 38 || s.id === 40;
+                if (ch === 3) return s.id >= 88 && s.id <= 125;
+                if (ch === 4) return s.id >= 126 && s.id <= 165;
+                return false;
+            });
+        }
+
+        // custom lists
+        const ids = state.customLists[filter] || [];
+        return songs.filter(s => ids.includes(s.id) && (!s.hidden || state.secretsUnlocked));
     }
+
 
     function initializeNewState() {
-        state.songs = JSON.parse(JSON.stringify(songList));
+        const source = window.songList || songList || [];
+        state.songs = JSON.parse(JSON.stringify(source));
         state.comparisons = 0;
     }
 
@@ -582,16 +956,19 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateApp() {
         if (myRankingBtn.classList.contains('active')) {
             displayRankings();
+        } else if (communityRankingBtn.classList.contains('active')) {
+            // we don't auto-update community rankings on every vote because that's expensive and slow.
+            // but sure, if you want to.
         }
         updateProgress();
         presentNewPair();
         saveState();
     }
 
-    if (typeof songList === 'undefined' || songList.length === 0) {
-        alert("Error: Song data not found. Make sure 'app_song_data.js' is present.");
-        return;
-    }
+    // if (typeof songList === 'undefined' || songList.length === 0) {
+    //     alert("Error: Song data not found. Make sure 'app_song_data.js' is present.");
+    //     return;
+    // }
 
     loadState();
 
@@ -632,42 +1009,93 @@ document.addEventListener('DOMContentLoaded', () => {
         displayCommunityRankings();
     });
 
-    filterBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            currentChapterFilter = btn.dataset.chapter;
 
-            filterBtns.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+
+    const mainFilterSelect = document.getElementById('main-filter-select');
+    // createListBtn is defined at the top
+
+    // Filter change logic
+    if (mainFilterSelect) {
+        mainFilterSelect.addEventListener('change', (e) => {
+            currentChapterFilter = e.target.value;
+            state.activeRankerList = currentChapterFilter;
+
+            // Show/Hide Edit Button
+            if (editListBtn) {
+                if (state.customLists[currentChapterFilter]) {
+                    editListBtn.style.display = 'inline-block';
+                } else {
+                    editListBtn.style.display = 'none';
+                }
+            }
 
             if (myRankingBtn.classList.contains('active')) {
                 displayRankings();
             } else {
                 displayCommunityRankings();
             }
+            presentNewPair();
         });
-    });
+    }
 
-    function filterSongsByChapter(songs, filter) {
-        if (filter === 'all') {
-            return songs;
+    // Removed duplicate createListBtn listener
+
+    function populateCustomDropdown() {
+        const select = document.getElementById('main-filter-select');
+        if (!select) return;
+
+        const currentVal = select.value;
+        select.innerHTML = '';
+
+        // Standard Options
+        const standardOptions = [
+            { val: 'all', text: 'All Songs (Original)' },
+            { val: '1', text: 'Chapter 1' },
+            { val: '2', text: 'Chapter 2' },
+            { val: '3', text: 'Chapter 3' },
+            { val: '4', text: 'Chapter 4' },
+        ];
+
+        // Add secret options if unlocked
+        if (state.secretsUnlocked) {
+            standardOptions.splice(1, 0, { val: 'all_plus', text: 'All Songs + Hidden' });
+            standardOptions.push({ val: 'hidden', text: 'Hidden Tracks' });
         }
-        switch (filter) {
-            case '1':
-            case 'ch1': // fallback for when i forget how numbers work
-                return songs.filter(s => s.id >= 1 && s.id <= 40);
-            case '2':
-            case 'ch2': // fallback for when i forget how numbers work
-                return songs.filter(s => (s.id >= 41 && s.id <= 87) || s.id === 38 || s.id === 40);
-            case '3':
-            case 'ch3': // Fallback
-                return songs.filter(s => s.id >= 88 && s.id <= 125);
-            case '4':
-            case 'ch4': // Fallback
-                return songs.filter(s => s.id >= 126 && s.id <= 165);
-            default:
-                return songs;
+
+        standardOptions.forEach(opt => {
+            const el = document.createElement('option');
+            el.value = opt.val;
+            el.textContent = opt.text;
+            select.appendChild(el);
+        });
+
+        // Custom Lists Optgroup
+        const listNames = Object.keys(state.customLists || {});
+        if (listNames.length > 0) {
+            const optgroup = document.createElement('optgroup');
+            optgroup.label = 'Custom Lists';
+            optgroup.id = 'custom-lists-optgroup';
+
+            listNames.sort().forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                option.textContent = name;
+                optgroup.appendChild(option);
+            });
+            select.appendChild(optgroup);
+        }
+
+        // Restore selection if valid
+        const validValues = standardOptions.map(o => o.val).concat(listNames);
+        if (validValues.includes(currentVal)) {
+            select.value = currentVal;
+        } else {
+            select.value = 'all';
         }
     }
+
+
+
 
     // sharing. i'm tired.
     const shareBtn = document.getElementById('share-btn');
@@ -944,5 +1372,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // init app
+    loadState();
+    checkSecretsGlobal(); // Refresh secrets from localStorage AFTER loading stale state
+    populateCustomDropdown(); // Rebuild dropdown with correct secrets status
+    if (!state.songs || state.songs.length === 0) {
+        state.songs = window.songList ? [...window.songList] : [];
+    }
+    presentNewPair();
     updateApp();
+
 });

@@ -27,47 +27,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!songs.length) return;
 
     // rating dist. whatever.
-    const ratings = songs.map(s => Math.round(s.rating));
+    const songsWithChapters = songs.map(s => {
+        const chapters = [];
+        if (s.id <= 40) chapters.push('Ch 1');
+        if ((s.id >= 41 && s.id <= 87) || s.id === 38 || s.id === 40) chapters.push('Ch 2');
+        if (s.id >= 88 && s.id <= 125) chapters.push('Ch 3');
+        if (s.id >= 126 && s.id <= 200) chapters.push('Ch 4');
+        return { ...s, chapters };
+    });
+
+    // Exclude hidden songs (IDs 201+) from all-time stats to prevent pollution
+    const publicSongs = songsWithChapters.filter(s => s.id <= 200);
+
+    const ratings = publicSongs.map(s => Math.round(s.rating));
     const bins = {};
-    // sorting into buckets of sadness.
     ratings.forEach(r => {
         const bin = Math.floor(r / 50) * 50;
         bins[bin] = (bins[bin] || 0) + 1;
     });
 
-    const sortedBins = Object.keys(bins).sort((a, b) => a - b);
-    const distData = sortedBins.map(b => bins[b]);
-    const distLabels = sortedBins.map(b => `${b}-${parseInt(b) + 50}`);
-
-    new Chart(document.getElementById('ratingDistChart'), {
-        type: 'bar',
-        data: {
-            labels: distLabels,
-            datasets: [{
-                label: 'Number of Songs',
-                data: distData,
-                backgroundColor: '#00ff9d',
-                borderColor: '#fff',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false }
-            }
-        }
-    });
-
-    // chapters. manually grouping them because why not.
-    function getChapter(id) {
-        if (id <= 40) return 'Ch 1';
-        if (id <= 87) return 'Ch 2';
-        if (id <= 125) return 'Ch 3';
-        return 'Ch 4';
-    }
-
+    // Actually calculate the stats i forgot to write
     const chapterStats = {
         'Ch 1': { sum: 0, count: 0 },
         'Ch 2': { sum: 0, count: 0 },
@@ -75,19 +54,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         'Ch 4': { sum: 0, count: 0 }
     };
 
-    songs.forEach(s => {
-        const chapters = [];
-        if (s.id <= 40) chapters.push('Ch 1');
-        // fine. they go in ch 2 too.
-        if ((s.id >= 41 && s.id <= 87) || s.id === 38 || s.id === 40) {
-            if (!chapters.includes('Ch 2')) chapters.push('Ch 2');
-        }
-        if (s.id >= 88 && s.id <= 125) chapters.push('Ch 3');
-        if (s.id >= 126) chapters.push('Ch 4');
-
-        chapters.forEach(ch => {
+    publicSongs.forEach(song => {
+        song.chapters.forEach(ch => {
             if (chapterStats[ch]) {
-                chapterStats[ch].sum += s.rating;
+                chapterStats[ch].sum += song.rating;
                 chapterStats[ch].count++;
             }
         });
@@ -121,7 +91,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // random numbers that look professional.
-    const top20 = songs.slice(0, 20);
+    const top20 = publicSongs.slice(0, 20);
 
     new Chart(document.getElementById('votesChart'), {
         type: 'scatter',
@@ -197,6 +167,31 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    // Rating Distribution (The missing link)
+    const binLabels = Object.keys(bins).sort((a, b) => parseInt(a) - parseInt(b));
+    const binData = binLabels.map(b => bins[b]);
+
+    new Chart(document.getElementById('ratingDistChart'), {
+        type: 'bar',
+        data: {
+            labels: binLabels.map(b => `${b}-${parseInt(b) + 50}`),
+            datasets: [{
+                label: 'Number of Songs',
+                data: binData,
+                backgroundColor: '#00ff9d',
+                borderColor: '#fff',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+
     // the slope of despair.
     const allSorted = [...songs].sort((a, b) => b.rating - a.rating);
 
@@ -237,12 +232,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // pure unadulterated chaos.
+    // chronological order view. but exclude secrets.
     new Chart(document.getElementById('chronoChart'), {
         type: 'scatter',
         data: {
             datasets: [{
                 label: 'Songs',
-                data: songs.map(s => ({ x: s.id, y: s.rating })),
+                data: publicSongs.map(s => ({ x: s.id, y: s.rating })),
                 backgroundColor: '#ff00ff'
             }]
         },
@@ -253,7 +249,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 tooltip: {
                     callbacks: {
                         label: (context) => {
-                            const song = songs.find(s => s.id === context.raw.x);
+                            const song = publicSongs.find(s => s.id === context.raw.x);
                             return `${song.name}: ${Math.round(context.raw.y)}`;
                         }
                     }
@@ -339,6 +335,52 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    // oh look, you found the stats. have some secrets.
+    const secretsUnlocked = localStorage.getItem('drSongRankerSecretsUnlocked');
+    if (!secretsUnlocked) {
+        localStorage.setItem('drSongRankerSecretsUnlocked', 'true');
 
+        // Create themed toast notification
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #000;
+            color: #00ff9d;
+            border: 3px solid #00ff9d;
+            padding: 20px 30px;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 1.1em;
+            text-align: center;
+            z-index: 9999;
+            box-shadow: 0 0 20px #00ff9d;
+            animation: toastSlide 0.5s ease-out;
+        `;
+        toast.innerHTML = `
+            <div style="font-size: 1.5em; margin-bottom: 10px;">★ SECRET TRACKS UNLOCKED ★</div>
+            <div style="color: #fff; font-size: 0.9em;">Hidden songs are now available in the main ranker!</div>
+        `;
 
+        // Add animation keyframes
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes toastSlide {
+                from { top: -100px; opacity: 0; }
+                to { top: 20px; opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+        document.body.appendChild(toast);
+
+        // Auto-dismiss after 5 seconds
+        setTimeout(() => {
+            toast.style.transition = 'opacity 0.5s';
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 500);
+        }, 5000);
+    }
 });
+
+

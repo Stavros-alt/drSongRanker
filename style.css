@@ -490,28 +490,38 @@ button:active {
 }
 
 .filter-tabs {
-    padding: 5px 10px;
-    /* Reduced padding to match gap */
+    padding: 10px;
     border-bottom: var(--border-width) solid #fff;
     display: flex;
-    gap: 5px;
+    gap: 8px;
     flex-wrap: wrap;
+    /* wrap if needed, don't clip */
     justify-content: center;
-    /* Center the tabs */
+}
+
+.filter-tabs::-webkit-scrollbar {
+    display: none;
+    /* Hide scrollbar Chrome/Safari */
 }
 
 .filter-btn {
-    border: 2px solid #444;
-    color: #888;
-    padding: 5px 10px;
+    border: 2px solid #333;
+    /* Darker border */
+    color: #666;
+    padding: 6px 12px;
+    /* Smaller padding */
     font-size: 0.8em;
+    /* Smaller font */
     background: #000;
-    font-weight: 400;
-    text-transform: none;
+    font-weight: 700;
+    text-transform: uppercase;
+    flex-shrink: 0;
+    white-space: nowrap;
+    transition: all 0.2s;
 }
 
 .filter-btn:hover {
-    background: #222;
+    background: #111;
     color: #fff;
     border-color: #666;
     box-shadow: none;
@@ -521,6 +531,27 @@ button:active {
     border-color: var(--accent-color);
     color: var(--accent-color);
     background: #000;
+}
+
+#main-filter-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: #000;
+    color: var(--accent-color);
+    border: 2px solid var(--accent-color);
+    text-align-last: center;
+    /* helper for centering select text */
+    font-family: inherit;
+    font-weight: 700;
+    text-transform: uppercase;
+    border-radius: 0;
+}
+
+#main-filter-select option,
+#main-filter-select optgroup {
+    background-color: #000;
+    color: #fff;
+    text-align: left;
 }
 
 #ranking-list {
