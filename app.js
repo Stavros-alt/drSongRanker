@@ -1457,5 +1457,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     presentNewPair();
     updateApp();
+    // refresh on back button because browsers are annoying.
+    window.addEventListener('pageshow', (e) => {
+        if (e.persisted) {
+            checkSecretsGlobal();
+            populateCustomDropdown();
+            updateApp();
+        }
+    });
 
 });

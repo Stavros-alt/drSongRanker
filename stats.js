@@ -337,41 +337,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // oh look, you found the stats. have some secrets.
     const secretsUnlocked = localStorage.getItem('drSongRankerSecretsUnlocked');
-    if (!secretsUnlocked) {
+    if (secretsUnlocked !== 'true') {
         localStorage.setItem('drSongRankerSecretsUnlocked', 'true');
 
         // Create themed toast notification
         const toast = document.createElement('div');
-        toast.style.cssText = `
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #000;
-            color: #00ff9d;
-            border: 3px solid #00ff9d;
-            padding: 20px 30px;
-            font-family: 'Roboto Mono', monospace;
-            font-size: 1.1em;
-            text-align: center;
-            z-index: 9999;
-            box-shadow: 0 0 20px #00ff9d;
-            animation: toastSlide 0.5s ease-out;
-        `;
+        toast.className = 'toast-notification';
         toast.innerHTML = `
-            <div style="font-size: 1.5em; margin-bottom: 10px;">★ SECRET TRACKS UNLOCKED ★</div>
-            <div style="color: #fff; font-size: 0.9em;">Hidden songs are now available in the main ranker!</div>
+            <div class="toast-title">SECRET TRACKS UNLOCKED</div>
+            <div class="toast-message">Hidden songs are now available in the main ranker!</div>
         `;
 
-        // Add animation keyframes
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes toastSlide {
-                from { top: -100px; opacity: 0; }
-                to { top: 20px; opacity: 1; }
-            }
-        `;
-        document.head.appendChild(style);
         document.body.appendChild(toast);
 
         // Auto-dismiss after 5 seconds
