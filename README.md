@@ -7,6 +7,7 @@ Elo-based ranking for Deltarune music. It works, so don't touch the code. I'm al
 - Ranks songs using Elo.
 - Stats dashboard (uses Chart.js, which was a nightmare to configure).
 - Global database sync via Supabase.
+- MP3 export as ZIP (for when you can't be bothered with Spotify).
 
 ## Setup
 

@@ -1271,25 +1271,38 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    function getExportSourceSongs() {
+        const isGlobal = communityRankingBtn.classList.contains('active');
+        let pool = isGlobal ? cachedCommunitySongs : state.songs;
+
+        if (isGlobal && pool.length === 0) {
+            return null; // Not loaded yet
+        }
+
+        // Apply chapter/custom filter
+        let filtered = filterSongsByChapter(pool, currentChapterFilter);
+
+        // Sort by rating (global or personal)
+        return [...filtered].sort((a, b) => b.rating - a.rating);
+    }
+
     exportM3UBtn.addEventListener('click', () => {
-        let sourceSongs = [];
-        if (communityRankingBtn.classList.contains('active')) {
-            sourceSongs = cachedCommunitySongs;
-        } else {
-            sourceSongs = [...state.songs].sort((a, b) => b.rating - a.rating);
+        const sourceSongs = getExportSourceSongs();
+        if (sourceSongs === null) {
+            alert("Global data not loaded. Switch to Global tab once first.");
+            return;
         }
 
-        if (currentChapterFilter !== 'all') {
-            sourceSongs = filterSongsByChapter(sourceSongs, currentChapterFilter);
-        }
+        const limit = parseInt(document.getElementById('export-limit').value) || 10;
+        const exportPool = sourceSongs.slice(0, limit);
 
-        if (sourceSongs.length === 0) {
+        if (exportPool.length === 0) {
             alert("Nothing to export. Maybe vote once?");
             return;
         }
 
         let m3uContent = "#EXTM3U\n";
-        sourceSongs.forEach(song => {
+        exportPool.forEach(song => {
             // we use the local path. if you moved your files, that's a you problem.
             m3uContent += `#EXTINF:-1,${song.name}\n${song.file}\n`;
         });
@@ -1304,24 +1317,87 @@ document.addEventListener('DOMContentLoaded', () => {
         exportModal.style.display = 'none';
     });
 
+    const exportZipBtn = document.getElementById('export-zip-btn');
+    exportZipBtn.addEventListener('click', async () => {
+        const sourceSongs = getExportSourceSongs();
+        if (sourceSongs === null) {
+            alert("Global data not loaded. Switch to Global tab once first.");
+            return;
+        }
+
+        const limit = parseInt(document.getElementById('export-limit').value) || 10;
+        const exportPool = sourceSongs.slice(0, limit);
+
+        if (exportPool.length === 0) {
+            alert("No songs to export. Select a list with actual songs in it.");
+            return;
+        }
+
+        exportZipBtn.disabled = true;
+        const originalText = exportZipBtn.textContent;
+        exportZipBtn.textContent = "ZIPPING...";
+
+        try {
+            const zip = new JSZip();
+            const folder = zip.folder("deltarune_mp3s");
+            let addedCount = 0;
+
+            const fetchPromises = exportPool.map(async (song) => {
+                try {
+                    // try to normalize path if it has weird ./ 
+                    const cleanPath = song.file.replace(/\/\.\//g, '/');
+                    const response = await fetch(encodeURI(cleanPath));
+                    if (!response.ok) throw new Error(`http error! status: ${response.status}`);
+                    const blob = await response.blob();
+                    // just the filename. i'm not recreating the entire soundtrack folder structure.
+                    const filename = cleanPath.split('/').pop();
+                    folder.file(filename, blob);
+                    addedCount++;
+                } catch (e) {
+                    console.error(`Failed to fetch ${song.name}:`, e);
+                }
+            });
+
+            await Promise.all(fetchPromises);
+
+            if (addedCount === 0) {
+                alert("Failed to fetch any MP3 files. Are you running this on a server? Check console for CORS or 404s.");
+                return;
+            }
+
+            const content = await zip.generateAsync({ type: "blob" });
+            const url = URL.createObjectURL(content);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `deltarune_top_${addedCount}_songs.zip`;
+            a.click();
+            URL.revokeObjectURL(url);
+            exportModal.style.display = 'none';
+        } catch (err) {
+            console.error("ZIP failed:", err);
+            alert("ZIP generation failed. I am genuinely surprised.");
+        } finally {
+            exportZipBtn.disabled = false;
+            exportZipBtn.textContent = originalText;
+        }
+    });
+
     exportTextBtn.addEventListener('click', () => {
-        let sourceSongs = [];
-        if (communityRankingBtn.classList.contains('active')) {
-            sourceSongs = cachedCommunitySongs;
-        } else {
-            sourceSongs = [...state.songs].sort((a, b) => b.rating - a.rating);
+        const sourceSongs = getExportSourceSongs();
+        if (sourceSongs === null) {
+            alert("Global data not loaded. Switch to Global tab once first.");
+            return;
         }
 
-        if (currentChapterFilter !== 'all') {
-            sourceSongs = filterSongsByChapter(sourceSongs, currentChapterFilter);
-        }
+        const limit = parseInt(document.getElementById('export-limit').value) || 10;
+        const exportPool = sourceSongs.slice(0, limit);
 
-        if (sourceSongs.length === 0) {
+        if (exportPool.length === 0) {
             alert("No songs, no list. Logic is hard, I know.");
             return;
         }
 
-        const textList = sourceSongs.map(s => {
+        const textList = exportPool.map(s => {
             let songName = s.name;
             // band-aids for bad search results.
             if (songName === "AIRWAVES") songName = "Air Waves";
