@@ -629,6 +629,22 @@ button:active {
     color: #000;
 }
 
+.support-link {
+    display: inline-block;
+    color: var(--accent-color);
+    text-decoration: none;
+    border: 2px solid var(--accent-color);
+    padding: 8px 16px;
+    margin-top: 10px;
+    font-weight: 700;
+    transition: all 0.1s;
+}
+
+.support-link:hover {
+    background: var(--accent-color);
+    color: #000;
+}
+
 footer {
     margin-top: auto;
     padding: 20px;

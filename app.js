@@ -213,13 +213,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const listEditorUi = document.getElementById('list-editor-ui');
     const editingListTitle = document.getElementById('editing-list-title');
 
-    // Load custom lists from storage
+    // load lists. don't ask.
     function loadCustomLists() {
         const saved = localStorage.getItem('drSongRankerCustomLists');
         if (saved) {
             state.customLists = JSON.parse(saved);
         } else {
-            // migration from old format ONLY if new format doesn't exist
+            // migration. i hate backward compatibility.
             const oldList = localStorage.getItem('drSongRankerCustomSelection');
             if (oldList) {
                 state.customLists = { "Default": JSON.parse(oldList) };
@@ -234,7 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     loadCustomLists();
 
-    // Unified Create List Logics
+    // creation logic. whatever.
     if (createListBtn) {
         createListBtn.addEventListener('click', () => {
             const name = prompt("Enter a name for your new custom list:");
@@ -251,15 +251,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
             populateCustomDropdown(); // Ensure dropdown has it
 
-            // auto-select
+            // auto select.
             const mainFilterSelect = document.getElementById('main-filter-select');
             if (mainFilterSelect) {
                 mainFilterSelect.value = name;
-                // dispatch change manually to trigger UI updates
+                // manual trigger. suffering.
                 mainFilterSelect.dispatchEvent(new Event('change'));
             }
 
-            // Open Editor Immediately
+            // open the editor.
             showListEditor(name);
         });
     }
@@ -314,7 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
         state.customLists[name] = checked;
         saveListsToStorage();
 
-        // Visual feedback
+        // feedback.
         const originalText = saveCustomBtn.textContent;
         saveCustomBtn.textContent = "Saved!";
         saveCustomBtn.style.backgroundColor = "var(--accent-color)";

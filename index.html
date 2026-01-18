@@ -10,14 +10,14 @@
     <link rel="icon" type="image/x-icon" href="Art/favicon.ico">
     <meta name="darkreader-lock">
 
-    <!-- generic meta tags -->
+    <!-- common metadata garbage -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://stavros-alt.github.io/drSongRanker/">
     <meta property="og:title" content="Deltarune Song Ranker">
     <meta property="og:description" content="Which Deltarune song is the best? Rank them all here!">
     <meta property="og:image" content="https://stavros-alt.github.io/drSongRanker/Art/funGang.jpeg">
 
-    <!-- twitter garbage -->
+    <!-- twitter boilerplate -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://stavros-alt.github.io/drSongRanker/">
     <meta property="twitter:title" content="Deltarune Song Ranker">
@@ -143,7 +143,7 @@
         </div>
     </div>
 
-    <!-- noise machine -->
+    <!-- music player i guess -->
     <div id="music-player-bar" class="hidden">
         <div class="player-info">
             <span id="player-song-name">Now Playing...</span>
@@ -157,7 +157,7 @@
         <audio id="playlist-audio"></audio>
     </div>
 
-    <!-- vanity sharing -->
+    <!-- share modal that nobody asked for -->
     <div id="share-modal"
         style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; align-items: center; justify-content: center;">
         <div
@@ -179,7 +179,7 @@
         </div>
     </div>
 
-    <!-- custom ranker modal -->
+    <!-- custom list management mess -->
     <div id="custom-ranker-modal" class="modal">
         <div class="modal-content" style="max-width: 600px; width: 95%;">
             <h2>CUSTOM LISTS</h2>
@@ -214,7 +214,7 @@
         </div>
     </div>
 
-    <!-- export stuff i guess -->
+    <!-- export options -->
 
     <div id="export-modal" class="modal">
         <div class="modal-content" style="max-width: 400px; width: 95%;">
@@ -247,13 +247,15 @@
             Fan Project. Music & IP © Toby Fox. |
             <a href="stats.html" id="secret-stats-link"
                 style="display: none; color: var(--accent-color); text-decoration: none; margin-right: 10px;">Stats</a>
+            <a href="https://ko-fi.com/stavros916" target="_blank" rel="noopener noreferrer"
+                style="color: var(--accent-color); text-decoration: none; margin-right: 10px;">Dark Candy</a>
             <a href="https://github.com/stavros-alt/drSongRanker" target="_blank"
                 style="color: #666; text-decoration: none;">GitHub</a>
         </p>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- useless settings -->
+    <!-- settings menu -->
     <div id="settings-modal">
         <div class="modal-content">
             <h2>SETTINGS</h2>
@@ -277,7 +279,14 @@
                 </div>
             </div>
 
-            <div class="setting-group" style="margin-top: 30px; border-top: 1px solid #333; padding-top: 20px;">
+            <div class="setting-group" style="margin-top: 20px; border-top: 1px solid #333; padding-top: 20px;">
+                <p>Enjoying the ranker?</p>
+                <a href="https://ko-fi.com/stavros916" target="_blank" rel="noopener noreferrer" class="support-link">
+                    Buy me a Dark Candy (Ko-fi)
+                </a>
+            </div>
+
+            <div class="setting-group" style="margin-top: 20px; border-top: 1px solid #333; padding-top: 20px;">
                 <p style="color: #ff4444; font-size: 0.9em;">Danger Zone</p>
                 <button id="reset-btn"
                     style="background: #300; border: 2px solid #ff4444; color: #ff4444; padding: 10px; cursor: pointer; font-family: 'Roboto Mono', monospace;">RESET
@@ -289,7 +298,7 @@
         </div>
     </div>
 
-    <!-- nostalgia trap for mobile -->
+    <!-- mobile controller thing -->
     <div id="nes-controller-overlay">
         <!-- d-pad for the konami code -->
         <div class="nes-dpad">
