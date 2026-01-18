@@ -109,7 +109,9 @@ document.addEventListener('DOMContentLoaded', () => {
         secretsUnlocked: false,
         activeRankerList: 'all', // all, 1, 2, 3, 4, hidden, or [customListName]
         customLists: {}, // { "Cool List": [1, 2, 5], ... }
-        currentCustomListName: null // which one are we editing right now
+        currentCustomListName: null, // which one are we editing right now
+        boostedSongId: null, // i guess we're rigging the election now.
+        showRatings: false // nobody wants to see the numbers apparently.
     };
 
     function saveState() {
@@ -122,6 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const parsed = JSON.parse(saved);
             state.comparisons = parsed.comparisons || 0;
             state.history = parsed.history || null;
+            state.showRatings = parsed.showRatings || false;
             // DO NOT load secretsUnlocked from here. It is managed by checkSecretsGlobal() reading from localStorage.
 
             // merge songs to keep ratings but add new files/metadata
@@ -185,6 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const communityRankingBtn = document.getElementById('community-ranking-btn');
     const filterBtns = document.querySelectorAll('.filter-btn');
     const undoBtn = document.getElementById('undo-btn');
+    const showRatingsToggle = document.getElementById('show-ratings-toggle');
     function checkSecretsGlobal() {
         const unlocked = localStorage.getItem('drSongRankerSecretsUnlocked') === 'true';
         state.secretsUnlocked = unlocked;
@@ -303,6 +307,16 @@ document.addEventListener('DOMContentLoaded', () => {
         deleteListBtn.style.display = 'none';
         state.currentCustomListName = null;
     });
+
+    if (showRatingsToggle) {
+        showRatingsToggle.checked = state.showRatings;
+        showRatingsToggle.addEventListener('change', (e) => {
+            state.showRatings = e.target.checked;
+            saveState();
+            if (myRankingBtn.classList.contains('active')) displayRankings();
+            else displayCommunityRankings();
+        });
+    }
 
     saveCustomBtn.addEventListener('click', () => {
         const name = state.currentCustomListName;
@@ -539,7 +553,19 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        if (roll < 0.6) {
+        // is someone cheating? i mean, using the boost feature?
+        let boostedSong = null;
+        if (state.boostedSongId) {
+            boostedSong = availableSongs.find(s => s.id === state.boostedSongId);
+        }
+
+        if (boostedSong && Math.random() < 0.25) {
+            // 25% chance to show the boosted song. whatever.
+            song1 = boostedSong;
+            state.boostedSongId = null; // finally done with that one.
+            if (myRankingBtn.classList.contains('active')) displayRankings();
+            else displayCommunityRankings();
+        } else if (roll < 0.6) {
             // 60% chance for some low vote songs i guess.
             const sortedByVotes = [...availableSongs].sort((a, b) => a.comparisons - b.comparisons);
             const uncertaintyPoolSize = Math.max(5, Math.floor(availableSongs.length * 0.25));
@@ -793,8 +819,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 li.appendChild(nameSpan);
 
                 const details = document.createElement('small');
-                details.textContent = ` (Rating: ${Math.round(song.rating)})`;
+                details.textContent = Math.round(song.rating);
+                details.style.display = state.showRatings ? 'inline' : 'none';
                 li.appendChild(details);
+
+                const boostBtn = document.createElement('button');
+                boostBtn.className = 'boost-rank-btn';
+                boostBtn.innerHTML = state.boostedSongId === song.id ? '⚡' : '↑';
+                boostBtn.title = "Boost probability in next matches";
+                if (state.boostedSongId === song.id) li.classList.add('boosted');
+
+                boostBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    setBoostedSong(song.id);
+                });
+                li.appendChild(boostBtn);
+
                 rankingList.appendChild(li);
             });
         } catch (error) {
@@ -821,8 +861,22 @@ document.addEventListener('DOMContentLoaded', () => {
             li.appendChild(nameSpan);
 
             const details = document.createElement('small');
-            details.textContent = ` (R: ${Math.round(song.rating)})`; // Shortened to check if this change applies
+            details.textContent = Math.round(song.rating);
+            details.style.display = state.showRatings ? 'inline' : 'none';
             li.appendChild(details);
+
+            const boostBtn = document.createElement('button');
+            boostBtn.className = 'boost-rank-btn';
+            boostBtn.innerHTML = state.boostedSongId === song.id ? '⚡' : '↑';
+            boostBtn.title = "Boost probability in next matches";
+            if (state.boostedSongId === song.id) li.classList.add('boosted');
+
+            boostBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                setBoostedSong(song.id);
+            });
+            li.appendChild(boostBtn);
+
             rankingList.appendChild(li);
         });
     }
@@ -900,6 +954,17 @@ document.addEventListener('DOMContentLoaded', () => {
         // custom lists
         const ids = state.customLists[filter] || [];
         return songs.filter(s => ids.includes(s.id) && (!s.hidden || state.secretsUnlocked));
+    }
+
+    function setBoostedSong(id) {
+        if (state.boostedSongId === id) {
+            state.boostedSongId = null; // toggle off i guess
+        } else {
+            state.boostedSongId = id;
+        }
+        saveState();
+        if (myRankingBtn.classList.contains('active')) displayRankings();
+        else displayCommunityRankings();
     }
 
 
@@ -1477,6 +1542,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // init app
     loadState();
+    if (showRatingsToggle) showRatingsToggle.checked = state.showRatings;
     checkSecretsGlobal(); // Refresh secrets from localStorage AFTER loading stale state
     populateCustomDropdown(); // Rebuild dropdown with correct secrets status
     if (!state.songs || state.songs.length === 0) {

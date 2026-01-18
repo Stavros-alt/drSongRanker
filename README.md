@@ -8,6 +8,7 @@ Elo-based ranking for Deltarune music. It works. Don't touch the code. I'm alrea
 - Stats dashboard.
 - Global sync via Supabase.
 - MP3 export.
+- Probability boost for underrated songs. (Yes, you're welcome.)
 
 ## Setup
 

@@ -605,10 +605,49 @@ button:active {
     color: #000;
 }
 
+.song-name {
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 15px;
+}
+
 #ranking-list small {
-    margin-left: auto;
+    color: #555;
+    font-size: 0.75em;
+    margin-right: 15px;
+    font-weight: normal;
+    flex-shrink: 0;
+}
+
+.boost-rank-btn {
+    background: none;
+    border: 1px solid #444;
     color: #666;
-    font-size: 0.8em;
+    padding: 2px 6px;
+    font-size: 0.7em;
+    cursor: none;
+    /* cursor.js handles this because i don't want to. */
+    transition: all 0.1s;
+    min-width: 25px;
+    flex-shrink: 0;
+}
+
+.boost-rank-btn:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    box-shadow: none;
+}
+
+#ranking-list li.boosted {
+    border-left: 4px solid var(--accent-color);
+    background: #111;
+}
+
+#ranking-list li.boosted .boost-rank-btn {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
 }
 
 /* Controls & Footer */
