@@ -490,23 +490,24 @@ button:active {
 }
 
 .filter-tabs {
-    padding: 10px;
+    padding: 6px 10px 14px;
     border-bottom: var(--border-width) solid #fff;
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
-    /* wrap if needed, don't clip */
+    /* wrap if needed. don't ask. */
     justify-content: center;
+    align-items: center;
 }
 
 .filter-tabs::-webkit-scrollbar {
     display: none;
-    /* Hide scrollbar Chrome/Safari */
+    /* hide scrollbar because it's ugly */
 }
 
 .filter-btn {
     border: 2px solid #333;
-    /* Darker border */
+    /* darker border for whatever reason */
     color: #666;
     padding: 6px 12px;
     /* Smaller padding */
