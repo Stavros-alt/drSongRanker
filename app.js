@@ -784,6 +784,9 @@ document.addEventListener('DOMContentLoaded', () => {
             rankingList.innerHTML = '';
             filteredSongs.forEach((song, index) => {
                 const li = document.createElement('li');
+                li.style.cursor = 'pointer';
+                li.addEventListener('click', () => playSongFromCurrentList(index)); // why even use the button at this point
+
                 const nameSpan = document.createElement('span');
                 nameSpan.classList.add('song-name');
                 nameSpan.textContent = song.name;
@@ -809,6 +812,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         sortedSongs.forEach((song, index) => {
             const li = document.createElement('li');
+            li.style.cursor = 'pointer'; // i shouldn't have to do this here but whatever
+            li.addEventListener('click', () => playSongFromCurrentList(index)); // fine, you can click it now. happy?
+
             const nameSpan = document.createElement('span');
             nameSpan.classList.add('song-name');
             nameSpan.textContent = song.name;
@@ -1210,6 +1216,30 @@ document.addEventListener('DOMContentLoaded', () => {
         playerPrevBtn.style.visibility = 'visible';
         playerNextBtn.style.visibility = 'visible';
 
+        musicPlayerBar.classList.remove('hidden');
+        playSongInPlaylist(currentPlaylistIndex);
+    }
+
+    function playSongFromCurrentList(index) {
+        // i am literally copying logic from generateAndStartPlaylist because refactoring is too much work today.
+        let sourceSongs = [];
+        if (communityRankingBtn.classList.contains('active')) {
+            sourceSongs = [...cachedCommunitySongs];
+        } else {
+            sourceSongs = [...state.songs].sort((a, b) => b.rating - a.rating);
+        }
+
+        if (currentChapterFilter !== 'all') {
+            sourceSongs = filterSongsByChapter(sourceSongs, currentChapterFilter);
+        }
+
+        if (sourceSongs.length === 0 || index < 0 || index >= sourceSongs.length) return; // i hope you didn't click nothing.
+
+        playlist = sourceSongs;
+        currentPlaylistIndex = index;
+
+        playerPrevBtn.style.visibility = 'visible';
+        playerNextBtn.style.visibility = 'visible';
         musicPlayerBar.classList.remove('hidden');
         playSongInPlaylist(currentPlaylistIndex);
     }

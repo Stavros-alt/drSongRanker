@@ -568,6 +568,16 @@ button:active {
     align-items: center;
     font-size: 0.95em;
     counter-increment: rank-counter;
+    cursor: pointer;
+    transition: background 0.1s;
+}
+
+#ranking-list li:hover {
+    background: #222;
+}
+
+#ranking-list li:first-child:hover {
+    background: #1a1a1a;
 }
 
 #ranking-list li::before {
