@@ -1198,10 +1198,8 @@ document.addEventListener('DOMContentLoaded', () => {
             sourceSongs = [...state.songs].sort((a, b) => b.rating - a.rating);
         }
 
-        // users with too many opinions.
-        if (currentChapterFilter !== 'all') {
-            sourceSongs = filterSongsByChapter(sourceSongs, currentChapterFilter);
-        }
+        // apply the filter. why did i even have that conditional check? i'm actually losing it.
+        sourceSongs = filterSongsByChapter(sourceSongs, currentChapterFilter);
 
         if (sourceSongs.length === 0) {
             alert("No songs found for this filter.");
@@ -1229,9 +1227,8 @@ document.addEventListener('DOMContentLoaded', () => {
             sourceSongs = [...state.songs].sort((a, b) => b.rating - a.rating);
         }
 
-        if (currentChapterFilter !== 'all') {
-            sourceSongs = filterSongsByChapter(sourceSongs, currentChapterFilter);
-        }
+        // filter the songs. i'm not dealing with hidden stuff if the user didn't ask for it.
+        sourceSongs = filterSongsByChapter(sourceSongs, currentChapterFilter);
 
         if (sourceSongs.length === 0 || index < 0 || index >= sourceSongs.length) return; // i hope you didn't click nothing.
 
