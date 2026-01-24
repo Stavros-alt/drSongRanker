@@ -149,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
         populateCustomDropdown();
 
         // validation: if active list is bogus, reset to all.
-        const validLists = ['all', '1', '2', '3', '4', 'hidden'];
+        const validLists = ['all', '1', '2', '3', '4', 'hidden', 'duration_30', 'duration_20', 'duration_10'];
         if (!validLists.includes(state.activeRankerList) && !state.customLists[state.activeRankerList]) {
             state.activeRankerList = 'all';
             currentChapterFilter = 'all';
@@ -244,7 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const name = prompt("Enter a name for your new custom list:");
             if (!name) return;
 
-            if (state.customLists[name] || ['all', 'all_plus', 'hidden', '1', '2', '3', '4'].includes(name)) {
+            if (state.customLists[name] || ['all', 'all_plus', 'hidden', '1', '2', '3', '4'].includes(name) || name.startsWith('duration_')) {
                 alert("List name already exists or is reserved!");
                 return;
             }
@@ -497,6 +497,11 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (filter === '1' || filter === '2' || filter === '3' || filter === '4') {
             const ch = parseInt(filter);
             return pool.filter(s => (!s.hidden || state.secretsUnlocked) && getChaptersForSong(s).includes(ch));
+        } else if (filter.startsWith('duration_')) {
+            const limit = parseInt(filter.split('_')[1]);
+            // filter out songs shorter than the limit (keep long ones).
+            // also exclude hidden unless unlocked. whatever.
+            return pool.filter(s => (!s.hidden || state.secretsUnlocked) && (s.duration && s.duration >= limit));
         } else if (filter === 'hidden') {
             return state.secretsUnlocked ? pool.filter(s => s.hidden) : [];
         } else {
@@ -801,7 +806,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 return {
                     ...cSong,
                     file: localSong ? localSong.file : '',
-                    hidden: localSong ? localSong.hidden : false
+                    hidden: localSong ? localSong.hidden : false,
+                    duration: localSong ? localSong.duration : 0 // include duration. don't forget it again.
                 };
             });
 
@@ -949,6 +955,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (ch === 4) return s.id >= 126 && s.id <= 165;
                 return false;
             });
+        }
+
+        if (filter.startsWith('duration_')) {
+            const limit = parseInt(filter.split('_')[1]);
+            // same logic as getfilteredsongs. why do i have two functions for this.
+            return songs.filter(s => (!s.hidden || state.secretsUnlocked) && (s.duration && s.duration >= limit));
         }
 
         // custom lists
@@ -1118,7 +1130,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentVal = select.value;
         select.innerHTML = '';
 
-        // Standard Options
+        // standard options
         const standardOptions = [
             { val: 'all', text: 'All Songs (Original)' },
             { val: '1', text: 'Chapter 1' },
@@ -1139,6 +1151,16 @@ document.addEventListener('DOMContentLoaded', () => {
             el.textContent = opt.text;
             select.appendChild(el);
         });
+
+        // duration filters
+        const durationGroup = document.createElement('optgroup');
+        durationGroup.label = "Filter by Length";
+        durationGroup.innerHTML = `
+            <option value="duration_30">Hide songs < 30s</option>
+            <option value="duration_20">Hide songs < 20s</option>
+            <option value="duration_10">Hide songs < 10s</option>
+        `;
+        select.appendChild(durationGroup);
 
         // Custom Lists Optgroup
         const listNames = Object.keys(state.customLists || {});
