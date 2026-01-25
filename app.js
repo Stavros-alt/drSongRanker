@@ -429,8 +429,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     submitSuggestionBtn.addEventListener('click', async () => {
         const content = suggestionText.value.trim();
-        if (!content) {
-            alert("Maybe actually type something first?");
+        // if they can't type 20 characters, it's not a real suggestion.
+        if (!content || content.length < 20) {
+            alert("Too short. Explain yourself better. (At least 20 chars)");
             return;
         }
 
