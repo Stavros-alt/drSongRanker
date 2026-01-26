@@ -505,6 +505,14 @@ document.addEventListener('DOMContentLoaded', () => {
             return pool.filter(s => (!s.hidden || state.secretsUnlocked) && (s.duration && s.duration >= limit));
         } else if (filter === 'hidden') {
             return state.secretsUnlocked ? pool.filter(s => s.hidden) : [];
+        } else if (filter.startsWith('mix_')) {
+            // "mix_1_2_3" -> [1, 2, 3]
+            const chapters = filter.replace('mix_', '').split('_').map(Number);
+            return pool.filter(s => {
+                if (s.hidden && !state.secretsUnlocked) return false;
+                const songChapters = getChaptersForSong(s);
+                return songChapters.some(ch => chapters.includes(ch));
+            });
         } else {
             // assuming it's a custom list name
             const ids = state.customLists[filter] || [];
@@ -964,6 +972,16 @@ document.addEventListener('DOMContentLoaded', () => {
             return songs.filter(s => (!s.hidden || state.secretsUnlocked) && (s.duration && s.duration >= limit));
         }
 
+        if (filter.startsWith('mix_')) {
+            const chapters = filter.replace('mix_', '').split('_').map(Number);
+            return songs.filter(s => {
+                const visible = !s.hidden || state.secretsUnlocked;
+                if (!visible) return false;
+                const songChapters = getChaptersForSong(s);
+                return songChapters.some(ch => chapters.includes(ch));
+            });
+        }
+
         // custom lists
         const ids = state.customLists[filter] || [];
         return songs.filter(s => ids.includes(s.id) && (!s.hidden || state.secretsUnlocked));
@@ -1096,11 +1114,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     const mainFilterSelect = document.getElementById('main-filter-select');
-    // createListBtn is defined at the top
+    // creation logic for the modal. i hate popups.
+    const chapterMixModal = document.getElementById('chapter-mix-modal');
+    const applyMixBtn = document.getElementById('apply-mix-btn');
+    const cancelMixBtn = document.getElementById('cancel-mix-btn');
+    const mixCheckboxes = document.querySelectorAll('.mix-chapter-cb');
 
-    // Filter change logic
     if (mainFilterSelect) {
         mainFilterSelect.addEventListener('change', (e) => {
+            if (e.target.value === 'mix_chapters') {
+                chapterMixModal.style.display = 'flex';
+                // reset checkboxes. start fresh.
+                mixCheckboxes.forEach(cb => cb.checked = false);
+                return;
+            }
+
             currentChapterFilter = e.target.value;
             state.activeRankerList = currentChapterFilter;
 
@@ -1122,13 +1150,64 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    if (applyMixBtn) {
+        applyMixBtn.addEventListener('click', () => {
+            const selected = Array.from(mixCheckboxes)
+                .filter(cb => cb.checked)
+                .map(cb => cb.value);
+
+            if (selected.length === 0) {
+                alert("Pick at least one chapter. I can't mix nothing.");
+                return;
+            }
+
+            const mixKey = `mix_${selected.join('_')}`;
+            const label = `Mixed: Ch ${selected.join(' + ')}`;
+
+            // hack: create temporary option so it shows up without reloading
+            let option = Array.from(mainFilterSelect.options).find(opt => opt.value === mixKey);
+            if (!option) {
+                option = document.createElement('option');
+                option.value = mixKey;
+                option.textContent = label;
+                // insert it after the standard chapters. finding the right spot is a pain.
+                const mixChaptersOpt = mainFilterSelect.querySelector('option[value="mix_chapters"]');
+                if (mixChaptersOpt) {
+                    mainFilterSelect.insertBefore(option, mixChaptersOpt);
+                } else {
+                    mainFilterSelect.appendChild(option);
+                }
+            }
+
+            mainFilterSelect.value = mixKey;
+            chapterMixModal.style.display = 'none';
+
+            // Trigger the change manually since setting value doesn't fire it
+            mainFilterSelect.dispatchEvent(new Event('change'));
+        });
+    }
+
+    if (cancelMixBtn) {
+        cancelMixBtn.addEventListener('click', () => {
+            chapterMixModal.style.display = 'none';
+            // revert to previous or default
+            mainFilterSelect.value = state.activeRankerList;
+            if (mainFilterSelect.value === 'mix_chapters') {
+                mainFilterSelect.value = 'all'; // fallback
+                state.activeRankerList = 'all';
+                presentNewPair(); // refresh just in case
+            }
+        });
+    }
+
     // Removed duplicate createListBtn listener
 
     function populateCustomDropdown() {
         const select = document.getElementById('main-filter-select');
         if (!select) return;
 
-        const currentVal = select.value;
+        // Use state as source of truth, fallback to current select value if valid
+        const targetVal = state.activeRankerList || select.value || 'all';
         select.innerHTML = '';
 
         // standard options
@@ -1140,6 +1219,9 @@ document.addEventListener('DOMContentLoaded', () => {
             { val: '4', text: 'Chapter 4' },
         ];
 
+        // Insert Mix Chapters option.
+        standardOptions.push({ val: 'mix_chapters', text: 'Mix Chapters...' });
+
         // Add secret options if unlocked
         if (state.secretsUnlocked) {
             standardOptions.splice(1, 0, { val: 'all_plus', text: 'All Songs + Hidden' });
@@ -1150,8 +1232,31 @@ document.addEventListener('DOMContentLoaded', () => {
             const el = document.createElement('option');
             el.value = opt.val;
             el.textContent = opt.text;
+            if (opt.val === 'mix_chapters') {
+                el.style.color = 'var(--accent-color)';
+                el.style.fontWeight = 'bold';
+            }
             select.appendChild(el);
         });
+
+        // check if we have an active mix that isn't in standard options.
+        // this is why we can't have nice things.
+        if (targetVal.startsWith('mix_') && targetVal !== 'mix_chapters') {
+            const chapters = targetVal.replace('mix_', '').split('_');
+            const label = `Mixed: Ch ${chapters.join(' + ')}`;
+
+            const option = document.createElement('option');
+            option.value = targetVal;
+            option.textContent = label;
+
+            // force insert it
+            const mixChaptersOpt = select.querySelector('option[value="mix_chapters"]');
+            if (mixChaptersOpt) {
+                select.insertBefore(option, mixChaptersOpt);
+            } else {
+                select.appendChild(option);
+            }
+        }
 
         // duration filters
         const durationGroup = document.createElement('optgroup');
@@ -1179,12 +1284,14 @@ document.addEventListener('DOMContentLoaded', () => {
             select.appendChild(optgroup);
         }
 
-        // Restore selection if valid
-        const validValues = standardOptions.map(o => o.val).concat(listNames);
-        if (validValues.includes(currentVal)) {
-            select.value = currentVal;
-        } else {
+        // Restore selection
+        select.value = targetVal;
+
+        // If the target value is invalid (not in options), fallback to all
+        if (select.value !== targetVal) {
             select.value = 'all';
+            // optional: update state?
+            // state.activeRankerList = 'all';
         }
     }
 

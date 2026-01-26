@@ -118,6 +118,8 @@
                     <option value="2">Chapter 2</option>
                     <option value="3">Chapter 3</option>
                     <option value="4">Chapter 4</option>
+                    <option value="mix_chapters" style="color: var(--accent-color); font-weight: bold;">Mix Chapters...
+                    </option>
                     <optgroup label="Filter by Length">
                         <option value="duration_30">Hide songs < 30s</option>
                         <option value="duration_20">Hide songs < 20s</option>
@@ -240,6 +242,27 @@
                 <button id="export-text-btn" class="action-btn">Copy Text (for Spotify/YouTube)</button>
                 <button id="close-export-btn" class="action-btn"
                     style="border-color: #666; color: #888;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="chapter-mix-modal" class="modal">
+        <div class="modal-content" style="max-width: 300px;">
+            <h2>MIX CHAPTERS</h2>
+            <p style="font-size: 0.9em; color: #888;">Select chapters to combine:</p>
+            <div style="display: flex; flex-direction: column; gap: 10px; margin: 20px 0; text-align: left;">
+                <label style="cursor: pointer;"><input type="checkbox" class="mix-chapter-cb" value="1"> Chapter
+                    1</label>
+                <label style="cursor: pointer;"><input type="checkbox" class="mix-chapter-cb" value="2"> Chapter
+                    2</label>
+                <label style="cursor: pointer;"><input type="checkbox" class="mix-chapter-cb" value="3"> Chapter
+                    3</label>
+                <label style="cursor: pointer;"><input type="checkbox" class="mix-chapter-cb" value="4"> Chapter
+                    4</label>
+            </div>
+            <div class="modal-actions">
+                <button id="apply-mix-btn" class="action-btn">Apply Mix</button>
+                <button id="cancel-mix-btn" class="action-btn">Cancel</button>
             </div>
         </div>
     </div>
