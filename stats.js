@@ -23,8 +23,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         return data;
     }
 
-    const songs = await fetchData();
-    if (!songs.length) return;
+    const dbSongs = await fetchData();
+    if (!dbSongs.length) return;
+
+    // merge with local data to get duration/metadata
+    const localSongs = window.songList || [];
+    const songs = dbSongs.map(dbS => {
+        const local = localSongs.find(l => l.id === dbS.id);
+        return {
+            ...dbS,
+            duration: local ? local.duration : 0,
+            file: local ? local.file : ''
+        };
+    });
 
     // rating dist. whatever.
     const songsWithChapters = songs.map(s => {
@@ -297,14 +308,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // tiers. everything is probably s anyway.
+    // dynamic tiers based on percentiles. better than arbitrary numbers.
+    // S+ (Top 5%), S (Next 10%), A (Next 20%), B (Next 30%), C (Next 20%), D (Bottom 15%)
+    const sortedByRating = [...publicSongs].sort((a, b) => b.rating - a.rating);
+    const total = sortedByRating.length;
+
+    // threshold indices
+    const iSPlus = Math.floor(total * 0.05);
+    const iS = Math.floor(total * 0.15);
+    const iA = Math.floor(total * 0.35);
+    const iB = Math.floor(total * 0.65);
+    const iC = Math.floor(total * 0.85);
+
     const tiers = { 'S+': 0, 'S': 0, 'A': 0, 'B': 0, 'C': 0, 'D': 0 };
-    songs.forEach(s => {
-        if (s.rating >= 1600) tiers['S+']++;
-        else if (s.rating >= 1550) tiers['S']++;
-        else if (s.rating >= 1500) tiers['A']++;
-        else if (s.rating >= 1450) tiers['B']++;
-        else if (s.rating >= 1400) tiers['C']++;
+
+    sortedByRating.forEach((s, index) => {
+        if (index < iSPlus) tiers['S+']++;
+        else if (index < iS) tiers['S']++;
+        else if (index < iA) tiers['A']++;
+        else if (index < iB) tiers['B']++;
+        else if (index < iC) tiers['C']++;
         else tiers['D']++;
     });
 
@@ -357,6 +380,100 @@ document.addEventListener('DOMContentLoaded', async () => {
             setTimeout(() => toast.remove(), 500);
         }, 5000);
     }
+
+
+    // new stats. user requested this. i deliver.
+
+    // 1. does length matter? (duration vs rating)
+    // kept the short clips. chaos is good.
+    new Chart(document.getElementById('durationChart'), {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Songs',
+                data: publicSongs.map(s => ({ x: s.duration, y: s.rating })),
+                backgroundColor: '#ffff00', // yellow because why not
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: (context) => {
+                            const song = publicSongs.find(s => Math.abs(s.duration - context.raw.x) < 0.01 && s.rating === context.raw.y);
+                            return `${song ? song.name : 'Unknown'}: ${Math.round(context.raw.y)} (${context.raw.x}s)`;
+                        }
+                    }
+                },
+                legend: { display: false }
+            },
+            scales: {
+                x: {
+                    title: { display: true, text: 'Duration (Seconds)' },
+                    type: 'linear',
+                    position: 'bottom'
+                },
+                y: {
+                    title: { display: true, text: 'Rating' }
+                }
+            }
+        }
+    });
+
+    // 2. most battled.
+    const mostBattled = [...publicSongs].sort((a, b) => b.comparisons - a.comparisons).slice(0, 10);
+
+    new Chart(document.getElementById('battlesChart'), {
+        type: 'bar',
+        data: {
+            labels: mostBattled.map(s => s.name.substring(0, 15) + '...'),
+            datasets: [{
+                label: 'Total Battles',
+                data: mostBattled.map(s => s.comparisons),
+                backgroundColor: '#ff8800', // orange
+                borderColor: '#fff',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { x: { beginAtZero: true } }
+        }
+    });
+
+    // 3. chapter mvps.
+    // we already have 'songsWithChapters'.
+    const mvpContainer = document.getElementById('mvp-container');
+    const chapters = ['Ch 1', 'Ch 2', 'Ch 3', 'Ch 4'];
+
+    chapters.forEach(ch => {
+        const chapterSongs = publicSongs.filter(s => s.chapters.includes(ch));
+        if (chapterSongs.length === 0) return;
+
+        const mvp = chapterSongs.reduce((prev, current) => (prev.rating > current.rating) ? prev : current);
+
+        const card = document.createElement('div');
+        card.style.border = '1px solid var(--accent-color, #fff)';
+        card.style.padding = '10px';
+        card.style.textAlign = 'center';
+        card.style.borderRadius = '8px';
+        card.style.background = '#111';
+
+        card.innerHTML = `
+            <h3 style="margin: 0 0 10px 0; color: #aaa;">${ch} MVP</h3>
+            <div style="font-weight: bold; color: #fff; margin-bottom: 5px;">${mvp.name}</div>
+            <div style="color: var(--accent-color, #00ff9d); font-size: 1.2em;">${Math.round(mvp.rating)}</div>
+        `;
+        mvpContainer.appendChild(card);
+    });
+
 });
 
 
