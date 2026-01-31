@@ -1,15 +1,100 @@
 document.addEventListener('DOMContentLoaded', () => {
     const SUPABASE_URL = 'https://tsqubxgafnzmxejwknbm.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzcXVieGdhZm56bXhlandrbmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwNzA2ODcsImV4cCI6MjA2ODY0NjY4N30.YY78tWRNQsK6OZREh-8w2fAxiLBbBaG4kZfVYROkirY';
-
-    if (!window.supabase) {
-        console.error("Supabase client not loaded. Make sure the script tag is in your HTML.");
-        alert("Error: Could not connect to the ranking service. Please refresh.");
-        return;
-    }
-
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+    // DOM cache. i'm done with these IDs.
+    const mainTitle = document.getElementById('main-title');
+    const mainFilterSelect = document.getElementById('main-filter-select');
+    const drToggle = document.getElementById('dr-toggle');
+    const utToggle = document.getElementById('ut-toggle');
+    const showRatingsToggle = document.getElementById('show-ratings-toggle');
+    const rankingList = document.getElementById('ranking-list');
+    const arena = document.querySelector('.arena');
+    const songACard = document.getElementById('songA-card');
+    const songBCard = document.getElementById('songB-card');
+    const songAName = document.getElementById('songA-name');
+    const songBName = document.getElementById('songB-name');
+    const chooseABtn = document.getElementById('chooseA-btn');
+    const chooseBBtn = document.getElementById('chooseB-btn');
+    const tieBtn = document.getElementById('tie-btn');
+    const undoBtn = document.getElementById('undo-btn');
+    const resetBtn = document.getElementById('reset-btn');
+    const progressBar = document.getElementById('progress-bar');
+    const progressText = document.getElementById('progress-text');
+    const rankingContainer = document.querySelector('.ranking-container');
+    const myRankingBtn = document.getElementById('my-ranking-btn');
+    const communityRankingBtn = document.getElementById('community-ranking-btn');
+    const toggleRankingsBtn = document.getElementById('toggle-rankings-btn');
+    const audioA = document.getElementById('audioA');
+    const audioB = document.getElementById('audioB');
+    const previewBtns = document.querySelectorAll('.preview-btn');
+    const fullPlayBtns = document.querySelectorAll('.full-play-btn');
+    const editListBtn = document.getElementById('edit-list-btn');
+    const chapterMixModal = document.getElementById('chapter-mix-modal');
+    const applyMixBtn = document.getElementById('apply-mix-btn');
+    const cancelMixBtn = document.getElementById('cancel-mix-btn');
+    const mixCheckboxes = document.querySelectorAll('.mix-chapter-cb');
+    const shareBtn = document.getElementById('share-btn');
+    const shareModal = document.getElementById('share-modal');
+    const closeShareBtn = document.getElementById('close-share-btn');
+    const downloadShareBtn = document.getElementById('download-share-btn');
+    const sharePreview = document.getElementById('share-preview');
+    const musicPlayerBar = document.getElementById('music-player-bar');
+    const playerSongName = document.getElementById('player-song-name');
+    const playerPrevBtn = document.getElementById('player-prev-btn');
+    const playerPlayBtn = document.getElementById('player-play-btn');
+    const playerNextBtn = document.getElementById('player-next-btn');
+    const playerCloseBtn = document.getElementById('player-close-btn');
+    const playlistAudio = document.getElementById('playlist-audio');
+    const playListBtn = document.getElementById('play-list-btn');
+    const exportListBtn = document.getElementById('export-list-btn');
+    const exportModal = document.getElementById('export-modal');
+    const closeExportBtn = document.getElementById('close-export-btn');
+    const exportM3UBtn = document.getElementById('export-m3u-btn');
+    const exportZipBtn = document.getElementById('export-zip-btn');
+    const exportTextBtn = document.getElementById('export-text-btn');
+    const rankingSearch = document.getElementById('ranking-search');
+
+    const settingsBtn = document.getElementById('settings-btn');
+    const settingsModal = document.getElementById('settings-modal');
+    const closeSettingsBtn = document.getElementById('close-settings-btn');
+    const customColorPicker = document.getElementById('custom-theme-picker');
+    const customColorLabel = document.querySelector('.custom-color-label');
+    const colorBtns = document.querySelectorAll('.color-btn:not(.custom-color-label)');
+
+    const customRankerModal = document.getElementById('custom-ranker-modal');
+    const closeCustomBtn = document.getElementById('close-custom-btn');
+    const saveCustomBtn = document.getElementById('save-custom-btn');
+    const deleteListBtn = document.getElementById('delete-list-btn');
+    const customSearch = document.getElementById('custom-search');
+    const customChecklistContainer = document.getElementById('custom-checklist-container');
+    const newListInput = document.getElementById('new-list-name');
+    const createListBtn = document.getElementById('create-list-btn');
+    const listEditorUi = document.getElementById('list-editor-ui');
+    const editingListTitle = document.getElementById('editing-list-title');
+
+    const secretLink = document.getElementById('secret-stats-link');
+    const hiddenTab = document.getElementById('hidden-filter-btn');
+
+    const suggestBtn = document.getElementById('suggest-btn');
+    const suggestionModal = document.getElementById('suggestion-modal');
+    const closeSuggestionBtn = document.getElementById('close-suggestion-btn');
+    const submitSuggestionBtn = document.getElementById('submit-suggestion-btn');
+    const suggestionText = document.getElementById('suggestion-text');
+
+    const voteStat = document.getElementById('vote-stat');
+    const personalVoteStat = document.getElementById('personal-vote-stat');
+    const exportLimitInput = document.getElementById('export-limit');
+
+    // Global state variables for the session
+    let currentSongA = null;
+    let currentSongB = null;
+    let previousRanking = [];
+    let activePreviewTimeout = null;
+    let currentChapterFilter = 'all';
+    let votesSinceLastRefresh = 0; // stop hammering the api
+    let currentActiveAudio = null; // tracking what's actually making noise.
 
     // theme stuff. i don't care if it's pink or green.
     const accentColors = [
@@ -31,12 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
     loadTheme();
 
     // settings ui stuff. i hate dom manipulation.
-    const settingsBtn = document.getElementById('settings-btn');
-    const settingsModal = document.getElementById('settings-modal');
-    const closeSettingsBtn = document.getElementById('close-settings-btn');
-    const colorBtns = document.querySelectorAll('.color-btn:not(.custom-color-label)');
-    const customColorPicker = document.getElementById('custom-theme-picker');
-    const customColorLabel = document.querySelector('.custom-color-label');
 
     settingsBtn.addEventListener('click', (e) => {
         if (settingsModal.style.display === 'flex') {
@@ -100,9 +179,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return (yiq >= 128) ? 'black' : 'white';
     }
 
-    const songList = window.songList || []; // pull from app_song_data.js
+    let globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{"currentGame": "deltarune", "showRatings": false}');
 
     let state = {
+        currentGame: globalState.currentGame,
         songs: [],
         comparisons: 0,
         history: null,
@@ -111,24 +191,41 @@ document.addEventListener('DOMContentLoaded', () => {
         customLists: {}, // { "Cool List": [1, 2, 5], ... }
         currentCustomListName: null, // which one are we editing right now
         boostedSongId: null, // i guess we're rigging the election now.
-        showRatings: false // nobody wants to see the numbers apparently.
+        showRatings: globalState.showRatings // nobody wants to see the numbers apparently.
     };
 
     function saveState() {
-        localStorage.setItem('drSongRankerState', JSON.stringify(state));
+        const key = state.currentGame === 'deltarune' ? 'drSongRankerState' : 'utSongRankerState';
+        localStorage.setItem(key, JSON.stringify(state));
+
+        // save global stuff too
+        localStorage.setItem('drSongRankerGlobalState', JSON.stringify({
+            currentGame: state.currentGame,
+            showRatings: state.showRatings
+        }));
     }
 
     function loadState() {
-        const saved = localStorage.getItem('drSongRankerState');
+        const key = state.currentGame === 'deltarune' ? 'drSongRankerState' : 'utSongRankerState';
+        const saved = localStorage.getItem(key);
+
+        // choose the source list based on game. i hate this.
+        let sourceList = [];
+        if (state.currentGame === 'deltarune') {
+            sourceList = (typeof songList !== 'undefined') ? songList : (window.songList || []);
+        } else {
+            sourceList = (typeof utSongList !== 'undefined') ? utSongList : (window.utSongList || []);
+        }
+
         if (saved) {
             const parsed = JSON.parse(saved);
             state.comparisons = parsed.comparisons || 0;
             state.history = parsed.history || null;
-            state.showRatings = parsed.showRatings || false;
-            // DO NOT load secretsUnlocked from here. It is managed by checkSecretsGlobal() reading from localStorage.
+            state.activeRankerList = parsed.activeRankerList || 'all';
+            state.customLists = parsed.customLists || {};
+            state.boostedSongId = parsed.boostedSongId || null;
 
             // merge songs to keep ratings but add new files/metadata
-            const sourceList = window.songList || songList || [];
             state.songs = sourceList.map(baseSong => {
                 const savedSong = parsed.songs ? parsed.songs.find(s => s.id === baseSong.id) : null;
                 if (savedSong) {
@@ -138,84 +235,59 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         } else {
             // fresh start
-            const sourceList = window.songList || songList || [];
             state.songs = sourceList.map(s => ({ ...s }));
+            state.comparisons = 0;
+            state.history = null;
+            state.activeRankerList = 'all';
+            state.customLists = {};
+            state.boostedSongId = null;
         }
 
-        // ensure custom lists are loaded if they weren't in state (migration)
-        if (Object.keys(state.customLists).length === 0) {
-            // loadCustomLists(); // deprecated?
-        }
         populateCustomDropdown();
 
         // validation: if active list is bogus, reset to all.
-        const validLists = ['all', '1', '2', '3', '4', 'hidden', 'duration_30', 'duration_20', 'duration_10'];
+        const drValid = ['all', '1', '2', '3', '4', 'hidden', 'duration_30', 'duration_20', 'duration_10'];
+        const utValid = ['all', '1', '2', '3', '4', '5', 'hidden', 'duration_30', 'duration_20', 'duration_10'];
+        const validLists = state.currentGame === 'deltarune' ? drValid : utValid;
+
         if (!validLists.includes(state.activeRankerList) && !state.customLists[state.activeRankerList]) {
             state.activeRankerList = 'all';
             currentChapterFilter = 'all';
-            if (activeListSelect) activeListSelect.value = 'all';
+            if (mainFilterSelect) mainFilterSelect.value = 'all';
+        } else {
+            currentChapterFilter = state.activeRankerList;
+            if (mainFilterSelect) mainFilterSelect.value = state.activeRankerList;
         }
+
+        updateGameUI();
     }
 
-    let currentSongA, currentSongB;
-    let previousRanking = [];
-    let activePreviewTimeout = null;
-    let currentChapterFilter = 'all';
-    let votesSinceLastRefresh = 0; // stop hammering the api
-    let currentActiveAudio = null; // tracking what's actually making noise.
+    function updateGameUI() {
+        if (state.currentGame === 'deltarune') {
+            if (drToggle) drToggle.classList.add('active');
+            if (utToggle) utToggle.classList.remove('active');
+            if (mainTitle) mainTitle.textContent = "Which Deltarune song is better?";
+        } else {
+            if (drToggle) drToggle.classList.remove('active');
+            if (utToggle) utToggle.classList.add('active');
+            if (mainTitle) mainTitle.textContent = "Which Undertale song is better?";
+        }
+    }
     const PREVIEW_DURATION = 10000;
     const PREVIEW_START_TIME = 30;
 
-    const songAName = document.getElementById('songA-name');
-    const songBName = document.getElementById('songB-name');
-    const songACard = document.getElementById('songA-card');
-    const songBCard = document.getElementById('songB-card');
-    const arena = document.querySelector('.arena');
-    const chooseABtn = document.getElementById('chooseA-btn');
-    const chooseBBtn = document.getElementById('chooseB-btn');
-    const tieBtn = document.getElementById('tie-btn');
-    const resetBtn = document.getElementById('reset-btn');
-    const progressBar = document.getElementById('progress-bar');
-    const progressText = document.getElementById('progress-text');
-    const rankingList = document.getElementById('ranking-list');
-    const audioA = document.getElementById('audioA');
-    const audioB = document.getElementById('audioB');
-    const previewBtns = document.querySelectorAll('.preview-btn');
-    const fullPlayBtns = document.querySelectorAll('.full-play-btn');
-    const toggleRankingsBtn = document.getElementById('toggle-rankings-btn');
-    const rankingContainer = document.querySelector('.ranking-container');
-    const myRankingBtn = document.getElementById('my-ranking-btn');
-    const communityRankingBtn = document.getElementById('community-ranking-btn');
-    const filterBtns = document.querySelectorAll('.filter-btn');
-    const undoBtn = document.getElementById('undo-btn');
-    const showRatingsToggle = document.getElementById('show-ratings-toggle');
     function checkSecretsGlobal() {
         const unlocked = localStorage.getItem('drSongRankerSecretsUnlocked') === 'true';
         state.secretsUnlocked = unlocked;
-        const statsLink = document.getElementById('secret-stats-link');
-        if (statsLink) {
-            statsLink.style.display = unlocked ? 'inline' : 'none';
+        if (secretLink) {
+            secretLink.style.display = unlocked ? 'inline-block' : 'none';
         }
-        const hiddenTab = document.getElementById('hidden-filter-btn');
         if (hiddenTab) {
             hiddenTab.style.display = unlocked ? 'inline-block' : 'none';
         }
     }
     checkSecretsGlobal();
 
-    // custom ranker stuff. i'm done with lists.
-    const manageCustomBtn = document.getElementById('manage-custom-btn');
-    const customRankerModal = document.getElementById('custom-ranker-modal');
-    const closeCustomBtn = document.getElementById('close-custom-btn');
-    const saveCustomBtn = document.getElementById('save-custom-btn');
-    const deleteListBtn = document.getElementById('delete-list-btn');
-    const customSearch = document.getElementById('custom-search');
-    const customChecklistContainer = document.getElementById('custom-checklist-container');
-    const newListInput = document.getElementById('new-list-name');
-    const createListBtn = document.getElementById('create-list-btn');
-    const editListBtn = document.getElementById('edit-list-btn');
-    const listEditorUi = document.getElementById('list-editor-ui');
-    const editingListTitle = document.getElementById('editing-list-title');
 
     // load lists. don't ask.
     function loadCustomLists() {
@@ -256,7 +328,6 @@ document.addEventListener('DOMContentLoaded', () => {
             populateCustomDropdown(); // Ensure dropdown has it
 
             // auto select.
-            const mainFilterSelect = document.getElementById('main-filter-select');
             if (mainFilterSelect) {
                 mainFilterSelect.value = name;
                 // manual trigger. suffering.
@@ -270,7 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (editListBtn) {
         editListBtn.addEventListener('click', () => {
-            const currentObj = document.getElementById('main-filter-select');
+            const currentObj = mainFilterSelect;
             if (currentObj && state.customLists[currentObj.value]) {
                 state.currentCustomListName = currentObj.value;
                 showListEditor(currentObj.value);
@@ -362,7 +433,6 @@ document.addEventListener('DOMContentLoaded', () => {
         populateCustomDropdown();
 
         // Reset selection to 'all'
-        const mainFilterSelect = document.getElementById('main-filter-select');
         if (mainFilterSelect) {
             mainFilterSelect.value = 'all';
             mainFilterSelect.dispatchEvent(new Event('change'));
@@ -413,11 +483,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // suggestion box. i don't even know why i'm taking requests.
 
-    const suggestBtn = document.getElementById('suggest-btn');
-    const suggestionModal = document.getElementById('suggestion-modal');
-    const closeSuggestionBtn = document.getElementById('close-suggestion-btn');
-    const submitSuggestionBtn = document.getElementById('submit-suggestion-btn');
-    const suggestionText = document.getElementById('suggestion-text');
 
     suggestBtn.addEventListener('click', () => {
         suggestionModal.style.display = 'flex';
@@ -495,7 +560,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (filter === 'all_plus') {
             // show me everything (if unlocked)
             return state.secretsUnlocked ? pool : pool.filter(s => !s.hidden);
-        } else if (filter === '1' || filter === '2' || filter === '3' || filter === '4') {
+        } else if (['1', '2', '3', '4', '5'].includes(filter)) {
             const ch = parseInt(filter);
             return pool.filter(s => (!s.hidden || state.secretsUnlocked) && getChaptersForSong(s).includes(ch));
         } else if (filter.startsWith('duration_')) {
@@ -523,14 +588,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function getChaptersForSong(song) {
-        const ch = [];
-        if (song.id <= 40) ch.push(1);
-        if ((song.id >= 41 && song.id <= 87) || song.id === 38 || song.id === 40) {
-            ch.push(2);
+        if (state.currentGame === 'deltarune') {
+            const ch = [];
+            if (song.id <= 40) ch.push(1);
+            if ((song.id >= 41 && song.id <= 87) || song.id === 38 || song.id === 40) {
+                ch.push(2);
+            }
+            if (song.id >= 88 && song.id <= 125) ch.push(3);
+            if (song.id >= 126 && song.id <= 200) ch.push(4);
+            return ch;
+        } else {
+            // Undertale areas. Ruins (1-14), Snowdin (15-24), Waterfall (25-46), Hotland/CORE (47-70), New Home (71+)
+            const track = song.id - 1000;
+            if (track <= 14) return [1];
+            if (track >= 15 && track <= 24) return [2];
+            if (track >= 25 && track <= 46) return [3];
+            if (track >= 47 && track <= 70) return [4];
+            if (track >= 71) return [5];
+            return [];
         }
-        if (song.id >= 88 && song.id <= 125) ch.push(3);
-        if (song.id >= 126 && song.id <= 200) ch.push(4);
-        return ch;
     }
 
     function presentNewPair() {
@@ -574,47 +650,46 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (boostedSong && Math.random() < 0.25) {
-            // 25% chance to show the boosted song. whatever.
             song1 = boostedSong;
             state.boostedSongId = null; // finally done with that one.
             if (myRankingBtn.classList.contains('active')) displayRankings();
             else displayCommunityRankings();
         } else if (roll < 0.6) {
-            // 60% chance for some low vote songs i guess.
+            // 60% for underrated
             const sortedByVotes = [...availableSongs].sort((a, b) => a.comparisons - b.comparisons);
             const uncertaintyPoolSize = Math.max(5, Math.floor(availableSongs.length * 0.25));
             const uncertaintyPool = sortedByVotes.slice(0, uncertaintyPoolSize);
             song1 = uncertaintyPool[Math.floor(Math.random() * uncertaintyPool.length)];
         } else if (roll < 0.9) {
-            // 30% for the top rated ones.
+            // 30% for top rated
             const sortedByRating = [...availableSongs].sort((a, b) => b.rating - a.rating);
             const topPoolSize = Math.min(20, availableSongs.length);
             const topPool = sortedByRating.slice(0, topPoolSize);
             song1 = topPool[Math.floor(Math.random() * topPool.length)];
         } else {
-            // 10% pure chaos.
+            // 10% pure chaos
             song1 = availableSongs[Math.floor(Math.random() * availableSongs.length)];
         }
+
 
         // next victim.
         const sortedOpponents = [...availableSongs]
             .filter(s => s.id !== song1.id)
             .sort((a, b) => Math.abs(a.rating - song1.rating) - Math.abs(b.rating - song1.rating));
 
-
-
         // neighbors. whatever.
         const neighborPoolSize = 10;
         const neighborPool = sortedOpponents.slice(0, neighborPoolSize);
         const song2 = neighborPool[Math.floor(Math.random() * neighborPool.length)];
 
+
         currentSongA = song1;
         currentSongB = song2;
 
-        songAName.textContent = currentSongA.name;
-        songBName.textContent = currentSongB.name;
-        chooseABtn.textContent = `I prefer ${currentSongA.name}`;
-        chooseBBtn.textContent = `I prefer ${currentSongB.name}`;
+        if (songAName && currentSongA) songAName.textContent = currentSongA.name;
+        if (songBName && currentSongB) songBName.textContent = currentSongB.name;
+        if (chooseABtn && currentSongA) chooseABtn.textContent = `I prefer ${currentSongA.name}`;
+        if (chooseBBtn && currentSongB) chooseBBtn.textContent = `I prefer ${currentSongB.name}`;
 
         audioA.src = encodeURI(currentSongA.file);
         audioB.src = encodeURI(currentSongB.file);
@@ -634,7 +709,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleChoice(winner) {
-        if (!currentSongA || !currentSongB) return;
+        if (!currentSongA || !currentSongB) {
+            return;
+        }
 
         // save history before we mess it up.
         state.history = {
@@ -670,7 +747,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 votesSinceLastRefresh = 0;
             } else {
                 // incrementing locally because the api is too slow/expensive.
-                const voteStat = document.getElementById('vote-stat');
                 if (voteStat) {
                     const currentText = voteStat.textContent || "";
                     const match = currentText.match(/\d+/);
@@ -739,10 +815,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function playFullSong(songKey) {
+        const songData = (songKey === 'A') ? currentSongA : currentSongB;
+        if (!songData) {
+            console.warn("playFullSong called with no song data.");
+            return;
+        }
         stopAllMusic();
 
         const audioEl = (songKey === 'A') ? audioA : audioB;
-        const songData = (songKey === 'A') ? currentSongA : currentSongB;
 
         currentActiveAudio = audioEl;
         playerSongName.textContent = songData.name;
@@ -764,6 +844,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     async function recordCommunityVote(winnerId, loserId) {
+        if (state.currentGame !== 'deltarune') return; // no ut backend yet. i'm not doing it.
         try {
             const { error } = await supabaseClient.rpc('handle_vote', {
                 winner_id: winnerId,
@@ -778,6 +859,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     async function fetchAndDisplayAllTimeStats() {
+        if (state.currentGame !== 'deltarune') {
+            if (voteStat) voteStat.textContent = "";
+            return;
+        }
         try {
             const { data: voteData, error: voteError } = await supabaseClient
                 .rpc('get_total_votes');
@@ -787,12 +872,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const votes = voteData || 0;
-            const voteStat = document.getElementById('vote-stat');
             if (voteStat) voteStat.textContent = `Total Votes: ${votes}`;
 
         } catch (error) {
             console.error("CRITICAL ERROR fetching stats:", error);
-            const voteStat = document.getElementById('vote-stat');
             if (voteStat) voteStat.textContent = "";
         }
     }
@@ -801,6 +884,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function displayCommunityRankings() {
         rankingList.innerHTML = '<li>Loading community data...</li>';
+        if (state.currentGame !== 'deltarune') {
+            rankingList.innerHTML = '<li>Community rankings only available for Deltarune. Go bug the dev.</li>';
+            return;
+        }
         try {
             const { data, error } = await supabaseClient
                 .from('songs')
@@ -900,11 +987,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // math. i'm done.
         const accuracy = 100 * (1 - Math.exp(-state.comparisons / 100));
 
-        progressBar.style.width = `${accuracy}%`;
-        progressText.textContent = `Ranking Accuracy: ${accuracy.toFixed(1)}%`;
+        if (progressBar) progressBar.style.width = `${accuracy}%`;
+        if (progressText) progressText.textContent = `Ranking Accuracy: ${accuracy.toFixed(1)}%`;
 
         // vote hoarding counter.
-        const personalVoteStat = document.getElementById('personal-vote-stat');
         if (personalVoteStat) {
             personalVoteStat.textContent = `YOUR VOTES: ${state.comparisons}`;
         }
@@ -919,7 +1005,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (activeList === 'hidden') {
-            return songs.filter(s => s.hidden || s.id > 200);
+            return songs.filter(s => s.hidden || (state.currentGame === 'deltarune' && s.id > 200));
         }
 
         if (activeList === 'custom') {
@@ -927,14 +1013,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return songs.filter(s => customSelection.includes(s.id));
         }
 
-        // chapter grouping. math is pain.
+        // chapter grouping.
         const ch = parseInt(activeList);
         return songs.filter(s => {
-            if (ch === 1) return s.id <= 40;
-            if (ch === 2) return (s.id >= 41 && s.id <= 87) || s.id === 38 || s.id === 40;
-            if (ch === 3) return s.id >= 88 && s.id <= 125;
-            if (ch === 4) return s.id >= 126 && s.id <= 165;
-            return false;
+            const chapters = getChaptersForSong(s);
+            return chapters.includes(ch);
         });
     }
 
@@ -948,21 +1031,18 @@ document.addEventListener('DOMContentLoaded', () => {
             return state.secretsUnlocked ? songs : songs.filter(s => !s.hidden);
         }
         if (filter === 'hidden') {
-            return state.secretsUnlocked ? songs.filter(s => s.hidden || s.id > 200) : [];
+            return state.secretsUnlocked ? songs.filter(s => s.hidden || (state.currentGame === 'deltarune' && s.id > 200)) : [];
         }
 
         // chapters
-        if (['1', '2', '3', '4'].includes(filter)) {
+        if (['1', '2', '3', '4', '5'].includes(filter)) {
             const ch = parseInt(filter);
             return songs.filter(s => {
                 const visible = !s.hidden || state.secretsUnlocked;
                 if (!visible) return false;
 
-                if (ch === 1) return s.id <= 40;
-                if (ch === 2) return (s.id >= 41 && s.id <= 87) || s.id === 38 || s.id === 40;
-                if (ch === 3) return s.id >= 88 && s.id <= 125;
-                if (ch === 4) return s.id >= 126 && s.id <= 165;
-                return false;
+                const chapters = getChaptersForSong(s);
+                return chapters.includes(ch);
             });
         }
 
@@ -1072,32 +1152,34 @@ document.addEventListener('DOMContentLoaded', () => {
     //     return;
     // }
 
-    loadState();
-
-
-    fetchAndDisplayAllTimeStats();
-
-    chooseABtn.addEventListener('click', () => handleChoice('A'));
-    chooseBBtn.addEventListener('click', () => handleChoice('B'));
-    tieBtn.addEventListener('click', () => handleChoice(null));
-    undoBtn.addEventListener('click', undoVote);
-    resetBtn.addEventListener('click', resetState);
-    previewBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            // stop playlist if previewing. why did i even make a playlist.
-            if (isPlaylistPlaying) {
-                playlistAudio.pause();
-                isPlaylistPlaying = false;
-            }
-            playPreview(btn.dataset.song);
+    // listeners. i'm not doing this twice.
+    if (drToggle) {
+        drToggle.addEventListener('click', () => {
+            if (state.currentGame === 'deltarune') return;
+            saveState(); // save old game state first
+            state.currentGame = 'deltarune';
+            loadState();
+            saveState(); // save new currentGame to globalState
+            presentNewPair();
+            fetchAndDisplayAllTimeStats();
+            if (myRankingBtn.classList.contains('active')) displayRankings();
+            else displayCommunityRankings();
         });
-    });
-    fullPlayBtns.forEach(btn => {
-        btn.addEventListener('click', () => playFullSong(btn.dataset.song)); // hope they like the whole song.
-    });
-    toggleRankingsBtn.addEventListener('click', () => {
-        rankingContainer.classList.toggle('visible');
-    });
+    }
+
+    if (utToggle) {
+        utToggle.addEventListener('click', () => {
+            if (state.currentGame === 'undertale') return;
+            saveState(); // save old game state first
+            state.currentGame = 'undertale';
+            loadState();
+            saveState(); // save new currentGame to globalState
+            presentNewPair();
+            fetchAndDisplayAllTimeStats();
+            if (myRankingBtn.classList.contains('active')) displayRankings();
+            else displayCommunityRankings();
+        });
+    }
 
     myRankingBtn.addEventListener('click', () => {
         communityRankingBtn.classList.remove('active');
@@ -1110,15 +1192,6 @@ document.addEventListener('DOMContentLoaded', () => {
         communityRankingBtn.classList.add('active');
         displayCommunityRankings();
     });
-
-
-
-    const mainFilterSelect = document.getElementById('main-filter-select');
-    // creation logic for the modal. i hate popups.
-    const chapterMixModal = document.getElementById('chapter-mix-modal');
-    const applyMixBtn = document.getElementById('apply-mix-btn');
-    const cancelMixBtn = document.getElementById('cancel-mix-btn');
-    const mixCheckboxes = document.querySelectorAll('.mix-chapter-cb');
 
     if (mainFilterSelect) {
         mainFilterSelect.addEventListener('change', (e) => {
@@ -1149,6 +1222,31 @@ document.addEventListener('DOMContentLoaded', () => {
             presentNewPair();
         });
     }
+
+    fetchAndDisplayAllTimeStats();
+
+    chooseABtn.addEventListener('click', () => handleChoice('A'));
+    chooseBBtn.addEventListener('click', () => handleChoice('B'));
+    tieBtn.addEventListener('click', () => handleChoice(null));
+    undoBtn.addEventListener('click', undoVote);
+    resetBtn.addEventListener('click', resetState);
+    previewBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // stop playlist if previewing. why did i even make a playlist.
+            if (isPlaylistPlaying) {
+                playlistAudio.pause();
+                isPlaylistPlaying = false;
+            }
+            playPreview(btn.dataset.song);
+        });
+    });
+    fullPlayBtns.forEach(btn => {
+        btn.addEventListener('click', () => playFullSong(btn.dataset.song)); // hope they like the whole song.
+    });
+    toggleRankingsBtn.addEventListener('click', () => {
+        rankingContainer.classList.toggle('visible');
+    });
+
 
     if (applyMixBtn) {
         applyMixBtn.addEventListener('click', () => {
@@ -1203,7 +1301,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Removed duplicate createListBtn listener
 
     function populateCustomDropdown() {
-        const select = document.getElementById('main-filter-select');
+        const select = mainFilterSelect;
         if (!select) return;
 
         // Use state as source of truth, fallback to current select value if valid
@@ -1211,18 +1309,29 @@ document.addEventListener('DOMContentLoaded', () => {
         select.innerHTML = '';
 
         // standard options
-        const standardOptions = [
-            { val: 'all', text: 'All Songs (Original)' },
-            { val: '1', text: 'Chapter 1' },
-            { val: '2', text: 'Chapter 2' },
-            { val: '3', text: 'Chapter 3' },
-            { val: '4', text: 'Chapter 4' },
+        let standardOptions = [
+            { val: 'all', text: state.currentGame === 'deltarune' ? 'All Songs (Original)' : 'All Songs' }
         ];
 
-        // Insert Mix Chapters option.
-        standardOptions.push({ val: 'mix_chapters', text: 'Mix Chapters...' });
+        if (state.currentGame === 'deltarune') {
+            standardOptions.push(
+                { val: '1', text: 'Chapter 1' },
+                { val: '2', text: 'Chapter 2' },
+                { val: '3', text: 'Chapter 3' },
+                { val: '4', text: 'Chapter 4' },
+                { val: 'mix_chapters', text: 'Mix Chapters...' }
+            );
+        } else {
+            standardOptions.push(
+                { val: '1', text: 'Ruins' },
+                { val: '2', text: 'Snowdin' },
+                { val: '3', text: 'Waterfall' },
+                { val: '4', text: 'Hotland / CORE' },
+                { val: '5', text: 'New Home / End' }
+            );
+        }
 
-        // Add secret options if unlocked
+        // Add secret options if unlocked (mostly for DR, but whatever)
         if (state.secretsUnlocked) {
             standardOptions.splice(1, 0, { val: 'all_plus', text: 'All Songs + Hidden' });
             standardOptions.push({ val: 'hidden', text: 'Hidden Tracks' });
@@ -1299,42 +1408,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // sharing. i'm tired.
-    const shareBtn = document.getElementById('share-btn');
-    const shareModal = document.getElementById('share-modal');
-    const closeShareBtn = document.getElementById('close-share-btn');
-    const downloadShareBtn = document.getElementById('download-share-btn');
-    const sharePreview = document.getElementById('share-preview');
+    if (shareBtn) {
+        shareBtn.addEventListener('click', () => {
+            const isCommunity = communityRankingBtn.classList.contains('active');
+            const sourceData = isCommunity ? cachedCommunitySongs : state.songs;
 
-    shareBtn.addEventListener('click', () => {
-        const isCommunity = communityRankingBtn.classList.contains('active');
-        const sourceData = isCommunity ? cachedCommunitySongs : state.songs;
+            if (isCommunity && cachedCommunitySongs.length === 0) {
+                alert("Community data not loaded yet. Please wait.");
+                return;
+            }
 
-        if (isCommunity && cachedCommunitySongs.length === 0) {
-            alert("Community data not loaded yet. Please wait.");
-            return;
-        }
+            const filteredData = filterSongsByChapter(sourceData, currentChapterFilter);
+            const topSongs = [...filteredData]
+                .sort((a, b) => b.rating - a.rating)
+                .slice(0, 10);
 
-        const filteredData = filterSongsByChapter(sourceData, currentChapterFilter);
-        const topSongs = [...filteredData]
-            .sort((a, b) => b.rating - a.rating)
-            .slice(0, 10);
+            let titleText = isCommunity ? "COMMUNITY TOP 10" : "MY TOP 10";
+            if (currentChapterFilter !== 'all') {
+                titleText += ` (${currentChapterFilter.toUpperCase()})`;
+            }
 
-        let titleText = isCommunity ? "COMMUNITY TOP 10" : "MY TOP 10";
-        if (currentChapterFilter !== 'all') {
-            titleText += ` (${currentChapterFilter.toUpperCase()})`;
-        }
+            let html = `<h3 style="margin-top:0; border-bottom: 2px solid #fff; padding-bottom: 5px; text-transform: uppercase;">${titleText}</h3>`;
+            html += '<ol style="padding-left: 20px; margin: 0;">';
+            topSongs.forEach(song => {
+                html += `<li style="margin-bottom: 5px;">${song.name}</li>`;
+            });
+            html += '</ol>';
+            html += '<p style="margin-top: 15px; font-size: 0.8em; color: #888;">Ranked at: stavros-alt.github.io/drSongRanker</p>';
 
-        let html = `<h3 style="margin-top:0; border-bottom: 2px solid #fff; padding-bottom: 5px; text-transform: uppercase;">${titleText}</h3>`;
-        html += '<ol style="padding-left: 20px; margin: 0;">';
-        topSongs.forEach(song => {
-            html += `<li style="margin-bottom: 5px;">${song.name}</li>`;
+            sharePreview.innerHTML = html;
+            shareModal.style.display = 'flex';
         });
-        html += '</ol>';
-        html += '<p style="margin-top: 15px; font-size: 0.8em; color: #888;">Ranked at: stavros-alt.github.io/drSongRanker</p>';
-
-        sharePreview.innerHTML = html;
-        shareModal.style.display = 'flex';
-    });
+    }
 
     closeShareBtn.addEventListener('click', () => {
         shareModal.style.display = 'none';
@@ -1361,19 +1466,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // endless stream of noise.
-    const musicPlayerBar = document.getElementById('music-player-bar');
-    const playerSongName = document.getElementById('player-song-name');
-    const playerPrevBtn = document.getElementById('player-prev-btn');
-    const playerPlayBtn = document.getElementById('player-play-btn');
-    const playerNextBtn = document.getElementById('player-next-btn');
-    const playerCloseBtn = document.getElementById('player-close-btn');
-    const playlistAudio = document.getElementById('playlist-audio');
-    const playListBtn = document.getElementById('play-list-btn');
-    const exportListBtn = document.getElementById('export-list-btn');
-    const exportModal = document.getElementById('export-modal');
-    const closeExportBtn = document.getElementById('close-export-btn');
-    const exportM3UBtn = document.getElementById('export-m3u-btn');
-    const exportTextBtn = document.getElementById('export-text-btn');
+
 
     let playlist = [];
     let currentPlaylistIndex = 0;
@@ -1515,7 +1608,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const limit = parseInt(document.getElementById('export-limit').value) || 10;
+        const limit = parseInt(exportLimitInput.value) || 10;
         const exportPool = sourceSongs.slice(0, limit);
 
         if (exportPool.length === 0) {
@@ -1533,13 +1626,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `deltarune_playlist_${currentChapterFilter}.m3u`;
+        const prefix = state.currentGame === 'deltarune' ? 'deltarune' : 'undertale';
+        a.download = `${prefix}_playlist_${currentChapterFilter}.m3u`;
         a.click();
         URL.revokeObjectURL(url);
         exportModal.style.display = 'none';
     });
 
-    const exportZipBtn = document.getElementById('export-zip-btn');
+
     exportZipBtn.addEventListener('click', async () => {
         const sourceSongs = getExportSourceSongs();
         if (sourceSongs === null) {
@@ -1547,7 +1641,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const limit = parseInt(document.getElementById('export-limit').value) || 10;
+        const limit = parseInt(exportLimitInput.value) || 10;
         const exportPool = sourceSongs.slice(0, limit);
 
         if (exportPool.length === 0) {
@@ -1587,11 +1681,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            const prefix = state.currentGame === 'deltarune' ? 'deltarune' : 'undertale';
             const content = await zip.generateAsync({ type: "blob" });
             const url = URL.createObjectURL(content);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `deltarune_top_${addedCount}_songs.zip`;
+            a.download = `${prefix}_top_${addedCount}_songs.zip`;
             a.click();
             URL.revokeObjectURL(url);
             exportModal.style.display = 'none';
@@ -1611,7 +1706,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const limit = parseInt(document.getElementById('export-limit').value) || 10;
+        const limit = parseInt(exportLimitInput.value) || 10;
         const exportPool = sourceSongs.slice(0, limit);
 
         if (exportPool.length === 0) {
@@ -1634,12 +1729,22 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             let chapterSuffix = "";
-            if (s.id <= 40) chapterSuffix = " (Chapter 1)";
-            else if (s.id <= 87 || s.id === 38 || s.id === 40) chapterSuffix = " (Chapter 2)";
-            else if (s.id <= 125) chapterSuffix = " (Chapter 3)";
-            else if (s.id <= 165) chapterSuffix = " (Chapter 4)";
+            if (state.currentGame === 'deltarune') {
+                if (s.id <= 40) chapterSuffix = " (Chapter 1)";
+                else if (s.id <= 87 || s.id === 38 || s.id === 40) chapterSuffix = " (Chapter 2)";
+                else if (s.id <= 125) chapterSuffix = " (Chapter 3)";
+                else if (s.id <= 165) chapterSuffix = " (Chapter 4)";
+            } else {
+                const track = s.id - 1000;
+                if (track <= 14) chapterSuffix = " (Ruins)";
+                else if (track <= 24) chapterSuffix = " (Snowdin)";
+                else if (track <= 46) chapterSuffix = " (Waterfall)";
+                else if (track <= 70) chapterSuffix = " (Hotland/CORE)";
+                else chapterSuffix = " (New Home/End)";
+            }
 
-            return `${songName} - Toby Fox Deltarune OST${chapterSuffix}`;
+            const ostName = state.currentGame === 'deltarune' ? 'Deltarune OST' : 'Undertale OST';
+            return `${songName} - Toby Fox ${ostName}${chapterSuffix}`;
         }).join('\n');
         navigator.clipboard.writeText(textList).then(() => {
             alert("Copied to clipboard. Paste it into Spotify/YouTube tools and leave me alone.");
@@ -1655,7 +1760,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // search.
-    const rankingSearch = document.getElementById('ranking-search');
+
     rankingSearch.addEventListener('input', (e) => {
         const searchTerm = e.target.value.toLowerCase();
         const items = rankingList.getElementsByTagName('li');
@@ -1673,12 +1778,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // init app
     loadState();
     if (showRatingsToggle) showRatingsToggle.checked = state.showRatings;
-    checkSecretsGlobal(); // Refresh secrets from localStorage AFTER loading stale state
-    populateCustomDropdown(); // Rebuild dropdown with correct secrets status
-    if (!state.songs || state.songs.length === 0) {
-        state.songs = window.songList ? [...window.songList] : [];
-    }
-    presentNewPair();
+    checkSecretsGlobal();
+    populateCustomDropdown();
     updateApp();
     // refresh on back button because browsers are annoying.
     window.addEventListener('pageshow', (e) => {

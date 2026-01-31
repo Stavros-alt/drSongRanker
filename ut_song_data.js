@@ -1,0 +1,812 @@
+const utSongList = [
+    {
+        "id": 1001,
+        "name": "Once Upon a Time",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 01 Once Upon a Time.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 89.0
+    },
+    {
+        "id": 1002,
+        "name": "Start Menu",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 02 Start Menu.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 32.03
+    },
+    {
+        "id": 1003,
+        "name": "Your Best Friend",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 03 Your Best Friend.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 23.28
+    },
+    {
+        "id": 1004,
+        "name": "Fallen Down",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 04 Fallen Down.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 57.86
+    },
+    {
+        "id": 1005,
+        "name": "Ruins",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 05 Ruins.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 92.32
+    },
+    {
+        "id": 1006,
+        "name": "Uwa!! So Temperate\u266b",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 06 Uwa!! So Temperate\u266b.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 56.61
+    },
+    {
+        "id": 1007,
+        "name": "Anticipation",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 07 Anticipation.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 22.33
+    },
+    {
+        "id": 1008,
+        "name": "Unnecessary Tension",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 08 Unnecessary Tension.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 17.32
+    },
+    {
+        "id": 1009,
+        "name": "Enemy Approaching",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 09 Enemy Approaching.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 56.42
+    },
+    {
+        "id": 1010,
+        "name": "Ghost Fight",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 10 Ghost Fight.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 56.58
+    },
+    {
+        "id": 1011,
+        "name": "Determination",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 11 Determination.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 50.39
+    },
+    {
+        "id": 1012,
+        "name": "Home",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 12 Home.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 123.04
+    },
+    {
+        "id": 1013,
+        "name": "Home (Music Box)",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 13 Home (Music Box).mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 122.93
+    },
+    {
+        "id": 1014,
+        "name": "Heartache",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 14 Heartache.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 108.49
+    },
+    {
+        "id": 1015,
+        "name": "sans.",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 15 sans..mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 50.65
+    },
+    {
+        "id": 1016,
+        "name": "Nyeh Heh Heh!",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 16 Nyeh Heh Heh!.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 32.44
+    },
+    {
+        "id": 1017,
+        "name": "Snowy",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 17 Snowy.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 104.31
+    },
+    {
+        "id": 1018,
+        "name": "Uwa!! So Holiday\u266b",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 18 Uwa!! So Holiday\u266b.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 30.04
+    },
+    {
+        "id": 1019,
+        "name": "Dogbass",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 19 Dogbass.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 6.58
+    },
+    {
+        "id": 1020,
+        "name": "Mysterious Place",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 20 Mysterious Place.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 44.83
+    },
+    {
+        "id": 1021,
+        "name": "Dogsong",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 21 Dogsong.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 37.33
+    },
+    {
+        "id": 1022,
+        "name": "Snowdin Town",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 22 Snowdin Town.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 76.2
+    },
+    {
+        "id": 1023,
+        "name": "Shop",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 23 Shop.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 50.31
+    },
+    {
+        "id": 1024,
+        "name": "Bonetrousle",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 24 Bonetrousle.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 57.63
+    },
+    {
+        "id": 1025,
+        "name": "Dating Start!",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 25 Dating Start!.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 116.9
+    },
+    {
+        "id": 1026,
+        "name": "Dating Tense!",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 26 Dating Tense!.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 26.17
+    },
+    {
+        "id": 1027,
+        "name": "Dating Fight!",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 27 Dating Fight!.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 35.94
+    },
+    {
+        "id": 1028,
+        "name": "Premonition",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 28 Premonition.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 61.81
+    },
+    {
+        "id": 1029,
+        "name": "Danger Mystery",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 29 Danger Mystery.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 18.47
+    },
+    {
+        "id": 1030,
+        "name": "Undyne",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 30 Undyne.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 45.95
+    },
+    {
+        "id": 1031,
+        "name": "Waterfall",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 31 Waterfall.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 126.9
+    },
+    {
+        "id": 1032,
+        "name": "Run!",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 32 Run!.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 26.91
+    },
+    {
+        "id": 1033,
+        "name": "Quiet Water",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 33 Quiet Water.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 32.03
+    },
+    {
+        "id": 1034,
+        "name": "Memory",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 34 Memory.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 75.05
+    },
+    {
+        "id": 1035,
+        "name": "Bird That Carries You Over A Disproportionately Small Gap",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 35 Bird That Carries You Over A Disproportionately Small Gap.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 25.13
+    },
+    {
+        "id": 1036,
+        "name": "Dummy!",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 36 Dummy!.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 145.95
+    },
+    {
+        "id": 1037,
+        "name": "Pathetic House",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 37 Pathetic House.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 38.82
+    },
+    {
+        "id": 1038,
+        "name": "Spooktune",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 38 Spooktune.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 23.64
+    },
+    {
+        "id": 1039,
+        "name": "Spookwave",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 39 Spookwave.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 25.13
+    },
+    {
+        "id": 1040,
+        "name": "Ghouliday",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 40 Ghouliday.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 12.88
+    },
+    {
+        "id": 1041,
+        "name": "Chill",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 41 Chill.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 56.32
+    },
+    {
+        "id": 1042,
+        "name": "Thundersnail",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 42 Thundersnail.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 42.42
+    },
+    {
+        "id": 1043,
+        "name": "Temmie Village",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 43 Temmie Village.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 57.89
+    },
+    {
+        "id": 1044,
+        "name": "Tem Shop",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 44 Tem Shop.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 45.27
+    },
+    {
+        "id": 1045,
+        "name": "NGAHHH!!",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 45 NGAHHH!!.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 82.6
+    },
+    {
+        "id": 1046,
+        "name": "Spear of Justice",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 46 Spear of Justice.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 115.49
+    },
+    {
+        "id": 1047,
+        "name": "Ooo",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 47 Ooo.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 14.18
+    },
+    {
+        "id": 1048,
+        "name": "Alphys",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 48 Alphys.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 85.29
+    },
+    {
+        "id": 1049,
+        "name": "It's Showtime!",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 49 It's Showtime!.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 46.16
+    },
+    {
+        "id": 1050,
+        "name": "Metal Crusher",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 50 Metal Crusher.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 63.22
+    },
+    {
+        "id": 1051,
+        "name": "Another Medium",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 51 Another Medium.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 142.18
+    },
+    {
+        "id": 1052,
+        "name": "Uwa!! So HEATS!!\u266b",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 52 Uwa!! So HEATS!!\u266b.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 34.01
+    },
+    {
+        "id": 1053,
+        "name": "Stronger Monsters",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 53 Stronger Monsters.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 63.16
+    },
+    {
+        "id": 1054,
+        "name": "Hotel",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 54 Hotel.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 87.77
+    },
+    {
+        "id": 1055,
+        "name": "Can You Really Call This A Hotel, I Didn't Receive A Mint On My Pillow Or Anything",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 55 Can You Really Call This A Hotel, I Didn't Receive A Mint On My Pillow Or Anything.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 61.47
+    },
+    {
+        "id": 1056,
+        "name": "Confession",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 56 Confession.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 42.11
+    },
+    {
+        "id": 1057,
+        "name": "Live Report",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 57 Live Report.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 17.79
+    },
+    {
+        "id": 1058,
+        "name": "Death Report",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 58 Death Report.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 47.15
+    },
+    {
+        "id": 1059,
+        "name": "Spider Dance",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 59 Spider Dance.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 106.48
+    },
+    {
+        "id": 1060,
+        "name": "Wrong Enemy !-",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 60 Wrong Enemy !-.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 58.44
+    },
+    {
+        "id": 1061,
+        "name": "Oh! One True Love",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 61 Oh! One True Love.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 84.04
+    },
+    {
+        "id": 1062,
+        "name": "Oh! Dungeon",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 62 Oh! Dungeon.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 32.89
+    },
+    {
+        "id": 1063,
+        "name": "It's Raining Somewhere Else",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 63 It's Raining Somewhere Else.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 170.34
+    },
+    {
+        "id": 1064,
+        "name": "CORE Approach",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 64 CORE Approach.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 12.09
+    },
+    {
+        "id": 1065,
+        "name": "CORE",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 65 CORE.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 166.43
+    },
+    {
+        "id": 1066,
+        "name": "Last Episode!",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 66 Last Episode!.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 7.65
+    },
+    {
+        "id": 1067,
+        "name": "Oh My...",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 67 Oh My....mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 14.52
+    },
+    {
+        "id": 1068,
+        "name": "Death by Glamour",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 68 Death by Glamour.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 134.64
+    },
+    {
+        "id": 1069,
+        "name": "For the Fans",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 69 For the Fans.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 107.28
+    },
+    {
+        "id": 1070,
+        "name": "Long Elevator",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 70 Long Elevator.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 20.06
+    },
+    {
+        "id": 1071,
+        "name": "Undertale",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 71 Undertale.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 381.57
+    },
+    {
+        "id": 1072,
+        "name": "Song That Might Play When You Fight Sans",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 72 Song That Might Play When You Fight Sans.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 62.04
+    },
+    {
+        "id": 1073,
+        "name": "The Choice",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 73 The Choice.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 132.57
+    },
+    {
+        "id": 1074,
+        "name": "Small Shock",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 74 Small Shock.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 14.16
+    },
+    {
+        "id": 1075,
+        "name": "Barrier",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 75 Barrier.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 31.19
+    },
+    {
+        "id": 1076,
+        "name": "Bergentr\u00fcckung",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 76 Bergentr\u00fcckung.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 21.26
+    },
+    {
+        "id": 1077,
+        "name": "ASGORE",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 77 ASGORE.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 156.03
+    },
+    {
+        "id": 1078,
+        "name": "You Idiot",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 78 You Idiot.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 34.59
+    },
+    {
+        "id": 1079,
+        "name": "Your Best Nightmare",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 79 Your Best Nightmare.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 240.04
+    },
+    {
+        "id": 1080,
+        "name": "Finale",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 80 Finale.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 112.46
+    },
+    {
+        "id": 1081,
+        "name": "An Ending",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 81 An Ending.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 208.85
+    },
+    {
+        "id": 1082,
+        "name": "She's Playing Piano",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 82 She's Playing Piano.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 18.89
+    },
+    {
+        "id": 1083,
+        "name": "Here We Are",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 83 Here We Are.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 126.22
+    },
+    {
+        "id": 1084,
+        "name": "Amalgam",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 84 Amalgam.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 80.04
+    },
+    {
+        "id": 1085,
+        "name": "Fallen Down (Reprise)",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 85 Fallen Down (Reprise).mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 150.6
+    },
+    {
+        "id": 1086,
+        "name": "Don't Give Up",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 86 Don't Give Up.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 122.04
+    },
+    {
+        "id": 1087,
+        "name": "Hopes and Dreams",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 87 Hopes and Dreams.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 181.32
+    },
+    {
+        "id": 1088,
+        "name": "Burn in Despair!",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 88 Burn in Despair!.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 21.37
+    },
+    {
+        "id": 1089,
+        "name": "SAVE the World",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 89 SAVE the World.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 113.37
+    },
+    {
+        "id": 1090,
+        "name": "His Theme",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 90 His Theme.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 125.36
+    },
+    {
+        "id": 1091,
+        "name": "Final Power",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 91 Final Power.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 18.94
+    },
+    {
+        "id": 1092,
+        "name": "Reunited",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 92 Reunited.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 284.11
+    },
+    {
+        "id": 1093,
+        "name": "Menu (Full)",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 93 Menu (Full).mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 32.03
+    },
+    {
+        "id": 1094,
+        "name": "Respite",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 94 Respite.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 114.05
+    },
+    {
+        "id": 1095,
+        "name": "Bring It In, Guys!",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 95 Bring It In, Guys!.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 252.21
+    },
+    {
+        "id": 1096,
+        "name": "Last Goodbye",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 96 Last Goodbye.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 135.24
+    },
+    {
+        "id": 1097,
+        "name": "But the Earth Refused to Die",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 97 But the Earth Refused to Die.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 34.32
+    },
+    {
+        "id": 1098,
+        "name": "Battle Against a True Hero",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 98 Battle Against a True Hero.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 156.84
+    },
+    {
+        "id": 1099,
+        "name": "Power of -NEO-",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 99 Power of -NEO-.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 30.67
+    },
+    {
+        "id": 1100,
+        "name": "MEGALOVANIA",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 100 MEGALOVANIA.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 156.03
+    },
+    {
+        "id": 1101,
+        "name": "Good Night",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 101 Good Night.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 31.01
+    }
+];
+
+window.utSongList = utSongList;

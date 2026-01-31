@@ -235,6 +235,25 @@ body {
     align-items: center;
 }
 
+.game-toggle {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.game-btn {
+    padding: 8px 16px;
+    font-size: 0.8em;
+    border: 2px solid #333;
+    color: #666;
+    background: #000;
+}
+
+.game-btn.active {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+}
+
 h1 {
     font-size: 2em;
     font-weight: 700;

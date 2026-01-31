@@ -1,6 +1,6 @@
 # drSongRanker
 
-Elo-based ranking for Deltarune music. It works. Don't touch the code. I'm already handling enough egress issues.
+Elo-based ranking for Deltarune and Undertale music. It works. Don't touch the code.
 
 ## Features
 

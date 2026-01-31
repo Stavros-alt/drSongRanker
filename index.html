@@ -39,7 +39,11 @@
     </div>
     <div class="main-container">
         <div class="arena-container">
-            <h1>Which song is better?</h1>
+            <div class="game-toggle">
+                <button id="dr-toggle" class="game-btn active">Deltarune</button>
+                <button id="ut-toggle" class="game-btn">Undertale</button>
+            </div>
+            <h1 id="main-title">Which song is better?</h1>
             <div class="arena">
                 <div id="songA-card" class="song-card">
                     <h2 id="songA-name"></h2>
@@ -365,6 +369,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="app_song_data.js"></script>
+    <script src="ut_song_data.js"></script>
     <script src="cursor.js"></script>
     <script src="app.js"></script>
     <script>
