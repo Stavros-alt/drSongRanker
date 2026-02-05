@@ -868,29 +868,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+    // recording votes. joy.
     async function recordCommunityVote(winnerId, loserId) {
-        if (state.currentGame !== 'deltarune') return; // no ut backend yet. i'm not doing it.
+        const rpcName = state.currentGame === 'deltarune' ? 'handle_vote' : 'handle_ut_vote';
         try {
-            const { error } = await supabaseClient.rpc('handle_vote', {
+            const { error } = await supabaseClient.rpc(rpcName, {
                 winner_id: winnerId,
                 loser_id: loserId
             });
             if (error) throw error;
         } catch (error) {
-            console.error("Error recording community vote:", error.message);
+            console.error(`Error recording community vote for ${state.currentGame}:`, error.message);
         }
     }
 
 
 
+    // fetching stats because numbers are fun.
     async function fetchAndDisplayAllTimeStats() {
-        if (state.currentGame !== 'deltarune') {
-            if (voteStat) voteStat.textContent = "";
-            return;
-        }
+        const rpcName = state.currentGame === 'deltarune' ? 'get_total_votes' : 'get_total_ut_votes';
         try {
             const { data: voteData, error: voteError } = await supabaseClient
-                .rpc('get_total_votes');
+                .rpc(rpcName);
 
             if (voteError) {
                 throw voteError;
@@ -907,15 +906,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let cachedCommunitySongs = [];
 
+    // displaying community rankings. finally.
     async function displayCommunityRankings() {
         rankingList.innerHTML = '<li>Loading community data...</li>';
-        if (state.currentGame !== 'deltarune') {
-            rankingList.innerHTML = '<li>Community rankings only available for Deltarune. Go bug the dev.</li>';
-            return;
-        }
+        const tableName = state.currentGame === 'deltarune' ? 'songs' : 'ut_songs';
         try {
             const { data, error } = await supabaseClient
-                .from('songs')
+                .from(tableName)
                 .select('name, id, rating')
                 .order('rating', { ascending: false });
 
