@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const drToggle = document.getElementById('dr-toggle');
     const utToggle = document.getElementById('ut-toggle');
     const showRatingsToggle = document.getElementById('show-ratings-toggle');
+    const preventDuplicatesToggle = document.getElementById('prevent-duplicates-toggle');
     const rankingList = document.getElementById('ranking-list');
     const arena = document.querySelector('.arena');
     const songACard = document.getElementById('songA-card');
@@ -179,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return (yiq >= 128) ? 'black' : 'white';
     }
 
-    let globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{"currentGame": "deltarune", "showRatings": false}');
+    let globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{"currentGame": "deltarune", "showRatings": false, "preventDuplicates": false}');
 
     let state = {
         currentGame: globalState.currentGame,
@@ -191,7 +192,9 @@ document.addEventListener('DOMContentLoaded', () => {
         customLists: {}, // { "Cool List": [1, 2, 5], ... }
         currentCustomListName: null, // which one are we editing right now
         boostedSongId: null, // i guess we're rigging the election now.
-        showRatings: globalState.showRatings // nobody wants to see the numbers apparently.
+        showRatings: globalState.showRatings, // nobody wants to see the numbers apparently.
+        preventDuplicates: globalState.preventDuplicates || false,
+        recentMatches: [] // keeping track of what we just saw.
     };
 
     function saveState() {
@@ -201,7 +204,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // save global stuff too
         localStorage.setItem('drSongRankerGlobalState', JSON.stringify({
             currentGame: state.currentGame,
-            showRatings: state.showRatings
+            showRatings: state.showRatings,
+            preventDuplicates: state.preventDuplicates
         }));
     }
 
@@ -386,6 +390,16 @@ document.addEventListener('DOMContentLoaded', () => {
             saveState();
             if (myRankingBtn.classList.contains('active')) displayRankings();
             else displayCommunityRankings();
+        });
+    }
+
+    if (preventDuplicatesToggle) {
+        preventDuplicatesToggle.checked = state.preventDuplicates;
+        preventDuplicatesToggle.addEventListener('change', (e) => {
+            state.preventDuplicates = e.target.checked;
+            // fine, clear the memory. i don't care.
+            if (!state.preventDuplicates) state.recentMatches = [];
+            saveState();
         });
     }
 
@@ -632,55 +646,66 @@ document.addEventListener('DOMContentLoaded', () => {
         chooseBBtn.disabled = false;
         tieBtn.disabled = false;
 
-        // picking two songs. don't ask about the distribution.
-        const roll = Math.random();
-        let song1;
+        let song1, song2;
+        let attempts = 0;
+        const maxAttempts = 15; // if we can't find a new pair in 15 tries, just give up. i'm done.
 
-        if (availableSongs.length < 2) {
-            // well this is awkward.
-            songAName.textContent = "Not enough songs";
-            songBName.textContent = "in this list.";
-            return;
+        do {
+            // picking two songs. don't ask about the distribution.
+            const roll = Math.random();
+
+            // is someone cheating? i mean, using the boost feature?
+            let boostedSong = null;
+            if (state.boostedSongId) {
+                boostedSong = availableSongs.find(s => s.id === state.boostedSongId);
+            }
+
+            if (boostedSong && Math.random() < 0.25) {
+                song1 = boostedSong;
+                state.boostedSongId = null; // finally done with that one.
+                if (myRankingBtn.classList.contains('active')) displayRankings();
+                else displayCommunityRankings();
+            } else if (roll < 0.6) {
+                // 60% for underrated
+                const sortedByVotes = [...availableSongs].sort((a, b) => a.comparisons - b.comparisons);
+                const uncertaintyPoolSize = Math.max(5, Math.floor(availableSongs.length * 0.25));
+                const uncertaintyPool = sortedByVotes.slice(0, uncertaintyPoolSize);
+                song1 = uncertaintyPool[Math.floor(Math.random() * uncertaintyPool.length)];
+            } else if (roll < 0.9) {
+                // 30% for top rated
+                const sortedByRating = [...availableSongs].sort((a, b) => b.rating - a.rating);
+                const topPoolSize = Math.min(20, availableSongs.length);
+                const topPool = sortedByRating.slice(0, topPoolSize);
+                song1 = topPool[Math.floor(Math.random() * topPool.length)];
+            } else {
+                // 10% pure chaos
+                song1 = availableSongs[Math.floor(Math.random() * availableSongs.length)];
+            }
+
+
+            // next victim.
+            const sortedOpponents = [...availableSongs]
+                .filter(s => s.id !== song1.id)
+                .sort((a, b) => Math.abs(a.rating - song1.rating) - Math.abs(b.rating - song1.rating));
+
+            // neighbors. whatever.
+            const neighborPoolSize = 10;
+            const neighborPool = sortedOpponents.slice(0, neighborPoolSize);
+            song2 = neighborPool[Math.floor(Math.random() * neighborPool.length)];
+
+            if (!state.preventDuplicates || availableSongs.length < 5) break;
+
+            const pairKey = [song1.id, song2.id].sort((a, b) => a - b).join('-');
+            if (!state.recentMatches.includes(pairKey)) break;
+            attempts++;
+        } while (attempts < maxAttempts);
+
+        if (state.preventDuplicates && song1 && song2) {
+            const pairKey = [song1.id, song2.id].sort((a, b) => a - b).join('-');
+            state.recentMatches.push(pairKey);
+            // keep it short. i'm not paying for your ram.
+            if (state.recentMatches.length > 20) state.recentMatches.shift();
         }
-
-        // is someone cheating? i mean, using the boost feature?
-        let boostedSong = null;
-        if (state.boostedSongId) {
-            boostedSong = availableSongs.find(s => s.id === state.boostedSongId);
-        }
-
-        if (boostedSong && Math.random() < 0.25) {
-            song1 = boostedSong;
-            state.boostedSongId = null; // finally done with that one.
-            if (myRankingBtn.classList.contains('active')) displayRankings();
-            else displayCommunityRankings();
-        } else if (roll < 0.6) {
-            // 60% for underrated
-            const sortedByVotes = [...availableSongs].sort((a, b) => a.comparisons - b.comparisons);
-            const uncertaintyPoolSize = Math.max(5, Math.floor(availableSongs.length * 0.25));
-            const uncertaintyPool = sortedByVotes.slice(0, uncertaintyPoolSize);
-            song1 = uncertaintyPool[Math.floor(Math.random() * uncertaintyPool.length)];
-        } else if (roll < 0.9) {
-            // 30% for top rated
-            const sortedByRating = [...availableSongs].sort((a, b) => b.rating - a.rating);
-            const topPoolSize = Math.min(20, availableSongs.length);
-            const topPool = sortedByRating.slice(0, topPoolSize);
-            song1 = topPool[Math.floor(Math.random() * topPool.length)];
-        } else {
-            // 10% pure chaos
-            song1 = availableSongs[Math.floor(Math.random() * availableSongs.length)];
-        }
-
-
-        // next victim.
-        const sortedOpponents = [...availableSongs]
-            .filter(s => s.id !== song1.id)
-            .sort((a, b) => Math.abs(a.rating - song1.rating) - Math.abs(b.rating - song1.rating));
-
-        // neighbors. whatever.
-        const neighborPoolSize = 10;
-        const neighborPool = sortedOpponents.slice(0, neighborPoolSize);
-        const song2 = neighborPool[Math.floor(Math.random() * neighborPool.length)];
 
 
         currentSongA = song1;
