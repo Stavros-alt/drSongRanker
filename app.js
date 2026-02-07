@@ -58,6 +58,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const exportTextBtn = document.getElementById('export-text-btn');
     const rankingSearch = document.getElementById('ranking-search');
     const vsText = document.getElementById('vs-text'); // i guess we need this now.
+    const historyModal = document.getElementById('history-modal');
+    const historySongName = document.getElementById('history-song-name');
+    const historyList = document.getElementById('history-list');
+    const closeHistoryBtn = document.getElementById('close-history-btn');
 
     const settingsBtn = document.getElementById('settings-btn');
     const settingsModal = document.getElementById('settings-modal');
@@ -260,50 +264,62 @@ document.addEventListener('DOMContentLoaded', () => {
             state.customLists = parsed.customLists || {};
             state.boostedSongId = parsed.boostedSongId || null;
 
-            // loading individual states for syncing. i hate state.
             const drSaved = localStorage.getItem('drSongRankerState');
             const utSaved = localStorage.getItem('utSongRankerState');
+            const combinedSaved = localStorage.getItem('combinedSongRankerState');
             const drParsed = drSaved ? JSON.parse(drSaved) : null;
             const utParsed = utSaved ? JSON.parse(utSaved) : null;
+            const combinedParsed = combinedSaved ? JSON.parse(combinedSaved) : null;
 
-            // merging ratings so i don't have to rank the same song twice.
             state.songs = sourceList.map(baseSong => {
-                // checking existing state.
-                let savedSong = parsed.songs ? parsed.songs.find(s => s.id === baseSong.id) : null;
+                // we want the "freshest" data for this song, wherever it is.
+                const possibleStates = [
+                    parsed && parsed.songs ? parsed.songs.find(s => s.id === baseSong.id) : null,
+                    drParsed && drParsed.songs ? drParsed.songs.find(s => s.id === baseSong.id) : null,
+                    utParsed && utParsed.songs ? utParsed.songs.find(s => s.id === baseSong.id) : null,
+                    combinedParsed && combinedParsed.songs ? combinedParsed.songs.find(s => s.id === baseSong.id) : null
+                ].filter(s => s !== null);
 
-                // in combined mode we pull "fresh" ratings if individual ones are better.
-                if (state.currentGame === 'combined') {
-                    const originalParsed = baseSong.id < 1000 ? drParsed : utParsed;
-                    if (originalParsed && originalParsed.songs) {
-                        const originalSong = originalParsed.songs.find(s => s.id === baseSong.id);
-                        // if it hasn't been ranked yet or individual is fresher. i'm a genius.
-                        if (originalSong && (!savedSong || originalSong.comparisons > savedSong.comparisons)) {
-                            savedSong = originalSong;
-                        }
-                    }
-                }
+                // sort by comparison count, descending. i'm a genius.
+                const freshest = possibleStates.sort((a, b) => (b.comparisons || 0) - (a.comparisons || 0))[0];
 
-                if (savedSong) {
-                    return { ...baseSong, rating: savedSong.rating, comparisons: savedSong.comparisons };
+                if (freshest) {
+                    return {
+                        ...baseSong,
+                        rating: freshest.rating,
+                        comparisons: freshest.comparisons,
+                        matchHistory: freshest.matchHistory || []
+                    };
                 }
-                return { ...baseSong };
+                return { ...baseSong, matchHistory: [] };
             });
         } else {
-            // fresh start. pulling from game states.
+            // fresh start. still pulling from whatever might exist.
             const drSaved = localStorage.getItem('drSongRankerState');
             const utSaved = localStorage.getItem('utSongRankerState');
+            const combinedSaved = localStorage.getItem('combinedSongRankerState');
             const drParsed = drSaved ? JSON.parse(drSaved) : null;
             const utParsed = utSaved ? JSON.parse(utSaved) : null;
+            const combinedParsed = combinedSaved ? JSON.parse(combinedSaved) : null;
 
             state.songs = sourceList.map(baseSong => {
-                const originalParsed = baseSong.id < 1000 ? drParsed : utParsed;
-                if (originalParsed && originalParsed.songs) {
-                    const originalSong = originalParsed.songs.find(s => s.id === baseSong.id);
-                    if (originalSong) {
-                        return { ...baseSong, rating: originalSong.rating, comparisons: originalSong.comparisons };
-                    }
+                const possibleStates = [
+                    drParsed && drParsed.songs ? drParsed.songs.find(s => s.id === baseSong.id) : null,
+                    utParsed && utParsed.songs ? utParsed.songs.find(s => s.id === baseSong.id) : null,
+                    combinedParsed && combinedParsed.songs ? combinedParsed.songs.find(s => s.id === baseSong.id) : null
+                ].filter(s => s !== null);
+
+                const freshest = possibleStates.sort((a, b) => (b.comparisons || 0) - (a.comparisons || 0))[0];
+
+                if (freshest) {
+                    return {
+                        ...baseSong,
+                        rating: freshest.rating,
+                        comparisons: freshest.comparisons,
+                        matchHistory: freshest.matchHistory || []
+                    };
                 }
-                return { ...baseSong };
+                return { ...baseSong, matchHistory: [] };
             });
             state.comparisons = 0;
             state.history = null;
@@ -828,6 +844,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const winnerSong = (winner === 'A') ? currentSongA : currentSongB;
             const loserSong = (winner === 'A') ? currentSongB : currentSongA;
 
+            recordMatchHistory(winnerSong, loserSong);
+
             const { newWinnerRating, newLoserRating } = updateElo(
                 winnerSong.rating,
                 loserSong.rating,
@@ -860,10 +878,37 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             }
+        } else {
+            recordMatchHistory(null, null, true);
         }
 
         updateApp();
         saveState();
+    }
+
+    function recordMatchHistory(winner, loser, isTie = false) {
+        const timestamp = Date.now();
+        const resultA = isTie ? 'tie' : (winner === currentSongA ? 'win' : 'loss');
+        const resultB = isTie ? 'tie' : (winner === currentSongB ? 'win' : 'loss');
+
+        if (!currentSongA.matchHistory) currentSongA.matchHistory = [];
+        if (!currentSongB.matchHistory) currentSongB.matchHistory = [];
+
+        currentSongA.matchHistory.unshift({
+            opponent: currentSongB.name,
+            result: resultA,
+            time: timestamp
+        });
+
+        currentSongB.matchHistory.unshift({
+            opponent: currentSongA.name,
+            result: resultB,
+            time: timestamp
+        });
+
+        // cap history to 100 entries. i'm not a database.
+        if (currentSongA.matchHistory.length > 100) currentSongA.matchHistory.pop();
+        if (currentSongB.matchHistory.length > 100) currentSongB.matchHistory.pop();
     }
 
     function stopAllMusic() {
@@ -971,12 +1016,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // fetching stats because numbers are fun.
     async function fetchAndDisplayAllTimeStats() {
-        if (state.currentGame === 'combined') {
-            if (voteStat) voteStat.textContent = "Total Votes: (Mixed Pool)";
-            return;
-        }
-        const rpcName = state.currentGame === 'deltarune' ? 'get_total_votes' : 'get_total_ut_votes';
         try {
+            if (state.currentGame === 'combined') {
+                const [drRes, utRes] = await Promise.all([
+                    supabaseClient.rpc('get_total_votes'),
+                    supabaseClient.rpc('get_total_ut_votes')
+                ]);
+
+                if (drRes.error) throw drRes.error;
+                if (utRes.error) throw utRes.error;
+
+                const total = (drRes.data || 0) + (utRes.data || 0);
+                if (voteStat) voteStat.textContent = `Total Votes: ${total}`;
+                return;
+            }
+
+            const rpcName = state.currentGame === 'deltarune' ? 'get_total_votes' : 'get_total_ut_votes';
             const { data: voteData, error: voteError } = await supabaseClient
                 .rpc(rpcName);
 
@@ -1104,6 +1159,16 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             li.appendChild(boostBtn);
 
+            const historyBtn = document.createElement('button');
+            historyBtn.className = 'history-rank-btn';
+            historyBtn.innerHTML = '📜';
+            historyBtn.title = "View match history";
+            historyBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showMatchHistory(song);
+            });
+            li.appendChild(historyBtn);
+
             rankingList.appendChild(li);
         });
     }
@@ -1203,6 +1268,54 @@ document.addEventListener('DOMContentLoaded', () => {
         else displayCommunityRankings();
     }
 
+    function showMatchHistory(song) {
+        historySongName.textContent = `HISTORY: ${song.name}`;
+        historyList.innerHTML = '';
+
+        const history = song.matchHistory || [];
+        if (history.length === 0) {
+            historyList.innerHTML = '<p style="color: #666; text-align: center;">No matches recorded yet.</p>';
+        } else {
+            history.forEach(match => {
+                const item = document.createElement('div');
+                item.style.padding = '10px';
+                item.style.borderBottom = '1px solid #222';
+                item.style.display = 'flex';
+                item.style.justifyContent = 'space-between';
+                item.style.alignItems = 'center';
+
+                const resultColor = match.result === 'win' ? '#00ff9d' : (match.result === 'loss' ? '#ff4444' : '#888');
+                const resultText = match.result.toUpperCase();
+
+                const date = new Date(match.time).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+                item.innerHTML = `
+                    <div style="flex: 1;">
+                        <span style="color: ${resultColor}; font-weight: bold;">[${resultText}]</span>
+                        <span> vs ${match.opponent}</span>
+                    </div>
+                    <small style="color: #444; font-size: 0.7em;">${date}</small>
+                `;
+                historyList.appendChild(item);
+            });
+        }
+
+        historyModal.style.display = 'flex';
+    }
+
+    if (closeHistoryBtn) {
+        closeHistoryBtn.addEventListener('click', () => {
+            historyModal.style.display = 'none';
+        });
+    }
+
+    // close on click outside.
+    window.addEventListener('click', (e) => {
+        if (e.target === historyModal) {
+            historyModal.style.display = 'none';
+        }
+    });
+
 
     function initializeNewState() {
         const source = window.songList || songList || [];
@@ -1236,6 +1349,10 @@ document.addEventListener('DOMContentLoaded', () => {
             // go back to the scene of the crime.
             currentSongA = songA;
             currentSongB = songB;
+
+            // cleanup history. i'm not leaving tracks.
+            if (songA.matchHistory) songA.matchHistory.shift();
+            if (songB.matchHistory) songB.matchHistory.shift();
         }
 
         state.history = null; // one time use. don't get greedy.
