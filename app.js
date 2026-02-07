@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const mainTitle = document.getElementById('main-title');
     const mainFilterSelect = document.getElementById('main-filter-select');
     const drToggle = document.getElementById('dr-toggle');
+    const combinedToggle = document.getElementById('combined-toggle'); // finally.
     const utToggle = document.getElementById('ut-toggle');
     const showRatingsToggle = document.getElementById('show-ratings-toggle');
     const preventDuplicatesToggle = document.getElementById('prevent-duplicates-toggle');
@@ -56,6 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const exportZipBtn = document.getElementById('export-zip-btn');
     const exportTextBtn = document.getElementById('export-text-btn');
     const rankingSearch = document.getElementById('ranking-search');
+    const vsText = document.getElementById('vs-text'); // i guess we need this now.
 
     const settingsBtn = document.getElementById('settings-btn');
     const settingsModal = document.getElementById('settings-modal');
@@ -96,6 +98,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentChapterFilter = 'all';
     let votesSinceLastRefresh = 0; // stop hammering the api
     let currentActiveAudio = null; // tracking what's actually making noise.
+    let vsClickCount = 0;
+    let vsClickTimer = null;
 
     // theme stuff. i don't care if it's pink or green.
     const accentColors = [
@@ -117,6 +121,28 @@ document.addEventListener('DOMContentLoaded', () => {
     loadTheme();
 
     // settings ui stuff. i hate dom manipulation.
+
+    if (vsText) {
+        vsText.addEventListener('click', () => {
+            vsClickCount++;
+            clearTimeout(vsClickTimer);
+            vsClickTimer = setTimeout(() => {
+                vsClickCount = 0;
+            }, 500);
+
+            if (vsClickCount === 3) {
+                if (!globalState.combinedDiscovered) {
+                    globalState.combinedDiscovered = true;
+                    saveState();
+                }
+                // the button does the switching now.
+                if (combinedToggle) combinedToggle.style.display = 'inline-block';
+
+                // auto-switch if we just discovered it? nah, let them click.
+                vsClickCount = 0;
+            }
+        });
+    }
 
     settingsBtn.addEventListener('click', (e) => {
         if (settingsModal.style.display === 'flex') {
@@ -180,7 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return (yiq >= 128) ? 'black' : 'white';
     }
 
-    let globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{"currentGame": "deltarune", "showRatings": false, "preventDuplicates": false}');
+    let globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{"currentGame": "deltarune", "showRatings": false, "preventDuplicates": false, "combinedDiscovered": false}');
 
     let state = {
         currentGame: globalState.currentGame,
@@ -198,24 +224,29 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     function saveState() {
-        const key = state.currentGame === 'deltarune' ? 'drSongRankerState' : 'utSongRankerState';
+        const key = state.currentGame === 'combined' ? 'combinedSongRankerState' : (state.currentGame === 'deltarune' ? 'drSongRankerState' : 'utSongRankerState');
         localStorage.setItem(key, JSON.stringify(state));
 
-        // save global stuff too
+        // why am i saving this twice? whatever.
         localStorage.setItem('drSongRankerGlobalState', JSON.stringify({
             currentGame: state.currentGame,
             showRatings: state.showRatings,
-            preventDuplicates: state.preventDuplicates
+            preventDuplicates: state.preventDuplicates,
+            combinedDiscovered: globalState.combinedDiscovered
         }));
     }
 
     function loadState() {
-        const key = state.currentGame === 'deltarune' ? 'drSongRankerState' : 'utSongRankerState';
+        const key = state.currentGame === 'combined' ? 'combinedSongRankerState' : (state.currentGame === 'deltarune' ? 'drSongRankerState' : 'utSongRankerState');
         const saved = localStorage.getItem(key);
 
         // choose the source list based on game. i hate this.
         let sourceList = [];
-        if (state.currentGame === 'deltarune') {
+        if (state.currentGame === 'combined') {
+            const drList = (typeof songList !== 'undefined') ? songList : (window.songList || []);
+            const utList = (typeof utSongList !== 'undefined') ? utSongList : (window.utSongList || []);
+            sourceList = [...drList, ...utList];
+        } else if (state.currentGame === 'deltarune') {
             sourceList = (typeof songList !== 'undefined') ? songList : (window.songList || []);
         } else {
             sourceList = (typeof utSongList !== 'undefined') ? utSongList : (window.utSongList || []);
@@ -229,17 +260,51 @@ document.addEventListener('DOMContentLoaded', () => {
             state.customLists = parsed.customLists || {};
             state.boostedSongId = parsed.boostedSongId || null;
 
-            // merge songs to keep ratings but add new files/metadata
+            // loading individual states for syncing. i hate state.
+            const drSaved = localStorage.getItem('drSongRankerState');
+            const utSaved = localStorage.getItem('utSongRankerState');
+            const drParsed = drSaved ? JSON.parse(drSaved) : null;
+            const utParsed = utSaved ? JSON.parse(utSaved) : null;
+
+            // merging ratings so i don't have to rank the same song twice.
             state.songs = sourceList.map(baseSong => {
-                const savedSong = parsed.songs ? parsed.songs.find(s => s.id === baseSong.id) : null;
+                // checking existing state.
+                let savedSong = parsed.songs ? parsed.songs.find(s => s.id === baseSong.id) : null;
+
+                // in combined mode we pull "fresh" ratings if individual ones are better.
+                if (state.currentGame === 'combined') {
+                    const originalParsed = baseSong.id < 1000 ? drParsed : utParsed;
+                    if (originalParsed && originalParsed.songs) {
+                        const originalSong = originalParsed.songs.find(s => s.id === baseSong.id);
+                        // if it hasn't been ranked yet or individual is fresher. i'm a genius.
+                        if (originalSong && (!savedSong || originalSong.comparisons > savedSong.comparisons)) {
+                            savedSong = originalSong;
+                        }
+                    }
+                }
+
                 if (savedSong) {
                     return { ...baseSong, rating: savedSong.rating, comparisons: savedSong.comparisons };
                 }
                 return { ...baseSong };
             });
         } else {
-            // fresh start
-            state.songs = sourceList.map(s => ({ ...s }));
+            // fresh start. pulling from game states.
+            const drSaved = localStorage.getItem('drSongRankerState');
+            const utSaved = localStorage.getItem('utSongRankerState');
+            const drParsed = drSaved ? JSON.parse(drSaved) : null;
+            const utParsed = utSaved ? JSON.parse(utSaved) : null;
+
+            state.songs = sourceList.map(baseSong => {
+                const originalParsed = baseSong.id < 1000 ? drParsed : utParsed;
+                if (originalParsed && originalParsed.songs) {
+                    const originalSong = originalParsed.songs.find(s => s.id === baseSong.id);
+                    if (originalSong) {
+                        return { ...baseSong, rating: originalSong.rating, comparisons: originalSong.comparisons };
+                    }
+                }
+                return { ...baseSong };
+            });
             state.comparisons = 0;
             state.history = null;
             state.activeRankerList = 'all';
@@ -249,10 +314,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         populateCustomDropdown();
 
-        // validation: if active list is bogus, reset to all.
+        // validation. because users are untrustworthy.
         const drValid = ['all', '1', '2', '3', '4', 'hidden', 'duration_30', 'duration_20', 'duration_10'];
         const utValid = ['all', '1', '2', '3', '4', '5', 'hidden', 'duration_30', 'duration_20', 'duration_10'];
-        const validLists = state.currentGame === 'deltarune' ? drValid : utValid;
+        let validLists = state.currentGame === 'deltarune' ? drValid : utValid;
+        if (state.currentGame === 'combined') {
+            validLists = Array.from(new Set([...drValid, ...utValid, 'combined_all']));
+        }
 
         if (!validLists.includes(state.activeRankerList) && !state.customLists[state.activeRankerList]) {
             state.activeRankerList = 'all';
@@ -269,12 +337,23 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateGameUI() {
         if (state.currentGame === 'deltarune') {
             if (drToggle) drToggle.classList.add('active');
+            if (combinedToggle) combinedToggle.classList.remove('active');
             if (utToggle) utToggle.classList.remove('active');
             if (mainTitle) mainTitle.textContent = "Which Deltarune song is better?";
+        } else if (state.currentGame === 'combined') {
+            if (drToggle) drToggle.classList.remove('active');
+            if (combinedToggle) combinedToggle.classList.add('active');
+            if (utToggle) utToggle.classList.remove('active');
+            if (mainTitle) mainTitle.textContent = "Deltarune vs Undertale: Which is better?";
         } else {
             if (drToggle) drToggle.classList.remove('active');
+            if (combinedToggle) combinedToggle.classList.remove('active');
             if (utToggle) utToggle.classList.add('active');
             if (mainTitle) mainTitle.textContent = "Which Undertale song is better?";
+        }
+
+        if (combinedToggle) {
+            combinedToggle.style.display = globalState.combinedDiscovered ? 'inline-block' : 'none';
         }
     }
     const PREVIEW_DURATION = 10000;
@@ -602,7 +681,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function getChaptersForSong(song) {
-        if (state.currentGame === 'deltarune') {
+        if (song.id < 1000) {
             const ch = [];
             if (song.id <= 40) ch.push(1);
             if ((song.id >= 41 && song.id <= 87) || song.id === 38 || song.id === 40) {
@@ -870,7 +949,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // recording votes. joy.
     async function recordCommunityVote(winnerId, loserId) {
-        const rpcName = state.currentGame === 'deltarune' ? 'handle_vote' : 'handle_ut_vote';
+        // mixed votes don't exist in the database. yet.
+        const winnerDeltarune = winnerId < 1000;
+        const loserDeltarune = loserId < 1000;
+
+        if (winnerDeltarune !== loserDeltarune) return;
+
+        const rpcName = winnerDeltarune ? 'handle_vote' : 'handle_ut_vote';
         try {
             const { error } = await supabaseClient.rpc(rpcName, {
                 winner_id: winnerId,
@@ -886,6 +971,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // fetching stats because numbers are fun.
     async function fetchAndDisplayAllTimeStats() {
+        if (state.currentGame === 'combined') {
+            if (voteStat) voteStat.textContent = "Total Votes: (Mixed Pool)";
+            return;
+        }
         const rpcName = state.currentGame === 'deltarune' ? 'get_total_votes' : 'get_total_ut_votes';
         try {
             const { data: voteData, error: voteError } = await supabaseClient
@@ -909,17 +998,31 @@ document.addEventListener('DOMContentLoaded', () => {
     // displaying community rankings. finally.
     async function displayCommunityRankings() {
         rankingList.innerHTML = '<li>Loading community data...</li>';
-        const tableName = state.currentGame === 'deltarune' ? 'songs' : 'ut_songs';
-        try {
-            const { data, error } = await supabaseClient
-                .from(tableName)
-                .select('name, id, rating')
-                .order('rating', { ascending: false });
 
-            if (error) throw error;
+        try {
+            let combinedData = [];
+            if (state.currentGame === 'combined') {
+                const [drRes, utRes] = await Promise.all([
+                    supabaseClient.from('songs').select('name, id, rating').order('rating', { ascending: false }),
+                    supabaseClient.from('ut_songs').select('name, id, rating').order('rating', { ascending: false })
+                ]);
+
+                if (drRes.error) throw drRes.error;
+                if (utRes.error) throw utRes.error;
+
+                combinedData = [...drRes.data, ...utRes.data].sort((a, b) => b.rating - a.rating);
+            } else {
+                const tableName = state.currentGame === 'deltarune' ? 'songs' : 'ut_songs';
+                const { data, error } = await supabaseClient
+                    .from(tableName)
+                    .select('name, id, rating')
+                    .order('rating', { ascending: false });
+                if (error) throw error;
+                combinedData = data;
+            }
 
             // paths. whatever.
-            cachedCommunitySongs = data.map(cSong => {
+            cachedCommunitySongs = combinedData.map(cSong => {
                 const localSong = state.songs.find(s => s.id === cSong.id);
                 return {
                     ...cSong,
@@ -1215,8 +1318,24 @@ document.addEventListener('DOMContentLoaded', () => {
         displayCommunityRankings();
     });
 
+    if (combinedToggle) {
+        combinedToggle.addEventListener('click', () => {
+            if (state.currentGame === 'combined') return;
+            saveState();
+            state.currentGame = 'combined';
+            loadState();
+            saveState();
+            presentNewPair();
+            fetchAndDisplayAllTimeStats();
+            if (myRankingBtn.classList.contains('active')) displayRankings();
+            else displayCommunityRankings();
+        });
+    }
+
     if (mainFilterSelect) {
         mainFilterSelect.addEventListener('change', (e) => {
+            if (e.target.value === 'combined_all') return; // ignored now.
+
             if (e.target.value === 'mix_chapters') {
                 chapterMixModal.style.display = 'flex';
                 // reset checkboxes. start fresh.
@@ -1226,6 +1345,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             currentChapterFilter = e.target.value;
             state.activeRankerList = currentChapterFilter;
+            saveState(); // actually record this.
 
             // Show/Hide Edit Button
             if (editListBtn) {
@@ -1343,6 +1463,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 { val: '4', text: 'Chapter 4' },
                 { val: 'mix_chapters', text: 'Mix Chapters...' }
             );
+        } else if (state.currentGame === 'combined') {
+            // keep it simple. just all songs.
         } else {
             standardOptions.push(
                 { val: '1', text: 'Ruins' },
@@ -1800,8 +1922,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // init app
     loadState();
     if (showRatingsToggle) showRatingsToggle.checked = state.showRatings;
+    if (preventDuplicatesToggle) preventDuplicatesToggle.checked = state.preventDuplicates;
     checkSecretsGlobal();
-    populateCustomDropdown();
+    // populateCustomDropdown is already called inside loadState. 
+    // Just ensure the select value is synced one last time.
+    if (mainFilterSelect) mainFilterSelect.value = state.activeRankerList;
     updateApp();
     // refresh on back button because browsers are annoying.
     window.addEventListener('pageshow', (e) => {

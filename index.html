@@ -41,6 +41,7 @@
         <div class="arena-container">
             <div class="game-toggle">
                 <button id="dr-toggle" class="game-btn active">Deltarune</button>
+                <button id="combined-toggle" class="game-btn" style="display: none;">Combined</button>
                 <button id="ut-toggle" class="game-btn">Undertale</button>
             </div>
             <h1 id="main-title">Which song is better?</h1>
@@ -52,7 +53,7 @@
                         <button class="full-play-btn" data-song="A">Play Full</button>
                     </div>
                 </div>
-                <div class="vs">VS</div>
+                <div class="vs" id="vs-text">VS</div>
                 <div id="songB-card" class="song-card">
                     <h2 id="songB-name"></h2>
                     <div class="card-controls">
@@ -325,7 +326,8 @@
                 <p>Ranker Settings</p>
                 <label
                     style="display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; font-size: 0.9em;">
-                    <input type="checkbox" id="prevent-duplicates-toggle" style="width: 18px; height: 18px; cursor: pointer;">
+                    <input type="checkbox" id="prevent-duplicates-toggle"
+                        style="width: 18px; height: 18px; cursor: pointer;">
                     Prevent Duplicate Questions
                 </label>
             </div>
