@@ -860,6 +860,8 @@ document.addEventListener('DOMContentLoaded', () => {
             loserSong.comparisons++;
             state.comparisons++;
 
+            syncCombinedVote(winnerSong, loserSong);
+
             recordCommunityVote(winnerSong.id, loserSong.id);
 
             // only fetch total votes every 15 personal votes. my egress is crying.
@@ -909,6 +911,55 @@ document.addEventListener('DOMContentLoaded', () => {
         // cap history to 100 entries. i'm not a database.
         if (currentSongA.matchHistory.length > 100) currentSongA.matchHistory.pop();
         if (currentSongB.matchHistory.length > 100) currentSongB.matchHistory.pop();
+    }
+
+    function syncCombinedVote(winnerSong, loserSong) {
+        if (state.currentGame !== 'combined') return;
+
+        // sinking this ship to the other ones.
+        try {
+            const drStr = localStorage.getItem('drSongRankerState');
+            const utStr = localStorage.getItem('utSongRankerState');
+
+            // if they don't exist, we can't update them. tough luck.
+            const drState = drStr ? JSON.parse(drStr) : null;
+            const utState = utStr ? JSON.parse(utStr) : null;
+
+            let drUpdated = false;
+            let utUpdated = false;
+
+            const patch = (targetState, sourceSong) => {
+                if (!targetState || !targetState.songs) return false;
+                const match = targetState.songs.find(s => s.id === sourceSong.id);
+                if (match) {
+                    match.rating = sourceSong.rating;
+                    match.comparisons = sourceSong.comparisons;
+                    match.matchHistory = sourceSong.matchHistory;
+                    return true;
+                }
+                return false;
+            };
+
+            // winner
+            if (winnerSong.id < 1000) { if (patch(drState, winnerSong)) drUpdated = true; }
+            else { if (patch(utState, winnerSong)) utUpdated = true; }
+
+            // loser
+            if (loserSong.id < 1000) { if (patch(drState, loserSong)) drUpdated = true; }
+            else { if (patch(utState, loserSong)) utUpdated = true; }
+
+            // save if we touched anything
+            if (drUpdated && drState) {
+                drState.comparisons = (drState.comparisons || 0) + 1;
+                localStorage.setItem('drSongRankerState', JSON.stringify(drState));
+            }
+            if (utUpdated && utState) {
+                utState.comparisons = (utState.comparisons || 0) + 1;
+                localStorage.setItem('utSongRankerState', JSON.stringify(utState));
+            }
+        } catch (e) {
+            console.error("Sync error. LocalStorage is haunting me.", e);
+        }
     }
 
     function stopAllMusic() {
