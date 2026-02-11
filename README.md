@@ -9,7 +9,8 @@ Elo-based ranking for Deltarune and Undertale music. It works. Don't touch the c
 - Global sync via Supabase.
 - MP3 export.
 - Mix and Match chapters.
-- Probability boost for underrated songs. (Yes, you're welcome.)
+- Volume slider. (Finally.)
+- Probability boost for underrated songs.
 
 ## Setup
 

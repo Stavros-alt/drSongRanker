@@ -62,6 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const historySongName = document.getElementById('history-song-name');
     const historyList = document.getElementById('history-list');
     const closeHistoryBtn = document.getElementById('close-history-btn');
+    const volumeSlider = document.getElementById('volume-slider');
 
     const settingsBtn = document.getElementById('settings-btn');
     const settingsModal = document.getElementById('settings-modal');
@@ -224,7 +225,8 @@ document.addEventListener('DOMContentLoaded', () => {
         boostedSongId: null, // i guess we're rigging the election now.
         showRatings: globalState.showRatings, // nobody wants to see the numbers apparently.
         preventDuplicates: globalState.preventDuplicates || false,
-        recentMatches: [] // keeping track of what we just saw.
+        recentMatches: [], // keeping track of what we just saw.
+        volume: parseFloat(localStorage.getItem('drSongRankerVolume') || '0.5')
     };
 
     function saveState() {
@@ -386,6 +388,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     checkSecretsGlobal();
+
+    // volume logic. make it loud.
+    function initVolume() {
+        if (volumeSlider) {
+            volumeSlider.value = state.volume;
+
+            const updateVolume = (val) => {
+                state.volume = val;
+                localStorage.setItem('drSongRankerVolume', val);
+                if (audioA) audioA.volume = val;
+                if (audioB) audioB.volume = val;
+                if (playlistAudio) playlistAudio.volume = val;
+            };
+
+            // init audio elements
+            updateVolume(state.volume);
+
+            volumeSlider.addEventListener('input', (e) => {
+                updateVolume(parseFloat(e.target.value));
+            });
+        }
+    }
+    initVolume();
 
 
     // load lists. don't ask.
