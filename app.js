@@ -86,10 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const hiddenTab = document.getElementById('hidden-filter-btn');
 
     const suggestBtn = document.getElementById('suggest-btn');
-    const suggestionModal = document.getElementById('suggestion-modal');
-    const closeSuggestionBtn = document.getElementById('close-suggestion-btn');
-    const submitSuggestionBtn = document.getElementById('submit-suggestion-btn');
-    const suggestionText = document.getElementById('suggestion-text');
+
 
     const voteStat = document.getElementById('vote-stat');
     const personalVoteStat = document.getElementById('personal-vote-stat');
@@ -619,47 +616,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     suggestBtn.addEventListener('click', () => {
-        suggestionModal.style.display = 'flex';
-    });
-
-    closeSuggestionBtn.addEventListener('click', () => {
-        suggestionModal.style.display = 'none';
-    });
-
-    submitSuggestionBtn.addEventListener('click', async () => {
-        const content = suggestionText.value.trim();
-        // if they can't type 20 characters, it's not a real suggestion.
-        if (!content || content.length < 20) {
-            alert("Too short. Explain yourself better. (At least 20 chars)");
-            return;
-        }
-
-        submitSuggestionBtn.disabled = true;
-        submitSuggestionBtn.textContent = "SENDING...";
-
-        try {
-            const { error } = await supabaseClient
-                .from('feature_suggestions')
-                .insert([{ content: content }]);
-
-            if (error) throw error;
-
-            alert("Got it. Go to the Discord to campaign for your idea.");
-            suggestionText.value = '';
-            suggestionModal.style.display = 'none';
-        } catch (err) {
-            console.error("Suggestion failed:", err);
-            alert("Great, even the suggestion box is broken. Try again later.");
-        } finally {
-            submitSuggestionBtn.disabled = false;
-            submitSuggestionBtn.textContent = "SUBMIT";
-        }
-    });
-
-    window.addEventListener('click', (e) => {
-        if (e.target === suggestionModal) {
-            suggestionModal.style.display = 'none';
-        }
+        window.open('https://stavros-alt.github.io/Stavros-alt/', '_blank');
     });
 
     // submissions are enabled. go bother people on discord.
