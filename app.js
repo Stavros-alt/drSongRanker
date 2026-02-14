@@ -63,6 +63,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const historyList = document.getElementById('history-list');
     const closeHistoryBtn = document.getElementById('close-history-btn');
     const volumeSlider = document.getElementById('volume-slider');
+    const playerProgress = document.getElementById('player-progress');
+    const playerCurrentTime = document.getElementById('player-current-time');
+    const playerDuration = document.getElementById('player-duration');
 
     const settingsBtn = document.getElementById('settings-btn');
     const settingsModal = document.getElementById('settings-modal');
@@ -408,6 +411,50 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     initVolume();
+
+    function formatTime(seconds) {
+        if (isNaN(seconds)) return "0:00";
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function updateProgressBar() {
+        if (!currentActiveAudio) return;
+
+        const audio = currentActiveAudio;
+        if (audio.duration) {
+            const percent = (audio.currentTime / audio.duration) * 100;
+            playerProgress.value = percent;
+            playerCurrentTime.textContent = formatTime(audio.currentTime);
+            playerDuration.textContent = formatTime(audio.duration);
+        }
+
+        if (!audio.paused) {
+            requestAnimationFrame(updateProgressBar);
+        }
+    }
+
+    if (playerProgress) {
+        playerProgress.addEventListener('input', (e) => {
+            // seeking logic because players can't just listen to the song.
+            if (!currentActiveAudio || !currentActiveAudio.duration) return;
+            const seekTime = (e.target.value / 100) * currentActiveAudio.duration;
+            currentActiveAudio.currentTime = seekTime;
+            playerCurrentTime.textContent = formatTime(seekTime);
+        });
+    }
+
+    // sync time updates if requestAnimationFrame is too much. 
+    // actually, let's just use it when playing. performance is a myth anyway.
+    [audioA, audioB, playlistAudio].forEach(audio => {
+        audio.addEventListener('play', () => requestAnimationFrame(updateProgressBar));
+        audio.addEventListener('loadedmetadata', () => {
+            if (currentActiveAudio === audio) {
+                playerDuration.textContent = formatTime(audio.duration);
+            }
+        });
+    });
 
 
     // load lists. don't ask.
@@ -954,6 +1001,9 @@ document.addEventListener('DOMContentLoaded', () => {
         playlistAudio.pause();
         isPlaylistPlaying = false;
         playerPlayBtn.textContent = "⏯"; // show the play icon because everything is dead.
+        if (playerProgress) playerProgress.value = 0;
+        if (playerCurrentTime) playerCurrentTime.textContent = "0:00";
+        if (playerDuration) playerDuration.textContent = "0:00";
     }
 
     function playPreview(songKey) {

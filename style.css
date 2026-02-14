@@ -961,10 +961,10 @@ footer {
     margin-right: 20px;
 }
 
-#volume-slider {
+#volume-slider,
+#player-progress {
     -webkit-appearance: none;
     appearance: none;
-    width: 100px;
     height: 6px;
     background: #333;
     outline: none;
@@ -972,7 +972,17 @@ footer {
     cursor: pointer;
 }
 
-#volume-slider::-webkit-slider-thumb {
+#player-progress {
+    flex: 1;
+    margin: 0 15px;
+}
+
+#volume-slider {
+    width: 100px;
+}
+
+#volume-slider::-webkit-slider-thumb,
+#player-progress::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
     width: 16px;
@@ -984,7 +994,8 @@ footer {
 }
 
 /* firefox support. why do people still use this browser. */
-#volume-slider::-moz-range-thumb {
+#volume-slider::-moz-range-thumb,
+#player-progress::-moz-range-thumb {
     width: 16px;
     height: 16px;
     background: #000;
@@ -994,14 +1005,31 @@ footer {
     transition: background 0.1s;
 }
 
-#volume-slider::-webkit-slider-thumb:hover {
+#volume-slider::-webkit-slider-thumb:hover,
+#player-progress::-webkit-slider-thumb:hover {
     background: var(--accent-color);
     border-color: var(--accent-color);
 }
 
-#volume-slider::-moz-range-thumb:hover {
+#volume-slider::-moz-range-thumb:hover,
+#player-progress::-moz-range-thumb:hover {
     background: var(--accent-color);
     border-color: var(--accent-color);
+}
+
+.progress-area {
+    flex: 2;
+    display: flex;
+    align-items: center;
+    color: #fff;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 0.8em;
+    padding: 0 20px;
+}
+
+#player-current-time, #player-duration {
+    min-width: 45px;
+    text-align: center;
 }
 
 /* Responsive adjustments for player */
