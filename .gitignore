@@ -1,8 +1,11 @@
+# environment garbage
 .directory
 .DS_Store
 *~
 *.log
 .tmp/
+.idea/
+
+# python cruft
 __pycache__/
 *.pyc
-.idea/

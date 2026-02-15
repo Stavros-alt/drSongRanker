@@ -873,14 +873,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const winnerSong = (winner === 'A') ? currentSongA : currentSongB;
             const loserSong = (winner === 'A') ? currentSongB : currentSongA;
 
-            recordMatchHistory(winnerSong, loserSong);
-
             const { newWinnerRating, newLoserRating } = updateElo(
                 winnerSong.rating,
                 loserSong.rating,
                 winnerSong.comparisons,
                 loserSong.comparisons
             );
+
+            const winnerChange = newWinnerRating - winnerSong.rating;
+            const loserChange = newLoserRating - loserSong.rating;
+
+            recordMatchHistory(winnerSong, loserSong, false, winnerChange, loserChange);
 
             winnerSong.rating = newWinnerRating;
             loserSong.rating = newLoserRating;
@@ -917,23 +920,29 @@ document.addEventListener('DOMContentLoaded', () => {
         saveState();
     }
 
-    function recordMatchHistory(winner, loser, isTie = false) {
+    function recordMatchHistory(winner, loser, isTie = false, winnerChange = 0, loserChange = 0) {
         const timestamp = Date.now();
         const resultA = isTie ? 'tie' : (winner === currentSongA ? 'win' : 'loss');
         const resultB = isTie ? 'tie' : (winner === currentSongB ? 'win' : 'loss');
+        const changeA = isTie ? 0 : (winner === currentSongA ? winnerChange : loserChange);
+        const changeB = isTie ? 0 : (winner === currentSongB ? winnerChange : loserChange);
 
         if (!currentSongA.matchHistory) currentSongA.matchHistory = [];
         if (!currentSongB.matchHistory) currentSongB.matchHistory = [];
 
         currentSongA.matchHistory.unshift({
             opponent: currentSongB.name,
+            opponentId: currentSongB.id,
             result: resultA,
+            ratingChange: changeA,
             time: timestamp
         });
 
         currentSongB.matchHistory.unshift({
             opponent: currentSongA.name,
+            opponentId: currentSongA.id,
             result: resultB,
+            ratingChange: changeB,
             time: timestamp
         });
 
@@ -1359,8 +1368,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (history.length === 0) {
             historyList.innerHTML = '<p style="color: #666; text-align: center;">No matches recorded yet.</p>';
         } else {
-            history.forEach(match => {
+            history.forEach((match, index) => {
                 const item = document.createElement('div');
+                item.className = 'history-item';
                 item.style.padding = '10px';
                 item.style.borderBottom = '1px solid #222';
                 item.style.display = 'flex';
@@ -1376,14 +1386,86 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div style="flex: 1;">
                         <span style="color: ${resultColor}; font-weight: bold;">[${resultText}]</span>
                         <span> vs ${match.opponent}</span>
+                        ${match.opponentId ? `<button class="swap-result-btn" title="Correction: Change this result" style="margin-left: 10px; background: none; border: 1px solid #333; color: #666; cursor: pointer; border-radius: 4px; padding: 2px 4px; font-size: 0.8em;">🔄</button>` : ''}
                     </div>
                     <small style="color: #444; font-size: 0.7em;">${date}</small>
                 `;
+
+                const swapBtn = item.querySelector('.swap-result-btn');
+                if (swapBtn) {
+                    swapBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (confirm(`Swap the result of the match against ${match.opponent}? Ratings will be adjusted.`)) {
+                            swapMatchResult(song, index);
+                        }
+                    });
+                }
+
                 historyList.appendChild(item);
             });
         }
 
         historyModal.style.display = 'flex';
+    }
+
+    function swapMatchResult(song, index) {
+        const match = song.matchHistory[index];
+        if (!match || !match.opponentId) return;
+
+        const opponent = state.songs.find(s => s.id === match.opponentId);
+        if (!opponent || !opponent.matchHistory) return;
+
+        // find the counterpart. why do they have to click things wrong.
+        const opponentMatchIndex = opponent.matchHistory.findIndex(m => m.time === match.time && m.opponentId === song.id);
+        if (opponentMatchIndex === -1) {
+            alert("Record lost in the void. Pruning happened or something.");
+            return;
+        }
+
+        const opponentMatch = opponent.matchHistory[opponentMatchIndex];
+
+        // undo the damage if we have the numbers.
+        if (match.ratingChange !== undefined) song.rating -= match.ratingChange;
+        if (opponentMatch.ratingChange !== undefined) opponent.rating -= opponentMatch.ratingChange;
+
+        // rewrite history. i'm not a time traveler.
+        const oldResult = match.result;
+        match.result = (oldResult === 'win') ? 'loss' : (oldResult === 'loss' ? 'win' : 'tie');
+        opponentMatch.result = (oldResult === 'win') ? 'win' : (oldResult === 'loss' ? 'loss' : 'tie');
+
+        // recalculate ratings because math never ends.
+        if (match.result !== 'tie') {
+            const winnerSong = (match.result === 'win') ? song : opponent;
+            const loserSong = (match.result === 'win') ? opponent : song;
+
+            const { newWinnerRating, newLoserRating } = updateElo(
+                winnerSong.rating,
+                loserSong.rating,
+                winnerSong.comparisons - 1,
+                opponent.comparisons - 1
+            );
+
+            const winnerChange = newWinnerRating - winnerSong.rating;
+            const loserChange = newLoserRating - loserSong.rating;
+
+            winnerSong.rating = newWinnerRating;
+            loserSong.rating = newLoserRating;
+
+            // store the new mistakes.
+            if (match.result === 'win') {
+                match.ratingChange = winnerChange;
+                opponentMatch.ratingChange = loserChange;
+            } else {
+                match.ratingChange = loserChange;
+                opponentMatch.ratingChange = winnerChange;
+            }
+        }
+
+        // dump everything back to storage.
+        syncCombinedVote(song, opponent);
+        saveState();
+        showMatchHistory(song);
+        if (myRankingBtn.classList.contains('active')) displayRankings();
     }
 
     if (closeHistoryBtn) {
