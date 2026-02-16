@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const shareModal = document.getElementById('share-modal');
     const closeShareBtn = document.getElementById('close-share-btn');
     const downloadShareBtn = document.getElementById('download-share-btn');
+    const shareCountInput = document.getElementById('share-count-input');
     const sharePreview = document.getElementById('share-preview');
     const musicPlayerBar = document.getElementById('music-player-bar');
     const playerSongName = document.getElementById('player-song-name');
@@ -1834,36 +1835,81 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // sharing. i'm tired.
+    function updateSharePreview() {
+        if (!shareBtn) return;
+        const isCommunity = communityRankingBtn.classList.contains('active');
+        const sourceData = isCommunity ? cachedCommunitySongs : state.songs;
+
+        if (isCommunity && cachedCommunitySongs.length === 0) {
+            alert("Community data not loaded yet. Please wait.");
+            return;
+        }
+
+        const filteredData = filterSongsByChapter(sourceData, currentChapterFilter);
+        const sortedData = [...filteredData].sort((a, b) => b.rating - a.rating);
+
+        const songCount = shareCountInput ? parseInt(shareCountInput.value) : 10;
+        const topSongs = sortedData.slice(0, songCount);
+
+        const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim() || '#00ff9d';
+
+        let titleText = isCommunity ? "COMMUNITY" : "MY";
+        titleText += songCount >= sortedData.length ? " RANKING" : ` TOP ${songCount}`;
+
+        if (currentChapterFilter !== 'all') {
+            titleText += ` (${currentChapterFilter.toUpperCase()})`;
+        }
+
+        // i shortened this because the footer kept eating the songs. hope this is enough.
+        const targetHeight = 580;
+
+        // scaling logic. i honestly don't know why i'm doing this anymore.
+        let cols = 1;
+        if (songCount > 120) cols = 4;
+        else if (songCount > 60) cols = 3;
+        else if (songCount > 25) cols = 2;
+
+        const itemsPerCol = Math.ceil(songCount / cols);
+        const itemHeight = targetHeight / itemsPerCol;
+
+        const fontSize = Math.min(Math.max(itemHeight * 0.7, 8), 28);
+        const marginBottom = Math.max(itemHeight - (fontSize * 1.2), 0);
+
+        let html = `<h3 style="margin-top:0; margin-bottom: 20px; border-bottom: 2px solid ${accentColor}; padding-bottom: 8px; text-transform: uppercase; color: ${accentColor}; font-size: 30px;">${titleText}</h3>`;
+
+        // less gap, more room for titles. because text needs a home.
+        html += `<div style="column-count: ${cols}; column-gap: 15px; height: ${targetHeight}px; font-size: ${fontSize}px; line-height: 1.1;">`;
+        // making room for the numbers i just shoved outside the list.
+        const listPaddingLeft = fontSize > 20 ? "60px" : "45px";
+        html += `<ul style="padding-left: ${listPaddingLeft}; margin: 0; color: #fff; height: 100%; list-style-type: none;">`;
+        topSongs.forEach((song, index) => {
+            // hanging numbers because apparently decimal alignment is a thing people care about.
+            // li no longer has overflow:hidden because i was accidentally hiding my own work. typical.
+            html += `<li style="margin-bottom: ${marginBottom}px; position: relative; width: 100%; display: block;">`;
+            html += `<span style="color: ${accentColor}; font-weight: bold; position: absolute; right: 100%; margin-right: 12px; text-align: right; pointer-events: none; white-space: nowrap;">${index + 1}.</span>`;
+            html += `<span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%;">${song.name}</span></li>`;
+        });
+        html += '</ul></div>';
+
+        // pushing this footer down. go away.
+        html += `<p style="position: absolute; bottom: 12px; right: 30px; margin: 0; font-size: 13px; color: #555; font-family: 'Roboto Mono', monospace;">stavros-alt.github.io/drSongRanker</p>`;
+
+        sharePreview.innerHTML = html;
+        sharePreview.style.backgroundColor = "#000";
+        // shrinking paddings because real estate is expensive.
+        sharePreview.style.padding = "45px 25px";
+    }
+
     if (shareBtn) {
         shareBtn.addEventListener('click', () => {
-            const isCommunity = communityRankingBtn.classList.contains('active');
-            const sourceData = isCommunity ? cachedCommunitySongs : state.songs;
-
-            if (isCommunity && cachedCommunitySongs.length === 0) {
-                alert("Community data not loaded yet. Please wait.");
-                return;
-            }
-
-            const filteredData = filterSongsByChapter(sourceData, currentChapterFilter);
-            const topSongs = [...filteredData]
-                .sort((a, b) => b.rating - a.rating)
-                .slice(0, 10);
-
-            let titleText = isCommunity ? "COMMUNITY TOP 10" : "MY TOP 10";
-            if (currentChapterFilter !== 'all') {
-                titleText += ` (${currentChapterFilter.toUpperCase()})`;
-            }
-
-            let html = `<h3 style="margin-top:0; border-bottom: 2px solid #fff; padding-bottom: 5px; text-transform: uppercase;">${titleText}</h3>`;
-            html += '<ol style="padding-left: 20px; margin: 0;">';
-            topSongs.forEach(song => {
-                html += `<li style="margin-bottom: 5px;">${song.name}</li>`;
-            });
-            html += '</ol>';
-            html += '<p style="margin-top: 15px; font-size: 0.8em; color: #888;">Ranked at: stavros-alt.github.io/drSongRanker</p>';
-
-            sharePreview.innerHTML = html;
+            updateSharePreview();
             shareModal.style.display = 'flex';
+        });
+    }
+
+    if (shareCountInput) {
+        shareCountInput.addEventListener('input', () => {
+            updateSharePreview();
         });
     }
 
@@ -1872,12 +1918,25 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     downloadShareBtn.addEventListener('click', () => {
+        // prepare for capture. 
+        // html2canvas struggles with transforms. let's temporarily un-transform it.
+        const originalStyle = sharePreview.style.cssText;
+        sharePreview.style.transform = 'none';
+        sharePreview.style.position = 'fixed';
+        sharePreview.style.top = '0';
+        sharePreview.style.left = '0';
+        sharePreview.style.zIndex = '-9999';
+
         html2canvas(sharePreview, {
             backgroundColor: "#000000",
+            width: 600,
+            height: 800,
+            scale: 2 // High res. i'm a pro.
         }).then(canvas => {
+            sharePreview.style.cssText = originalStyle; // restore
             const link = document.createElement('a');
             link.download = 'deltarune-ranking.png';
-            link.href = canvas.toDataURL();
+            link.href = canvas.toDataURL('image/png');
             link.click();
         });
     });
