@@ -10,24 +10,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     Chart.defaults.font.family = "'Roboto Mono', monospace";
 
     async function fetchData() {
-        const { data, error } = await supabase
-            .from('songs')
-            .select('id, name, rating, comparisons')
-            .order('rating', { ascending: false });
+        // fetch all 3 sets because why not.
+        const [drRes, utRes, utyRes] = await Promise.all([
+            supabase.from('songs').select('id, name, rating, comparisons').order('rating', { ascending: false }),
+            supabase.from('ut_songs').select('id, name, rating, comparisons').order('rating', { ascending: false }),
+            supabase.from('uty_songs').select('id, name, rating, comparisons').order('rating', { ascending: false })
+        ]);
 
-        if (error) {
-            console.error("Error fetching data:", error);
+        if (drRes.error || utRes.error || utyRes.error) {
+            console.error("Error fetching data:", drRes.error || utRes.error || utyRes.error);
             alert("Failed to load stats.");
             return [];
         }
-        return data;
+        return [...drRes.data, ...utRes.data, ...utyRes.data].sort((a, b) => b.rating - a.rating);
     }
 
     const dbSongs = await fetchData();
     if (!dbSongs.length) return;
 
-    // merge with local data to get duration/metadata
-    const localSongs = window.songList || [];
+    // merge with local data. metadata is a disaster.
+    const localSongs = [...(window.songList || []), ...(window.utSongList || []), ...(window.utySongList || [])];
     const songs = dbSongs.map(dbS => {
         const local = localSongs.find(l => l.id === dbS.id);
         return {
@@ -40,15 +42,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     // rating dist. whatever.
     const songsWithChapters = songs.map(s => {
         const chapters = [];
-        if (s.id <= 40) chapters.push('Ch 1');
-        if ((s.id >= 41 && s.id <= 87) || s.id === 38 || s.id === 40) chapters.push('Ch 2');
-        if (s.id >= 88 && s.id <= 125) chapters.push('Ch 3');
-        if (s.id >= 126 && s.id <= 200) chapters.push('Ch 4');
+        if (s.id < 1000) {
+            if (s.id <= 40) chapters.push('Ch 1');
+            if ((s.id >= 41 && s.id <= 87) || s.id === 38 || s.id === 40) chapters.push('Ch 2');
+            if (s.id >= 88 && s.id <= 125) chapters.push('Ch 3');
+            if (s.id >= 126 && s.id <= 200) chapters.push('Ch 4');
+        } else if (s.id >= 1000 && s.id < 2000) {
+            chapters.push('UT');
+        } else {
+            chapters.push('UTY');
+        }
         return { ...s, chapters };
     });
 
-    // Exclude hidden songs (IDs 201+) from all-time stats to prevent pollution
-    const publicSongs = songsWithChapters.filter(s => s.id <= 200);
+    // keep everything. i'm not filtering.
+    const publicSongs = songsWithChapters;
 
     const ratings = publicSongs.map(s => Math.round(s.rating));
     const bins = {};
@@ -57,7 +65,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         bins[bin] = (bins[bin] || 0) + 1;
     });
 
-    // Actually calculate the stats i forgot to write
+    // actually calculate the stats i forgot to write. peak performance.
     const chapterStats = {
         'Ch 1': { sum: 0, count: 0 },
         'Ch 2': { sum: 0, count: 0 },
@@ -178,7 +186,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Rating Distribution (The missing link)
+    // rating distribution. the missing link or whatever.
     const binLabels = Object.keys(bins).sort((a, b) => parseInt(a) - parseInt(b));
     const binData = binLabels.map(b => bins[b]);
 
@@ -243,7 +251,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // pure unadulterated chaos.
-    // chronological order view. but exclude secrets.
+    // chronological order view. keep the secrets secret. i don't care.
     new Chart(document.getElementById('chronoChart'), {
         type: 'scatter',
         data: {
@@ -308,7 +316,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // dynamic tiers based on percentiles. better than arbitrary numbers.
+    // dynamic tiers. better than arbitrary numbers i guess.
     // S+ (Top 5%), S (Next 10%), A (Next 20%), B (Next 30%), C (Next 20%), D (Bottom 15%)
     const sortedByRating = [...publicSongs].sort((a, b) => b.rating - a.rating);
     const total = sortedByRating.length;

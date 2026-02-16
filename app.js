@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const drToggle = document.getElementById('dr-toggle');
     const combinedToggle = document.getElementById('combined-toggle'); // finally.
     const utToggle = document.getElementById('ut-toggle');
+    const utyToggle = document.getElementById('uty-toggle');
     const showRatingsToggle = document.getElementById('show-ratings-toggle');
     const preventDuplicatesToggle = document.getElementById('prevent-duplicates-toggle');
     const rankingList = document.getElementById('ranking-list');
@@ -231,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     function saveState() {
-        const key = state.currentGame === 'combined' ? 'combinedSongRankerState' : (state.currentGame === 'deltarune' ? 'drSongRankerState' : 'utSongRankerState');
+        const key = state.currentGame === 'combined' ? 'combinedSongRankerState' : (state.currentGame === 'deltarune' ? 'drSongRankerState' : (state.currentGame === 'undertale' ? 'utSongRankerState' : 'utySongRankerState'));
         localStorage.setItem(key, JSON.stringify(state));
 
         // why am i saving this twice? whatever.
@@ -244,7 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function loadState() {
-        const key = state.currentGame === 'combined' ? 'combinedSongRankerState' : (state.currentGame === 'deltarune' ? 'drSongRankerState' : 'utSongRankerState');
+        const key = state.currentGame === 'combined' ? 'combinedSongRankerState' : (state.currentGame === 'deltarune' ? 'drSongRankerState' : (state.currentGame === 'undertale' ? 'utSongRankerState' : 'utySongRankerState'));
         const saved = localStorage.getItem(key);
 
         // choose the source list based on game. i hate this.
@@ -252,11 +253,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (state.currentGame === 'combined') {
             const drList = (typeof songList !== 'undefined') ? songList : (window.songList || []);
             const utList = (typeof utSongList !== 'undefined') ? utSongList : (window.utSongList || []);
-            sourceList = [...drList, ...utList];
+            const utyList = (typeof utySongList !== 'undefined') ? utySongList : (window.utySongList || []);
+            sourceList = [...drList, ...utList, ...utyList];
         } else if (state.currentGame === 'deltarune') {
             sourceList = (typeof songList !== 'undefined') ? songList : (window.songList || []);
-        } else {
+        } else if (state.currentGame === 'undertale') {
             sourceList = (typeof utSongList !== 'undefined') ? utSongList : (window.utSongList || []);
+        } else {
+            sourceList = (typeof utySongList !== 'undefined') ? utySongList : (window.utySongList || []);
         }
 
         if (saved) {
@@ -309,6 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const possibleStates = [
                     drParsed && drParsed.songs ? drParsed.songs.find(s => s.id === baseSong.id) : null,
                     utParsed && utParsed.songs ? utParsed.songs.find(s => s.id === baseSong.id) : null,
+                    (localStorage.getItem('utySongRankerState') ? JSON.parse(localStorage.getItem('utySongRankerState')).songs : []).find(s => s.id === baseSong.id) || null,
                     combinedParsed && combinedParsed.songs ? combinedParsed.songs.find(s => s.id === baseSong.id) : null
                 ].filter(s => s !== null);
 
@@ -336,9 +341,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // validation. because users are untrustworthy.
         const drValid = ['all', '1', '2', '3', '4', 'hidden', 'duration_30', 'duration_20', 'duration_10'];
         const utValid = ['all', '1', '2', '3', '4', '5', 'hidden', 'duration_30', 'duration_20', 'duration_10'];
-        let validLists = state.currentGame === 'deltarune' ? drValid : utValid;
+        const utyValid = ['all', 'ruins', 'snowdin', 'dunes', 'wild_east', 'steamworks', 'new_home', 'genocide', 'hidden', 'duration_30', 'duration_20', 'duration_10'];
+        let validLists = state.currentGame === 'deltarune' ? drValid : (state.currentGame === 'undertale' ? utValid : utyValid);
         if (state.currentGame === 'combined') {
-            validLists = Array.from(new Set([...drValid, ...utValid, 'combined_all']));
+            validLists = Array.from(new Set([...drValid, ...utValid, ...utyValid, 'combined_all']));
         }
 
         if (!validLists.includes(state.activeRankerList) && !state.customLists[state.activeRankerList]) {
@@ -363,12 +369,20 @@ document.addEventListener('DOMContentLoaded', () => {
             if (drToggle) drToggle.classList.remove('active');
             if (combinedToggle) combinedToggle.classList.add('active');
             if (utToggle) utToggle.classList.remove('active');
-            if (mainTitle) mainTitle.textContent = "Deltarune vs Undertale: Which is better?";
-        } else {
+            if (utyToggle) utyToggle.classList.remove('active');
+            if (mainTitle) mainTitle.textContent = "Deltarune vs Undertale vs UTY: Which is better?";
+        } else if (state.currentGame === 'undertale') {
             if (drToggle) drToggle.classList.remove('active');
             if (combinedToggle) combinedToggle.classList.remove('active');
             if (utToggle) utToggle.classList.add('active');
+            if (utyToggle) utyToggle.classList.remove('active');
             if (mainTitle) mainTitle.textContent = "Which Undertale song is better?";
+        } else {
+            if (drToggle) drToggle.classList.remove('active');
+            if (combinedToggle) combinedToggle.classList.remove('active');
+            if (utToggle) utToggle.classList.remove('active');
+            if (utyToggle) utyToggle.classList.add('active');
+            if (mainTitle) mainTitle.textContent = "Which Undertale Yellow song is better?";
         }
 
         if (combinedToggle) {
@@ -727,6 +741,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function getChaptersForSong(song) {
+        if (song.id >= 2000) {
+            const track = song.id - 2000;
+            if (track <= 16) return ['ruins'];
+            if (track >= 17 && track <= 33) return ['snowdin'];
+            if (track >= 34 && track <= 49) return ['dunes'];
+            if (track >= 50 && track <= 72) return ['wild_east'];
+            if (track >= 73 && track <= 94) return ['steamworks'];
+            if (track >= 95 && track <= 125) return ['new_home'];
+            if (track >= 126) return ['genocide'];
+            return [];
+        }
         if (song.id < 1000) {
             const ch = [];
             if (song.id <= 40) ch.push(1);
@@ -1093,7 +1118,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (winnerDeltarune !== loserDeltarune) return;
 
-        const rpcName = winnerDeltarune ? 'handle_vote' : 'handle_ut_vote';
+        let rpcName;
+        if (winnerDeltarune) rpcName = 'handle_vote';
+        else if (winnerId > 1000 && winnerId < 2000) rpcName = 'handle_ut_vote';
+        else if (winnerId >= 2000) rpcName = 'handle_uty_vote';
         try {
             const { error } = await supabaseClient.rpc(rpcName, {
                 winner_id: winnerId,
@@ -1111,20 +1139,24 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchAndDisplayAllTimeStats() {
         try {
             if (state.currentGame === 'combined') {
-                const [drRes, utRes] = await Promise.all([
+                const [drRes, utRes, utyRes] = await Promise.all([
                     supabaseClient.rpc('get_total_votes'),
-                    supabaseClient.rpc('get_total_ut_votes')
+                    supabaseClient.rpc('get_total_ut_votes'),
+                    supabaseClient.rpc('get_total_uty_votes')
                 ]);
 
                 if (drRes.error) throw drRes.error;
                 if (utRes.error) throw utRes.error;
+                if (utyRes.error) throw utyRes.error;
 
-                const total = (drRes.data || 0) + (utRes.data || 0);
+                const total = (drRes.data || 0) + (utRes.data || 0) + (utyRes.data || 0);
                 if (voteStat) voteStat.textContent = `Total Votes: ${total}`;
                 return;
             }
 
-            const rpcName = state.currentGame === 'deltarune' ? 'get_total_votes' : 'get_total_ut_votes';
+            let rpcName = 'get_total_votes';
+            if (state.currentGame === 'undertale') rpcName = 'get_total_ut_votes';
+            else if (state.currentGame === 'undertale_yellow' || state.currentGame === 'uty') rpcName = 'get_total_uty_votes';
             const { data: voteData, error: voteError } = await supabaseClient
                 .rpc(rpcName);
 
@@ -1150,17 +1182,21 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             let combinedData = [];
             if (state.currentGame === 'combined') {
-                const [drRes, utRes] = await Promise.all([
+                const [drRes, utRes, utyRes] = await Promise.all([
                     supabaseClient.from('songs').select('name, id, rating').order('rating', { ascending: false }),
-                    supabaseClient.from('ut_songs').select('name, id, rating').order('rating', { ascending: false })
+                    supabaseClient.from('ut_songs').select('name, id, rating').order('rating', { ascending: false }),
+                    supabaseClient.from('uty_songs').select('name, id, rating').order('rating', { ascending: false })
                 ]);
 
                 if (drRes.error) throw drRes.error;
                 if (utRes.error) throw utRes.error;
+                if (utyRes.error) throw utyRes.error;
 
-                combinedData = [...drRes.data, ...utRes.data].sort((a, b) => b.rating - a.rating);
+                combinedData = [...drRes.data, ...utRes.data, ...utyRes.data].sort((a, b) => b.rating - a.rating);
             } else {
-                const tableName = state.currentGame === 'deltarune' ? 'songs' : 'ut_songs';
+                let tableName = 'songs';
+                if (state.currentGame === 'undertale') tableName = 'ut_songs';
+                else if (state.currentGame === 'undertale_yellow' || state.currentGame === 'uty') tableName = 'uty_songs';
                 const { data, error } = await supabaseClient
                     .from(tableName)
                     .select('name, id, rating')
@@ -1273,7 +1309,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (progressBar) progressBar.style.width = `${accuracy}%`;
         if (progressText) progressText.textContent = `Ranking Accuracy: ${accuracy.toFixed(1)}%`;
 
-        // vote hoarding counter.
+        // vote hoarding counter. i guess people cheat. whatever.
         if (personalVoteStat) {
             personalVoteStat.textContent = `YOUR VOTES: ${state.comparisons}`;
         }
@@ -1288,7 +1324,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (activeList === 'hidden') {
-            return songs.filter(s => s.hidden || (state.currentGame === 'deltarune' && s.id > 200));
+            return songs.filter(s => s.hidden || (state.currentGame === 'deltarune' && s.id > 200) || (state.currentGame === 'undertale_yellow' && s.id > 3000));
         }
 
         if (activeList === 'custom') {
@@ -1296,7 +1332,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return songs.filter(s => customSelection.includes(s.id));
         }
 
-        // chapter grouping.
+        // chapter grouping. organization is suffering.
         const ch = parseInt(activeList);
         return songs.filter(s => {
             const chapters = getChaptersForSong(s);
@@ -1304,8 +1340,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // sync the ranking list filters with the active ranker if possible. 
-    // i'm not doing full reactive state, deal with it.
+    // sync the filters. automation for the lazy.    // i'm not doing full reactive state, deal with it.
     function filterSongsByChapter(songs, filter) {
         if (filter === 'all') {
             return songs.filter(s => !s.hidden);
@@ -1314,7 +1349,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return state.secretsUnlocked ? songs : songs.filter(s => !s.hidden);
         }
         if (filter === 'hidden') {
-            return state.secretsUnlocked ? songs.filter(s => s.hidden || (state.currentGame === 'deltarune' && s.id > 200)) : [];
+            return state.secretsUnlocked ? songs.filter(s => s.hidden || (state.currentGame === 'deltarune' && s.id > 200) || (state.currentGame === 'undertale_yellow' && s.id > 3000)) : [];
         }
 
         // chapters
@@ -1326,6 +1361,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const chapters = getChaptersForSong(s);
                 return chapters.includes(ch);
+            });
+        }
+
+        // uty locations. more work for me.
+        if (['ruins', 'snowdin', 'dunes', 'wild_east', 'steamworks', 'new_home', 'genocide'].includes(filter)) {
+            return songs.filter(s => {
+                const visible = !s.hidden || state.secretsUnlocked;
+                if (!visible) return false;
+                const chapters = getChaptersForSong(s);
+                return chapters.includes(filter);
             });
         }
 
@@ -1615,6 +1660,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    if (utyToggle) {
+        utyToggle.addEventListener('click', () => {
+            if (state.currentGame === 'undertale_yellow') return;
+            saveState();
+            state.currentGame = 'undertale_yellow';
+            loadState();
+            saveState();
+            presentNewPair();
+            fetchAndDisplayAllTimeStats();
+            if (myRankingBtn.classList.contains('active')) displayRankings();
+            else displayCommunityRankings();
+        });
+    }
+
     if (mainFilterSelect) {
         mainFilterSelect.addEventListener('change', (e) => {
             if (e.target.value === 'combined_all') return; // ignored now.
@@ -1735,7 +1794,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // standard options
         let standardOptions = [
-            { val: 'all', text: state.currentGame === 'deltarune' ? 'All Songs (Original)' : 'All Songs' }
+            { val: 'all', text: state.currentGame === 'deltarune' ? 'All Songs (Original)' : (state.currentGame === 'undertale_yellow' ? 'All Songs (UTY)' : 'All Songs') }
         ];
 
         if (state.currentGame === 'deltarune') {
@@ -1745,6 +1804,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 { val: '3', text: 'Chapter 3' },
                 { val: '4', text: 'Chapter 4' },
                 { val: 'mix_chapters', text: 'Mix Chapters...' }
+            );
+        } else if (state.currentGame === 'undertale_yellow' || state.currentGame === 'uty') {
+            standardOptions.push(
+                { val: 'ruins', text: 'Ruins (UTY)' },
+                { val: 'snowdin', text: 'Snowdin (UTY)' },
+                { val: 'dunes', text: 'Dunes (UTY)' },
+                { val: 'wild_east', text: 'Wild East (UTY)' },
+                { val: 'steamworks', text: 'Steamworks (UTY)' },
+                { val: 'new_home', text: 'New Home (UTY)' },
+                { val: 'genocide', text: 'Genocide (UTY)' }
             );
         } else if (state.currentGame === 'combined') {
             // keep it simple. just all songs.
@@ -2166,7 +2235,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const prefix = state.currentGame === 'deltarune' ? 'deltarune' : 'undertale';
+            let prefix = 'deltarune';
+            if (state.currentGame === 'undertale') prefix = 'undertale';
+            else if (state.currentGame === 'undertale_yellow') prefix = 'uty';
             const content = await zip.generateAsync({ type: "blob" });
             const url = URL.createObjectURL(content);
             const a = document.createElement('a');
@@ -2228,7 +2299,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 else chapterSuffix = " (New Home/End)";
             }
 
-            const ostName = state.currentGame === 'deltarune' ? 'Deltarune OST' : 'Undertale OST';
+            let ostName = 'Deltarune OST';
+            if (state.currentGame === 'undertale') ostName = 'Undertale OST';
+            else if (state.currentGame === 'undertale_yellow') ostName = 'Undertale Yellow OST';
             return `${songName} - Toby Fox ${ostName}${chapterSuffix}`;
         }).join('\n');
         navigator.clipboard.writeText(textList).then(() => {
