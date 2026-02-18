@@ -404,9 +404,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     checkSecretsGlobal();
 
+    // apple is a nightmare.
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
     // volume logic. make it loud.
     function initVolume() {
         if (volumeSlider) {
+            // ios doesn't let us touch the volume. because they hate us.
+            if (isIOS) {
+                volumeSlider.parentElement.style.display = 'none';
+                return;
+            }
+
             volumeSlider.value = state.volume;
 
             const updateVolume = (val) => {
@@ -428,11 +437,12 @@ document.addEventListener('DOMContentLoaded', () => {
     initVolume();
 
     function formatTime(seconds) {
-        if (isNaN(seconds)) return "0:00";
+        if (isNaN(seconds) || seconds === Infinity) return "0:00";
         const mins = Math.floor(seconds / 60);
         const secs = Math.floor(seconds % 60);
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     }
+
 
     function updateProgressBar() {
         if (!currentActiveAudio) return;
@@ -451,13 +461,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (playerProgress) {
-        playerProgress.addEventListener('input', (e) => {
-            // seeking logic because players can't just listen to the song.
-            if (!currentActiveAudio || !currentActiveAudio.duration) return;
+        const handleSeek = (e) => {
+            if (!currentActiveAudio || !currentActiveAudio.duration || currentActiveAudio.duration === Infinity) return;
             const seekTime = (e.target.value / 100) * currentActiveAudio.duration;
-            currentActiveAudio.currentTime = seekTime;
-            playerCurrentTime.textContent = formatTime(seekTime);
-        });
+
+            // safari gets cranky if we seek too fast.
+            try {
+                currentActiveAudio.currentTime = seekTime;
+                playerCurrentTime.textContent = formatTime(seekTime);
+            } catch (err) {
+                console.warn("Seeking failed. Safari being Safari.", err);
+            }
+        };
+
+        playerProgress.addEventListener('input', handleSeek);
+        playerProgress.addEventListener('change', handleSeek);
     }
 
     // sync time updates if requestAnimationFrame is too much. 

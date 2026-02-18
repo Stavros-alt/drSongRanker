@@ -1,6 +1,6 @@
 # drSongRanker
 
-Elo-based ranking for Deltarune and Undertale music. It works. Don't touch the code.
+Elo-based ranking for Deltarune, Undertale, and Undertale Yellow music. It works. Don't touch the code.
 
 ## Features
 

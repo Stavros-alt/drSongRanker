@@ -237,6 +237,8 @@ body {
 
 .game-toggle {
     display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 10px;
     margin-bottom: 10px;
 }
@@ -406,6 +408,8 @@ button:active {
 
 .choices {
     display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 20px;
     margin-bottom: 40px;
 }
@@ -1027,7 +1031,8 @@ footer {
     padding: 0 20px;
 }
 
-#player-current-time, #player-duration {
+#player-current-time,
+#player-duration {
     min-width: 45px;
     text-align: center;
 }

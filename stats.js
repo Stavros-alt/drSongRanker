@@ -70,7 +70,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         'Ch 1': { sum: 0, count: 0 },
         'Ch 2': { sum: 0, count: 0 },
         'Ch 3': { sum: 0, count: 0 },
-        'Ch 4': { sum: 0, count: 0 }
+        'Ch 4': { sum: 0, count: 0 },
+        'UT': { sum: 0, count: 0 },
+        'UTY': { sum: 0, count: 0 }
     };
 
     publicSongs.forEach(song => {
@@ -92,7 +94,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             datasets: [{
                 label: 'Average Rating',
                 data: chData,
-                backgroundColor: ['#00ff9d', '#00f2ff', '#ff00ff', '#ffff00'],
+                backgroundColor: ['#00ff9d', '#00f2ff', '#ff00ff', '#ffff00', '#ff0000', '#ff8800'],
                 borderColor: '#fff',
                 borderWidth: 1
             }]
@@ -459,7 +461,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 3. chapter mvps.
     // we already have 'songsWithChapters'.
     const mvpContainer = document.getElementById('mvp-container');
-    const chapters = ['Ch 1', 'Ch 2', 'Ch 3', 'Ch 4'];
+    const chapters = ['Ch 1', 'Ch 2', 'Ch 3', 'Ch 4', 'UT', 'UTY'];
 
     chapters.forEach(ch => {
         const chapterSongs = publicSongs.filter(s => s.chapters.includes(ch));
