@@ -4,13 +4,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // chart options. it's never gonna look right.
+    // chart defaults. still never gonna look perfect.
     Chart.defaults.color = '#fff';
     Chart.defaults.borderColor = '#333';
     Chart.defaults.font.family = "'Roboto Mono', monospace";
 
     async function fetchData() {
-        // fetch all 3 sets because why not.
         const [drRes, utRes, utyRes] = await Promise.all([
             supabase.from('songs').select('id, name, rating, comparisons').order('rating', { ascending: false }),
             supabase.from('ut_songs').select('id, name, rating, comparisons').order('rating', { ascending: false }),
@@ -28,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const dbSongs = await fetchData();
     if (!dbSongs.length) return;
 
-    // merge with local data. metadata is a disaster.
+    // merge with local metadata. this is still a disaster.
     const localSongs = [...(window.songList || []), ...(window.utSongList || []), ...(window.utySongList || [])];
     const songs = dbSongs.map(dbS => {
         const local = localSongs.find(l => l.id === dbS.id);
@@ -39,103 +38,91 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
     });
 
-    // rating dist. whatever.
-    const songsWithChapters = songs.map(s => {
-        const chapters = [];
-        if (s.id < 1000) {
-            if (s.id <= 40) chapters.push('Ch 1');
-            if ((s.id >= 41 && s.id <= 87) || s.id === 38 || s.id === 40) chapters.push('Ch 2');
-            if (s.id >= 88 && s.id <= 125) chapters.push('Ch 3');
-            if (s.id >= 126 && s.id <= 200) chapters.push('Ch 4');
-        } else if (s.id >= 1000 && s.id < 2000) {
-            chapters.push('UT');
-        } else {
-            chapters.push('UTY');
+    // game classification. straightforward for once.
+    function getGame(song) {
+        if (song.id < 1000) return 'DR';
+        if (song.id < 2000) return 'UT';
+        return 'UTY';
+    }
+
+    // section classification. copy-pasted from app.js because i'm not refactoring that right now.
+    function getSection(song) {
+        if (song.id < 1000) {
+            if (song.id <= 40) return 'Ch 1';
+            if (song.id <= 87 || song.id === 38 || song.id === 40) return 'Ch 2';
+            if (song.id <= 125) return 'Ch 3';
+            return 'Ch 4';
         }
-        return { ...s, chapters };
+        if (song.id < 2000) {
+            const track = song.id - 1000;
+            if (track <= 14) return 'Ruins';
+            if (track <= 24) return 'Snowdin';
+            if (track <= 46) return 'Waterfall';
+            if (track <= 70) return 'Hotland / CORE';
+            return 'New Home';
+        }
+        // uty
+        const track = song.id - 2000;
+        if (track <= 16) return 'Ruins';
+        if (track <= 33) return 'Snowdin';
+        if (track <= 49) return 'Dunes';
+        if (track <= 72) return 'Wild East';
+        if (track <= 94) return 'Steamworks';
+        if (track <= 125) return 'New Home';
+        return 'Genocide';
+    }
+
+    const publicSongs = songs;
+
+    // split by game. this should have been done from the start.
+    const drSongs = publicSongs.filter(s => getGame(s) === 'DR');
+    const utSongs = publicSongs.filter(s => getGame(s) === 'UT');
+    const utySongs = publicSongs.filter(s => getGame(s) === 'UTY');
+
+    // ──────────────────────────────────────────────
+    // quick stats row
+    // ──────────────────────────────────────────────
+    const quickStatsRow = document.getElementById('quick-stats-row');
+    const avgRating = publicSongs.reduce((sum, s) => sum + s.rating, 0) / publicSongs.length;
+    const totalComparisons = publicSongs.reduce((sum, s) => sum + (s.comparisons || 0), 0);
+
+    const statsData = [
+        { value: publicSongs.length, label: 'Total Songs' },
+        { value: drSongs.length, label: 'Deltarune' },
+        { value: utSongs.length, label: 'Undertale' },
+        { value: utySongs.length, label: 'UT Yellow' }
+    ];
+
+    statsData.forEach(stat => {
+        const box = document.createElement('div');
+        box.className = 'stat-box';
+        box.innerHTML = `
+            <div class="stat-value">${stat.value}</div>
+            <div class="stat-label">${stat.label}</div>
+        `;
+        quickStatsRow.appendChild(box);
     });
 
-    // keep everything. i'm not filtering.
-    const publicSongs = songsWithChapters;
-
-    const ratings = publicSongs.map(s => Math.round(s.rating));
-    const bins = {};
-    ratings.forEach(r => {
-        const bin = Math.floor(r / 50) * 50;
-        bins[bin] = (bins[bin] || 0) + 1;
-    });
-
-    // actually calculate the stats i forgot to write. peak performance.
-    const chapterStats = {
-        'Ch 1': { sum: 0, count: 0 },
-        'Ch 2': { sum: 0, count: 0 },
-        'Ch 3': { sum: 0, count: 0 },
-        'Ch 4': { sum: 0, count: 0 },
-        'UT': { sum: 0, count: 0 },
-        'UTY': { sum: 0, count: 0 }
-    };
-
-    publicSongs.forEach(song => {
-        song.chapters.forEach(ch => {
-            if (chapterStats[ch]) {
-                chapterStats[ch].sum += song.rating;
-                chapterStats[ch].count++;
+    // ──────────────────────────────────────────────
+    // helper: compute section averages
+    // ──────────────────────────────────────────────
+    function computeSectionAverages(songSet, sectionLabels) {
+        const stats = {};
+        sectionLabels.forEach(l => { stats[l] = { sum: 0, count: 0 }; });
+        songSet.forEach(s => {
+            const sec = getSection(s);
+            if (stats[sec]) {
+                stats[sec].sum += s.rating;
+                stats[sec].count++;
             }
         });
-    });
+        return sectionLabels.map(l => stats[l].count ? stats[l].sum / stats[l].count : 0);
+    }
 
-    const chLabels = Object.keys(chapterStats);
-    const chData = chLabels.map(ch => chapterStats[ch].sum / chapterStats[ch].count);
-
-    new Chart(document.getElementById('chapterChart'), {
-        type: 'bar',
-        data: {
-            labels: chLabels,
-            datasets: [{
-                label: 'Average Rating',
-                data: chData,
-                backgroundColor: ['#00ff9d', '#00f2ff', '#ff00ff', '#ffff00', '#ff0000', '#ff8800'],
-                borderColor: '#fff',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: { min: 1200 }
-            },
-            plugins: {
-                legend: { display: false }
-            }
-        }
-    });
-
-    // random numbers that look professional.
-    const top20 = publicSongs.slice(0, 20);
-
-    new Chart(document.getElementById('votesChart'), {
-        type: 'scatter',
-        data: {
-            datasets: [{
-                label: 'Songs',
-                data: top20.map(s => ({ x: s.rating, y: s.comparisons || 0 })),
-                backgroundColor: '#ff00ff'
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                x: { title: { display: true, text: 'Rating' } },
-                y: { title: { display: true, text: 'Estimated Votes (If Available)' } }
-            }
-        }
-    });
-
-    // visual clutter.
+    // ──────────────────────────────────────────────
+    // top 10 highest rated
+    // ──────────────────────────────────────────────
     const top10 = songs.slice(0, 10);
-    const top10Chart = Chart.getChart("votesChart");
-    if (top10Chart) top10Chart.destroy();
 
     new Chart(document.getElementById('votesChart'), {
         type: 'bar',
@@ -153,18 +140,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             indexAxis: 'y',
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false }
-            },
-            scales: {
-                x: { min: 1400 }
-            }
+            plugins: { legend: { display: false } },
+            scales: { x: { min: 1400 } }
         }
     });
 
-
-
-    // the absolute failures.
+    // ──────────────────────────────────────────────
+    // bottom 10 lowest rated
+    // ──────────────────────────────────────────────
     const bottom10 = [...songs].sort((a, b) => a.rating - b.rating).slice(0, 10);
 
     new Chart(document.getElementById('bottom10Chart'), {
@@ -188,7 +171,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // rating distribution. the missing link or whatever.
+    // ──────────────────────────────────────────────
+    // rating distribution
+    // ──────────────────────────────────────────────
+    const ratings = publicSongs.map(s => Math.round(s.rating));
+    const bins = {};
+    ratings.forEach(r => {
+        const bin = Math.floor(r / 50) * 50;
+        bins[bin] = (bins[bin] || 0) + 1;
+    });
     const binLabels = Object.keys(bins).sort((a, b) => parseInt(a) - parseInt(b));
     const binData = binLabels.map(b => bins[b]);
 
@@ -207,13 +198,171 @@ document.addEventListener('DOMContentLoaded', async () => {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+
+    // ──────────────────────────────────────────────
+    // average rating by game
+    // ──────────────────────────────────────────────
+    const gameLabels = ['Deltarune', 'Undertale', 'UT Yellow'];
+    const gameAvgs = [drSongs, utSongs, utySongs].map(set =>
+        set.reduce((sum, s) => sum + s.rating, 0) / set.length
+    );
+
+    new Chart(document.getElementById('avgByGameChart'), {
+        type: 'bar',
+        data: {
+            labels: gameLabels,
+            datasets: [{
+                label: 'Average Rating',
+                data: gameAvgs,
+                backgroundColor: ['#00ff9d', '#ff00ff', '#ffff00'],
+                borderColor: '#fff',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { y: { min: 1200 } },
+            plugins: { legend: { display: false } }
+        }
+    });
+
+    // ──────────────────────────────────────────────
+    // deltarune by chapter
+    // ──────────────────────────────────────────────
+    const drSections = ['Ch 1', 'Ch 2', 'Ch 3', 'Ch 4'];
+    const drAvgs = computeSectionAverages(drSongs, drSections);
+
+    new Chart(document.getElementById('drChapterChart'), {
+        type: 'bar',
+        data: {
+            labels: drSections,
+            datasets: [{
+                label: 'Average Rating',
+                data: drAvgs,
+                backgroundColor: ['#00ff9d', '#00f2ff', '#ff00ff', '#ffff00'],
+                borderColor: '#fff',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { y: { min: 1200 } },
+            plugins: { legend: { display: false } }
+        }
+    });
+
+    // ──────────────────────────────────────────────
+    // undertale by area
+    // ──────────────────────────────────────────────
+    const utSections = ['Ruins', 'Snowdin', 'Waterfall', 'Hotland / CORE', 'New Home'];
+    const utAvgs = computeSectionAverages(utSongs, utSections);
+
+    new Chart(document.getElementById('utAreaChart'), {
+        type: 'bar',
+        data: {
+            labels: utSections,
+            datasets: [{
+                label: 'Average Rating',
+                data: utAvgs,
+                backgroundColor: ['#ff0000', '#00f2ff', '#0066ff', '#ff8800', '#ff00ff'],
+                borderColor: '#fff',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { y: { min: 1200 } },
+            plugins: { legend: { display: false } }
+        }
+    });
+
+    // ──────────────────────────────────────────────
+    // uty by region
+    // ──────────────────────────────────────────────
+    const utySections = ['Ruins', 'Snowdin', 'Dunes', 'Wild East', 'Steamworks', 'New Home', 'Genocide'];
+    const utyAvgs = computeSectionAverages(utySongs, utySections);
+
+    new Chart(document.getElementById('utyRegionChart'), {
+        type: 'bar',
+        data: {
+            labels: utySections,
+            datasets: [{
+                label: 'Average Rating',
+                data: utyAvgs,
+                backgroundColor: ['#ff0000', '#00f2ff', '#ffff00', '#ff8800', '#888888', '#ff00ff', '#cc0000'],
+                borderColor: '#fff',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
             scales: {
-                y: { beginAtZero: true }
+                y: { min: 1200 },
+                x: {
+                    ticks: { maxRotation: 45, minRotation: 30, font: { size: 10 } }
+                }
+            },
+            plugins: { legend: { display: false } }
+        }
+    });
+
+    // ──────────────────────────────────────────────
+    // most volatile (biggest outliers from game mean)
+    // ──────────────────────────────────────────────
+    const gameMeans = { DR: gameAvgs[0], UT: gameAvgs[1], UTY: gameAvgs[2] };
+
+    const withDeviation = publicSongs.map(s => ({
+        ...s,
+        game: getGame(s),
+        deviation: s.rating - gameMeans[getGame(s)]
+    }));
+
+    // top 10 by absolute deviation
+    const mostVolatile = [...withDeviation]
+        .sort((a, b) => Math.abs(b.deviation) - Math.abs(a.deviation))
+        .slice(0, 10);
+
+    new Chart(document.getElementById('volatilityChart'), {
+        type: 'bar',
+        data: {
+            labels: mostVolatile.map(s => s.name.substring(0, 18) + (s.name.length > 18 ? '...' : '')),
+            datasets: [{
+                label: 'Deviation from Game Avg',
+                data: mostVolatile.map(s => s.deviation),
+                backgroundColor: mostVolatile.map(s => s.deviation > 0 ? '#00ff9d' : '#ff0000'),
+                borderColor: '#fff',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: (context) => {
+                            const song = mostVolatile[context.dataIndex];
+                            const sign = song.deviation > 0 ? '+' : '';
+                            return `${song.name} (${song.game}): ${sign}${Math.round(song.deviation)}`;
+                        }
+                    }
+                }
             }
         }
     });
 
-    // the slope of despair.
+    // ──────────────────────────────────────────────
+    // the curve (all songs sorted)
+    // ──────────────────────────────────────────────
     const allSorted = [...songs].sort((a, b) => b.rating - a.rating);
 
     new Chart(document.getElementById('curveChart'), {
@@ -252,15 +401,63 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // pure unadulterated chaos.
-    // chronological order view. keep the secrets secret. i don't care.
-    new Chart(document.getElementById('chronoChart'), {
+    // ──────────────────────────────────────────────
+    // chronological quality: 3 separate charts
+    // ──────────────────────────────────────────────
+    function makeChronoChart(canvasId, songSet, color, gameLabel) {
+        // normalize x-axis: just use order within this game
+        const sorted = [...songSet].sort((a, b) => a.id - b.id);
+        new Chart(document.getElementById(canvasId), {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: gameLabel,
+                    data: sorted.map((s, i) => ({ x: i + 1, y: s.rating })),
+                    backgroundColor: color,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => {
+                                const song = sorted[context.dataIndex];
+                                return `${song.name}: ${Math.round(context.raw.y)}`;
+                            }
+                        }
+                    },
+                    legend: { display: false }
+                },
+                scales: {
+                    x: { title: { display: true, text: 'Track Order' } },
+                    y: { title: { display: true, text: 'Rating' } }
+                }
+            }
+        });
+    }
+
+    makeChronoChart('chronoDrChart', drSongs, '#ff00ff', 'Deltarune');
+    makeChronoChart('chronoUtChart', utSongs, '#00ff9d', 'Undertale');
+    makeChronoChart('chronoUtyChart', utySongs, '#ffff00', 'UT Yellow');
+
+    // ──────────────────────────────────────────────
+    // duration vs rating (fixed: no zero-duration songs)
+    // ──────────────────────────────────────────────
+    const songsWithDuration = publicSongs.filter(s => s.duration && s.duration > 0);
+
+    new Chart(document.getElementById('durationChart'), {
         type: 'scatter',
         data: {
             datasets: [{
                 label: 'Songs',
-                data: publicSongs.map(s => ({ x: s.id, y: s.rating })),
-                backgroundColor: '#ff00ff'
+                data: songsWithDuration.map(s => ({ x: s.duration, y: s.rating })),
+                backgroundColor: '#ffff00',
+                pointRadius: 4,
+                pointHoverRadius: 6
             }]
         },
         options: {
@@ -270,31 +467,83 @@ document.addEventListener('DOMContentLoaded', async () => {
                 tooltip: {
                     callbacks: {
                         label: (context) => {
-                            const song = publicSongs.find(s => s.id === context.raw.x);
-                            return `${song.name}: ${Math.round(context.raw.y)}`;
+                            const song = songsWithDuration.find(s => Math.abs(s.duration - context.raw.x) < 0.01 && s.rating === context.raw.y);
+                            return `${song ? song.name : 'Unknown'}: ${Math.round(context.raw.y)} (${context.raw.x}s)`;
                         }
                     }
                 },
                 legend: { display: false }
             },
             scales: {
-                x: { title: { display: true, text: 'Song ID (Chronological)' } },
+                x: {
+                    title: { display: true, text: 'Duration (Seconds)' },
+                    type: 'linear',
+                    position: 'bottom'
+                },
                 y: { title: { display: true, text: 'Rating' } }
             }
         }
     });
 
+    // ──────────────────────────────────────────────
+    // most battled
+    // ──────────────────────────────────────────────
+    const mostBattled = [...publicSongs].sort((a, b) => b.comparisons - a.comparisons).slice(0, 10);
 
-    // useless shapes.
-    const chapterAverages = chData;
+    new Chart(document.getElementById('battlesChart'), {
+        type: 'bar',
+        data: {
+            labels: mostBattled.map(s => s.name.substring(0, 15) + '...'),
+            datasets: [{
+                label: 'Total Battles',
+                data: mostBattled.map(s => s.comparisons),
+                backgroundColor: '#ff8800',
+                borderColor: '#fff',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { x: { beginAtZero: true } }
+        }
+    });
+
+    // ──────────────────────────────────────────────
+    // radar chart. keeping it because it looks cool.
+    // ──────────────────────────────────────────────
+    const radarLabels = ['Ch 1', 'Ch 2', 'Ch 3', 'Ch 4', 'UT', 'UTY'];
+    const radarStats = {};
+    radarLabels.forEach(l => { radarStats[l] = { sum: 0, count: 0 }; });
+
+    publicSongs.forEach(s => {
+        const game = getGame(s);
+        if (game === 'DR') {
+            const sec = getSection(s);
+            if (radarStats[sec]) {
+                radarStats[sec].sum += s.rating;
+                radarStats[sec].count++;
+            }
+        } else if (game === 'UT') {
+            radarStats['UT'].sum += s.rating;
+            radarStats['UT'].count++;
+        } else {
+            radarStats['UTY'].sum += s.rating;
+            radarStats['UTY'].count++;
+        }
+    });
+
+    const radarData = radarLabels.map(l => radarStats[l].count ? radarStats[l].sum / radarStats[l].count : 0);
 
     new Chart(document.getElementById('radarChart'), {
         type: 'radar',
         data: {
-            labels: chLabels,
+            labels: radarLabels,
             datasets: [{
                 label: 'Avg Rating',
-                data: chapterAverages,
+                data: radarData,
                 backgroundColor: 'rgba(0, 255, 157, 0.2)',
                 borderColor: '#00ff9d',
                 pointBackgroundColor: '#fff',
@@ -318,62 +567,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // dynamic tiers. better than arbitrary numbers i guess.
-    // S+ (Top 5%), S (Next 10%), A (Next 20%), B (Next 30%), C (Next 20%), D (Bottom 15%)
-    const sortedByRating = [...publicSongs].sort((a, b) => b.rating - a.rating);
-    const total = sortedByRating.length;
-
-    // threshold indices
-    const iSPlus = Math.floor(total * 0.05);
-    const iS = Math.floor(total * 0.15);
-    const iA = Math.floor(total * 0.35);
-    const iB = Math.floor(total * 0.65);
-    const iC = Math.floor(total * 0.85);
-
-    const tiers = { 'S+': 0, 'S': 0, 'A': 0, 'B': 0, 'C': 0, 'D': 0 };
-
-    sortedByRating.forEach((s, index) => {
-        if (index < iSPlus) tiers['S+']++;
-        else if (index < iS) tiers['S']++;
-        else if (index < iA) tiers['A']++;
-        else if (index < iB) tiers['B']++;
-        else if (index < iC) tiers['C']++;
-        else tiers['D']++;
-    });
-
-    new Chart(document.getElementById('tierChart'), {
-        type: 'doughnut',
-        data: {
-            labels: Object.keys(tiers),
-            datasets: [{
-                data: Object.values(tiers),
-                backgroundColor: [
-                    '#ff00ff', // S+ Magenta
-                    '#00f2ff', // S Cyan
-                    '#00ff9d', // A Green
-                    '#ffff00', // B Yellow
-                    '#ff8800', // C Orange
-                    '#ff0000'  // D Red
-                ],
-                borderColor: '#000',
-                borderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'right', labels: { color: '#fff' } }
-            }
-        }
-    });
-
-    // oh look, you found the stats. have some secrets.
+    // ──────────────────────────────────────────────
+    // secrets unlock. keep this.
+    // ──────────────────────────────────────────────
     const secretsUnlocked = localStorage.getItem('drSongRankerSecretsUnlocked');
     if (secretsUnlocked !== 'true') {
         localStorage.setItem('drSongRankerSecretsUnlocked', 'true');
 
-        // Create themed toast notification
         const toast = document.createElement('div');
         toast.className = 'toast-notification';
         toast.innerHTML = `
@@ -383,7 +583,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         document.body.appendChild(toast);
 
-        // Auto-dismiss after 5 seconds
         setTimeout(() => {
             toast.style.transition = 'opacity 0.5s';
             toast.style.opacity = '0';
@@ -391,99 +590,4 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, 5000);
     }
 
-
-    // new stats. user requested this. i deliver.
-
-    // 1. does length matter? (duration vs rating)
-    // kept the short clips. chaos is good.
-    new Chart(document.getElementById('durationChart'), {
-        type: 'scatter',
-        data: {
-            datasets: [{
-                label: 'Songs',
-                data: publicSongs.map(s => ({ x: s.duration, y: s.rating })),
-                backgroundColor: '#ffff00', // yellow because why not
-                pointRadius: 4,
-                pointHoverRadius: 6
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: (context) => {
-                            const song = publicSongs.find(s => Math.abs(s.duration - context.raw.x) < 0.01 && s.rating === context.raw.y);
-                            return `${song ? song.name : 'Unknown'}: ${Math.round(context.raw.y)} (${context.raw.x}s)`;
-                        }
-                    }
-                },
-                legend: { display: false }
-            },
-            scales: {
-                x: {
-                    title: { display: true, text: 'Duration (Seconds)' },
-                    type: 'linear',
-                    position: 'bottom'
-                },
-                y: {
-                    title: { display: true, text: 'Rating' }
-                }
-            }
-        }
-    });
-
-    // 2. most battled.
-    const mostBattled = [...publicSongs].sort((a, b) => b.comparisons - a.comparisons).slice(0, 10);
-
-    new Chart(document.getElementById('battlesChart'), {
-        type: 'bar',
-        data: {
-            labels: mostBattled.map(s => s.name.substring(0, 15) + '...'),
-            datasets: [{
-                label: 'Total Battles',
-                data: mostBattled.map(s => s.comparisons),
-                backgroundColor: '#ff8800', // orange
-                borderColor: '#fff',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            indexAxis: 'y',
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: { x: { beginAtZero: true } }
-        }
-    });
-
-    // 3. chapter mvps.
-    // we already have 'songsWithChapters'.
-    const mvpContainer = document.getElementById('mvp-container');
-    const chapters = ['Ch 1', 'Ch 2', 'Ch 3', 'Ch 4', 'UT', 'UTY'];
-
-    chapters.forEach(ch => {
-        const chapterSongs = publicSongs.filter(s => s.chapters.includes(ch));
-        if (chapterSongs.length === 0) return;
-
-        const mvp = chapterSongs.reduce((prev, current) => (prev.rating > current.rating) ? prev : current);
-
-        const card = document.createElement('div');
-        card.style.border = '1px solid var(--accent-color, #fff)';
-        card.style.padding = '10px';
-        card.style.textAlign = 'center';
-        card.style.borderRadius = '8px';
-        card.style.background = '#111';
-
-        card.innerHTML = `
-            <h3 style="margin: 0 0 10px 0; color: #aaa;">${ch} MVP</h3>
-            <div style="font-weight: bold; color: #fff; margin-bottom: 5px;">${mvp.name}</div>
-            <div style="color: var(--accent-color, #00ff9d); font-size: 1.2em;">${Math.round(mvp.rating)}</div>
-        `;
-        mvpContainer.appendChild(card);
-    });
-
 });
-
-
