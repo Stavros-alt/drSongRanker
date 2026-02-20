@@ -863,7 +863,7 @@ const utSongList = [
     },
     {
         "id": 1108,
-        "name": "Finale",
+        "name": "Finale (unused)",
         "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 108 Finale.mp3",
         "rating": 1500,
         "comparisons": 0,
@@ -881,7 +881,7 @@ const utSongList = [
     },
     {
         "id": 1110,
-        "name": "Good Night",
+        "name": "Mus piano",
         "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 110 Good Night.mp3",
         "rating": 1500,
         "comparisons": 0,
