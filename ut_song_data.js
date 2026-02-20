@@ -806,6 +806,213 @@ const utSongList = [
         "rating": 1500,
         "comparisons": 0,
         "duration": 31.01
+    },
+    {
+        "id": 1102,
+        "name": "Abc 123 a new laughing",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 102 Abc 123 a new laughing.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 6.19,
+        "hidden": true
+    },
+    {
+        "id": 1103,
+        "name": "Abc 123 a old",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 103 Abc 123 a old.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 25.63,
+        "hidden": true
+    },
+    {
+        "id": 1104,
+        "name": "Alphys lab",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 104 Alphys lab.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 78.73,
+        "hidden": true
+    },
+    {
+        "id": 1105,
+        "name": "Dance of Dog",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 105 Dance of Dog.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 13.77,
+        "hidden": true
+    },
+    {
+        "id": 1106,
+        "name": "Dog Hole",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 106 Dog Hole.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 43.76,
+        "hidden": true
+    },
+    {
+        "id": 1107,
+        "name": "Dogtroid",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 107 Dogtroid.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 34.32,
+        "hidden": true
+    },
+    {
+        "id": 1108,
+        "name": "Finale",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 108 Finale.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 11.42,
+        "hidden": true
+    },
+    {
+        "id": 1109,
+        "name": "Gaster's Theme",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 109 Gaster's Theme.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 17.53,
+        "hidden": true
+    },
+    {
+        "id": 1110,
+        "name": "Good Night",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 110 Good Night.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 31.01,
+        "hidden": true
+    },
+    {
+        "id": 1111,
+        "name": "Grandpa Semi",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 111 Grandpa Semi.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 5.09,
+        "hidden": true
+    },
+    {
+        "id": 1112,
+        "name": "Happy Town",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 112 Happy Town.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 1.36,
+        "hidden": true
+    },
+    {
+        "id": 1113,
+        "name": "Meat Factory",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 113 Meat Factory.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 1.78,
+        "hidden": true
+    },
+    {
+        "id": 1114,
+        "name": "Mus kingdescription",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 114 Mus kingdescription.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 64.05,
+        "hidden": true
+    },
+    {
+        "id": 1115,
+        "name": "Mus ruinspiano",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 115 Mus ruinspiano.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 69.38,
+        "hidden": true
+    },
+    {
+        "id": 1116,
+        "name": "Mus smile",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 116 Mus smile.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 79.18,
+        "hidden": true
+    },
+    {
+        "id": 1117,
+        "name": "Mus star",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 117 Mus star.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 45.77,
+        "hidden": true
+    },
+    {
+        "id": 1118,
+        "name": "Patient",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 118 Patient.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 59.12,
+        "hidden": true
+    },
+    {
+        "id": 1119,
+        "name": "Sigh of Dog",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 119 Sigh of Dog.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 29.73,
+        "hidden": true
+    },
+    {
+        "id": 1120,
+        "name": "Trouble Dingle",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 120 Trouble Dingle.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 1.46,
+        "hidden": true
+    },
+    {
+        "id": 1121,
+        "name": "Undertale (Soundtrack)",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 121 Undertale (Soundtrack).mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 244.04,
+        "hidden": true
+    },
+    {
+        "id": 1122,
+        "name": "Undyne battle",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 122 Undyne battle.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 90.04,
+        "hidden": true
+    },
+    {
+        "id": 1123,
+        "name": "Wrong Number Song",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 123 Wrong Number Song.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 5.59,
+        "hidden": true
+    },
+    {
+        "id": 1124,
+        "name": "Your Best Nightmare (unused)",
+        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 124 Your Best Nightmare.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 25.31,
+        "hidden": true
     }
 ];
 
