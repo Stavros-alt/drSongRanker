@@ -696,7 +696,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     suggestBtn.addEventListener('click', () => {
-        window.open('https://stavros-alt.github.io/Stavros-alt/', '_blank');
+        window.open('https://stavros-alt.github.io/Stavros-alt/suggestions.html', '_blank');
     });
 
     // submissions are enabled. go bother people on discord.
