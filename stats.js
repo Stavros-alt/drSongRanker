@@ -69,7 +69,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (track <= 72) return 'Wild East';
         if (track <= 94) return 'Steamworks';
         if (track <= 125) return 'New Home';
-        return 'Genocide';
+        if (track === 126) return 'New Home'; // asgore. finally over.
+        if (track === 127) return 'Ruins'; // enemy retreating. starts in ruins but covers everything. still messy.
+        if (track === 128) return 'Snowdin'; // apprehension. Genocide martlet is exhausting.
+        if (track === 129 || track === 130) return 'Wild East'; // starlo and ceroba are too much for me right now.
+        if (track === 131) return 'Steamworks'; // axis. whatever.
+        return 'New Home'; // zenith tracks. i'm done.
     }
 
     const publicSongs = songs;
@@ -285,7 +290,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ──────────────────────────────────────────────
     // uty by region
     // ──────────────────────────────────────────────
-    const utySections = ['Ruins', 'Snowdin', 'Dunes', 'Wild East', 'Steamworks', 'New Home', 'Genocide'];
+    const utySections = ['Ruins', 'Snowdin', 'Dunes', 'Wild East', 'Steamworks', 'New Home'];
     const utyAvgs = computeSectionAverages(utySongs, utySections);
 
     new Chart(document.getElementById('utyRegionChart'), {
@@ -295,7 +300,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             datasets: [{
                 label: 'Average Rating',
                 data: utyAvgs,
-                backgroundColor: ['#ff0000', '#00f2ff', '#ffff00', '#ff8800', '#888888', '#ff00ff', '#cc0000'],
+                backgroundColor: ['#ff0000', '#00f2ff', '#ffff00', '#ff8800', '#888888', '#ff00ff'],
                 borderColor: '#fff',
                 borderWidth: 1
             }]

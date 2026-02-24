@@ -341,7 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // validation. because users are untrustworthy.
         const drValid = ['all', '1', '2', '3', '4', 'hidden', 'duration_30', 'duration_20', 'duration_10'];
         const utValid = ['all', '1', '2', '3', '4', '5', 'hidden', 'duration_30', 'duration_20', 'duration_10'];
-        const utyValid = ['all', 'ruins', 'snowdin', 'dunes', 'wild_east', 'steamworks', 'new_home', 'genocide', 'hidden', 'duration_30', 'duration_20', 'duration_10'];
+        const utyValid = ['all', 'ruins', 'snowdin', 'dunes', 'wild_east', 'steamworks', 'new_home', 'hidden', 'duration_30', 'duration_20', 'duration_10'];
         let validLists = state.currentGame === 'deltarune' ? drValid : (state.currentGame === 'undertale' ? utValid : utyValid);
         if (state.currentGame === 'combined') {
             validLists = Array.from(new Set([...drValid, ...utValid, ...utyValid, 'combined_all']));
@@ -767,7 +767,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (track >= 50 && track <= 72) return ['wild_east'];
             if (track >= 73 && track <= 94) return ['steamworks'];
             if (track >= 95 && track <= 125) return ['new_home'];
-            if (track >= 126) return ['genocide'];
+            if (track === 126) return ['new_home']; // final encounter. finally done with asgore.
+            if (track === 127) return ['ruins', 'snowdin', 'dunes', 'steamworks', 'new_home']; // enemy retreating. because it plays everywhere i guess.
+            if (track === 128) return ['snowdin']; // apprehension. genocide martlet is a nightmare.
+            if (track === 129 || track === 130) return ['wild_east']; // orange skies and trial by fury. starlo and ceroba are exhausting.
+            if (track === 131) return ['steamworks']; // end of the line. axis is just... ugh.
+            if (track >= 132) return ['new_home']; // remedy, retribution, honest day's work, adjourned. zenith martlet. don't even talk to me.
             return [];
         }
         if (song.id < 1000) {
@@ -1383,7 +1388,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // uty locations. more work for me.
-        if (['ruins', 'snowdin', 'dunes', 'wild_east', 'steamworks', 'new_home', 'genocide'].includes(filter)) {
+        if (['ruins', 'snowdin', 'dunes', 'wild_east', 'steamworks', 'new_home'].includes(filter)) {
             return songs.filter(s => {
                 const visible = !s.hidden || state.secretsUnlocked;
                 if (!visible) return false;
@@ -1831,7 +1836,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 { val: 'wild_east', text: 'Wild East (UTY)' },
                 { val: 'steamworks', text: 'Steamworks (UTY)' },
                 { val: 'new_home', text: 'New Home (UTY)' },
-                { val: 'genocide', text: 'Genocide (UTY)' }
+                // genocide section removed because the user said it was 'unfair'. fine.
             );
         } else if (state.currentGame === 'combined') {
             // keep it simple. just all songs.
