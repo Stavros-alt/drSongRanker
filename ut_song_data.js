@@ -109,7 +109,8 @@ const utSongList = [
         "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 14 Heartache.mp3",
         "rating": 1500,
         "comparisons": 0,
-        "duration": 108.49
+        "duration": 108.49,
+        "felfebFile": "audio/felfeb/feb-ut/Heartache (With Lyrics) - The Undertale Musical [kJgTTR5wE3M].mp3"
     },
     {
         "id": 1015,
@@ -469,7 +470,8 @@ const utSongList = [
         "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 59 Spider Dance.mp3",
         "rating": 1500,
         "comparisons": 0,
-        "duration": 106.48
+        "duration": 106.48,
+        "felfebFile": "audio/felfeb/feb-ut/Spider Dance (With Lyrics) - The Undertale Musical [FC-TH8DU8so].mp3"
     },
     {
         "id": 1060,
@@ -541,7 +543,8 @@ const utSongList = [
         "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 68 Death by Glamour.mp3",
         "rating": 1500,
         "comparisons": 0,
-        "duration": 134.64
+        "duration": 134.64,
+        "felfebFile": "audio/felfeb/feb-ut/Death By Glamour (With Lyrics) - The Undertale Musical [cf_GIbnsC6E].mp3"
     },
     {
         "id": 1069,
@@ -629,7 +632,8 @@ const utSongList = [
         "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 79 Your Best Nightmare.mp3",
         "rating": 1500,
         "comparisons": 0,
-        "duration": 240.04
+        "duration": 240.04,
+        "felfebFile": "audio/felfeb/feb-ut/Your Best Nightmare (With Lyrics) - The Undertale Musical [xEuAr3xUEV0].mp3"
     },
     {
         "id": 1080,
@@ -637,7 +641,8 @@ const utSongList = [
         "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 80 Finale.mp3",
         "rating": 1500,
         "comparisons": 0,
-        "duration": 112.46
+        "duration": 112.46,
+        "felfebFile": "audio/felfeb/feb-ut/Finale (With Lyrics) - The Undertale Musical [T8w6o6gzTpY].mp3"
     },
     {
         "id": 1081,
@@ -797,7 +802,8 @@ const utSongList = [
         "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 100 MEGALOVANIA.mp3",
         "rating": 1500,
         "comparisons": 0,
-        "duration": 156.03
+        "duration": 156.03,
+        "felfebFile": "audio/felfeb/feb-ut/Megalovania (With Lyrics) - The Undertale Musical [CCnvjYfU2Hc].mp3"
     },
     {
         "id": 1101,

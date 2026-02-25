@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const utyToggle = document.getElementById('uty-toggle');
     const showRatingsToggle = document.getElementById('show-ratings-toggle');
     const preventDuplicatesToggle = document.getElementById('prevent-duplicates-toggle');
-    const rankingList = document.getElementById('ranking-list');
+    const felfebModeToggle = document.getElementById('felfeb-mode-toggle');
     const arena = document.querySelector('.arena');
     const songACard = document.getElementById('songA-card');
     const songBCard = document.getElementById('songB-card');
@@ -59,6 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const exportZipBtn = document.getElementById('export-zip-btn');
     const exportTextBtn = document.getElementById('export-text-btn');
     const rankingSearch = document.getElementById('ranking-search');
+    const rankingList = document.getElementById('ranking-list');
     const vsText = document.getElementById('vs-text'); // i guess we need this now.
     const historyModal = document.getElementById('history-modal');
     const historySongName = document.getElementById('history-song-name');
@@ -213,7 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return (yiq >= 128) ? 'black' : 'white';
     }
 
-    let globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{"currentGame": "deltarune", "showRatings": false, "preventDuplicates": false, "combinedDiscovered": false}');
+    let globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{"currentGame": "deltarune", "showRatings": false, "preventDuplicates": false, "combinedDiscovered": false, "felfebMode": true}');
 
     let state = {
         currentGame: globalState.currentGame,
@@ -228,7 +229,8 @@ document.addEventListener('DOMContentLoaded', () => {
         showRatings: globalState.showRatings, // nobody wants to see the numbers apparently.
         preventDuplicates: globalState.preventDuplicates || false,
         recentMatches: [], // keeping track of what we just saw.
-        volume: parseFloat(localStorage.getItem('drSongRankerVolume') || '0.5')
+        volume: parseFloat(localStorage.getItem('drSongRankerVolume') || '0.5'),
+        felfebMode: globalState.felfebMode !== undefined ? globalState.felfebMode : true
     };
 
     function saveState() {
@@ -240,7 +242,8 @@ document.addEventListener('DOMContentLoaded', () => {
             currentGame: state.currentGame,
             showRatings: state.showRatings,
             preventDuplicates: state.preventDuplicates,
-            combinedDiscovered: globalState.combinedDiscovered
+            combinedDiscovered: globalState.combinedDiscovered,
+            felfebMode: state.felfebMode
         }));
     }
 
@@ -263,6 +266,15 @@ document.addEventListener('DOMContentLoaded', () => {
             sourceList = (typeof utySongList !== 'undefined') ? utySongList : (window.utySongList || []);
         }
 
+        const drSaved = localStorage.getItem('drSongRankerState');
+        const utSaved = localStorage.getItem('utSongRankerState');
+        const combinedSaved = localStorage.getItem('combinedSongRankerState');
+        const utySaved = localStorage.getItem('utySongRankerState');
+        const drParsed = drSaved ? JSON.parse(drSaved) : null;
+        const utParsed = utSaved ? JSON.parse(utSaved) : null;
+        const combinedParsed = combinedSaved ? JSON.parse(combinedSaved) : null;
+        const utyParsed = utySaved ? JSON.parse(utySaved) : null;
+
         if (saved) {
             const parsed = JSON.parse(saved);
             state.comparisons = parsed.comparisons || 0;
@@ -270,24 +282,17 @@ document.addEventListener('DOMContentLoaded', () => {
             state.activeRankerList = parsed.activeRankerList || 'all';
             state.customLists = parsed.customLists || {};
             state.boostedSongId = parsed.boostedSongId || null;
-
-            const drSaved = localStorage.getItem('drSongRankerState');
-            const utSaved = localStorage.getItem('utSongRankerState');
-            const combinedSaved = localStorage.getItem('combinedSongRankerState');
-            const drParsed = drSaved ? JSON.parse(drSaved) : null;
-            const utParsed = utSaved ? JSON.parse(utSaved) : null;
-            const combinedParsed = combinedSaved ? JSON.parse(combinedSaved) : null;
+            state.felfebMode = parsed.felfebMode !== undefined ? parsed.felfebMode : state.felfebMode;
 
             state.songs = sourceList.map(baseSong => {
-                // we want the "freshest" data for this song, wherever it is.
                 const possibleStates = [
                     parsed && parsed.songs ? parsed.songs.find(s => s.id === baseSong.id) : null,
                     drParsed && drParsed.songs ? drParsed.songs.find(s => s.id === baseSong.id) : null,
                     utParsed && utParsed.songs ? utParsed.songs.find(s => s.id === baseSong.id) : null,
+                    utyParsed && utyParsed.songs ? utyParsed.songs.find(s => s.id === baseSong.id) : null,
                     combinedParsed && combinedParsed.songs ? combinedParsed.songs.find(s => s.id === baseSong.id) : null
                 ].filter(s => s !== null);
 
-                // sort by comparison count, descending. i'm a genius.
                 const freshest = possibleStates.sort((a, b) => (b.comparisons || 0) - (a.comparisons || 0))[0];
 
                 if (freshest) {
@@ -298,22 +303,19 @@ document.addEventListener('DOMContentLoaded', () => {
                         matchHistory: freshest.matchHistory || []
                     };
                 }
-                return { ...baseSong, matchHistory: [] };
+                return {
+                    ...baseSong,
+                    rating: 1500,
+                    comparisons: 0,
+                    matchHistory: []
+                };
             });
         } else {
-            // fresh start. still pulling from whatever might exist.
-            const drSaved = localStorage.getItem('drSongRankerState');
-            const utSaved = localStorage.getItem('utSongRankerState');
-            const combinedSaved = localStorage.getItem('combinedSongRankerState');
-            const drParsed = drSaved ? JSON.parse(drSaved) : null;
-            const utParsed = utSaved ? JSON.parse(utSaved) : null;
-            const combinedParsed = combinedSaved ? JSON.parse(combinedSaved) : null;
-
             state.songs = sourceList.map(baseSong => {
                 const possibleStates = [
                     drParsed && drParsed.songs ? drParsed.songs.find(s => s.id === baseSong.id) : null,
                     utParsed && utParsed.songs ? utParsed.songs.find(s => s.id === baseSong.id) : null,
-                    (localStorage.getItem('utySongRankerState') ? JSON.parse(localStorage.getItem('utySongRankerState')).songs : []).find(s => s.id === baseSong.id) || null,
+                    utyParsed && utyParsed.songs ? utyParsed.songs.find(s => s.id === baseSong.id) : null,
                     combinedParsed && combinedParsed.songs ? combinedParsed.songs.find(s => s.id === baseSong.id) : null
                 ].filter(s => s !== null);
 
@@ -327,7 +329,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         matchHistory: freshest.matchHistory || []
                     };
                 }
-                return { ...baseSong, matchHistory: [] };
+                return {
+                    ...baseSong,
+                    rating: 1500,
+                    comparisons: 0,
+                    matchHistory: []
+                };
             });
             state.comparisons = 0;
             state.history = null;
@@ -338,7 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         populateCustomDropdown();
 
-        // validation. because users are untrustworthy.
+        // validation.
         const drValid = ['all', '1', '2', '3', '4', 'hidden', 'duration_30', 'duration_20', 'duration_10'];
         const utValid = ['all', '1', '2', '3', '4', '5', 'hidden', 'duration_30', 'duration_20', 'duration_10'];
         const utyValid = ['all', 'ruins', 'snowdin', 'dunes', 'wild_east', 'steamworks', 'new_home', 'hidden', 'duration_30', 'duration_20', 'duration_10'];
@@ -600,6 +607,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    if (felfebModeToggle) {
+        felfebModeToggle.checked = state.felfebMode;
+        felfebModeToggle.addEventListener('change', (e) => {
+            state.felfebMode = e.target.checked;
+            saveState();
+        });
+    }
+
     saveCustomBtn.addEventListener('click', () => {
         const name = state.currentCustomListName;
         if (!name) return;
@@ -725,7 +740,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let pool = state.songs;
 
-        if (filter === 'all') {
+        if (filter === 'all' || filter === 'combined_all') {
             // normal OST only. no secrets.
             pool = pool.filter(s => !s.hidden);
         } else if (filter === 'all_plus') {
@@ -734,6 +749,8 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (['1', '2', '3', '4', '5'].includes(filter)) {
             const ch = parseInt(filter);
             return pool.filter(s => (!s.hidden || state.secretsUnlocked) && getChaptersForSong(s).includes(ch));
+        } else if (['ruins', 'snowdin', 'dunes', 'wild_east', 'steamworks', 'new_home'].includes(filter)) {
+            return pool.filter(s => (!s.hidden || state.secretsUnlocked) && getChaptersForSong(s).includes(filter));
         } else if (filter.startsWith('duration_')) {
             const limit = parseInt(filter.split('_')[1]);
             // filter out songs shorter than the limit (keep long ones).
@@ -1074,6 +1091,14 @@ document.addEventListener('DOMContentLoaded', () => {
         otherAudioEl.pause();
 
         currentActiveAudio = audioEl;
+
+        let previewFile = songData.file;
+        if (state.felfebMode && songData.felfebFile && Math.random() < 0.1) {
+            previewFile = songData.felfebFile;
+        }
+        audioEl.src = encodeURI(previewFile);
+        audioEl.load();
+
         playerSongName.textContent = `${songData.name} (Preview)`;
 
         // no buttons for previews.
@@ -1115,6 +1140,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const audioEl = (songKey === 'A') ? audioA : audioB;
 
         currentActiveAudio = audioEl;
+
+        let fullFile = songData.file;
+        if (state.felfebMode && songData.felfebFile && Math.random() < 0.1) {
+            fullFile = songData.felfebFile;
+        }
+        audioEl.src = encodeURI(fullFile);
+        audioEl.load();
+
         playerSongName.textContent = songData.name;
 
         // hide prev/next because this isn't a playlist. i'm lazy.
@@ -1365,7 +1398,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // sync the filters. automation for the lazy.    // i'm not doing full reactive state, deal with it.
     function filterSongsByChapter(songs, filter) {
-        if (filter === 'all') {
+        if (filter === 'all' || filter === 'combined_all') {
             return songs.filter(s => !s.hidden);
         }
         if (filter === 'all_plus') {
@@ -1674,6 +1707,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (state.currentGame === 'combined') return;
             saveState();
             state.currentGame = 'combined';
+            if (mainTitle) mainTitle.textContent = 'DELTARUNE VS UNDERTALE VS UTY: WHICH IS BETTER?';
+            currentChapterFilter = 'combined_all';
+            state.activeRankerList = 'combined_all';
+            if (mainFilterSelect) mainFilterSelect.value = 'combined_all';
             loadState();
             saveState();
             presentNewPair();
@@ -1685,9 +1722,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (utyToggle) {
         utyToggle.addEventListener('click', () => {
-            if (state.currentGame === 'undertale_yellow') return;
+            if (state.currentGame === 'uty') return;
             saveState();
-            state.currentGame = 'undertale_yellow';
+            state.currentGame = 'uty';
             loadState();
             saveState();
             presentNewPair();
@@ -2115,7 +2152,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         currentActiveAudio = playlistAudio;
         playerSongName.textContent = `${index + 1}. ${song.name}`;
-        playlistAudio.src = encodeURI(song.file);
+        // felfeb jumpscare in the playlist too. nowhere is safe.
+        let playFile = song.file;
+        if (state.felfebMode && song.felfebFile && Math.random() < 0.1) {
+            playFile = song.felfebFile;
+        }
+        playlistAudio.src = encodeURI(playFile);
         playlistAudio.play().then(() => {
             isPlaylistPlaying = true;
             playerPlayBtn.textContent = "⏸";
