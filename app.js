@@ -1327,7 +1327,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     ...cSong,
                     file: localSong ? localSong.file : '',
                     hidden: localSong ? localSong.hidden : false,
-                    duration: localSong ? localSong.duration : 0 // include duration. don't forget it again.
+                    duration: localSong ? localSong.duration : 0, // include duration. don't forget it again.
+                    felfebFile: localSong ? localSong.felfebFile : undefined // global felfeb. finally.
                 };
             });
 
