@@ -300,14 +300,20 @@ document.addEventListener('DOMContentLoaded', () => {
                         ...baseSong,
                         rating: freshest.rating,
                         comparisons: freshest.comparisons,
-                        matchHistory: freshest.matchHistory || []
+                        matchHistory: freshest.matchHistory || [],
+                        felfebRating: freshest.felfebRating || 1500,
+                        felfebComparisons: freshest.felfebComparisons || 0,
+                        felfebMatchHistory: freshest.felfebMatchHistory || []
                     };
                 }
                 return {
                     ...baseSong,
                     rating: 1500,
                     comparisons: 0,
-                    matchHistory: []
+                    matchHistory: [],
+                    felfebRating: 1500,
+                    felfebComparisons: 0,
+                    felfebMatchHistory: []
                 };
             });
         } else {
@@ -326,14 +332,20 @@ document.addEventListener('DOMContentLoaded', () => {
                         ...baseSong,
                         rating: freshest.rating,
                         comparisons: freshest.comparisons,
-                        matchHistory: freshest.matchHistory || []
+                        matchHistory: freshest.matchHistory || [],
+                        felfebRating: freshest.felfebRating || 1500,
+                        felfebComparisons: freshest.felfebComparisons || 0,
+                        felfebMatchHistory: freshest.felfebMatchHistory || []
                     };
                 }
                 return {
                     ...baseSong,
                     rating: 1500,
                     comparisons: 0,
-                    matchHistory: []
+                    matchHistory: [],
+                    felfebRating: 1500,
+                    felfebComparisons: 0,
+                    felfebMatchHistory: []
                 };
             });
             state.comparisons = 0;
@@ -346,12 +358,12 @@ document.addEventListener('DOMContentLoaded', () => {
         populateCustomDropdown();
 
         // validation.
-        const drValid = ['all', '1', '2', '3', '4', 'hidden', 'duration_30', 'duration_20', 'duration_10'];
-        const utValid = ['all', '1', '2', '3', '4', '5', 'hidden', 'duration_30', 'duration_20', 'duration_10'];
+        const drValid = ['all', '1', '2', '3', '4', 'hidden', 'duration_30', 'duration_20', 'duration_10', 'felfeb'];
+        const utValid = ['all', '1', '2', '3', '4', '5', 'hidden', 'duration_30', 'duration_20', 'duration_10', 'felfeb'];
         const utyValid = ['all', 'ruins', 'snowdin', 'dunes', 'wild_east', 'steamworks', 'new_home', 'hidden', 'duration_30', 'duration_20', 'duration_10'];
         let validLists = state.currentGame === 'deltarune' ? drValid : (state.currentGame === 'undertale' ? utValid : utyValid);
         if (state.currentGame === 'combined') {
-            validLists = Array.from(new Set([...drValid, ...utValid, ...utyValid, 'combined_all']));
+            validLists = Array.from(new Set([...drValid, ...utValid, ...utyValid, 'combined_all', 'felfeb']));
         }
 
         if (!validLists.includes(state.activeRankerList) && !state.customLists[state.activeRankerList]) {
@@ -734,6 +746,23 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
+    // felfeb accessors. i refuse to copy-paste field names everywhere.
+    function isFelfebRanker() {
+        return state.activeRankerList === 'felfeb';
+    }
+
+    function getRating(song) {
+        return isFelfebRanker() ? (song.felfebRating || 1500) : song.rating;
+    }
+
+    function getComparisons(song) {
+        return isFelfebRanker() ? (song.felfebComparisons || 0) : song.comparisons;
+    }
+
+    function getMatchHistory(song) {
+        return isFelfebRanker() ? (song.felfebMatchHistory || []) : (song.matchHistory || []);
+    }
+
     function getFilteredSongs() {
         const query = rankingSearch.value.toLowerCase();
         const filter = state.activeRankerList;
@@ -756,6 +785,9 @@ document.addEventListener('DOMContentLoaded', () => {
             // filter out songs shorter than the limit (keep long ones).
             // also exclude hidden unless unlocked. whatever.
             return pool.filter(s => (!s.hidden || state.secretsUnlocked) && (s.duration && s.duration >= limit));
+        } else if (filter === 'felfeb') {
+            // only songs with felfeb versions. the musical lives on.
+            return pool.filter(s => s.felfebFile && (!s.hidden || state.secretsUnlocked));
         } else if (filter === 'hidden') {
             return state.secretsUnlocked ? pool.filter(s => s.hidden) : [];
         } else if (filter.startsWith('mix_')) {
@@ -857,13 +889,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 else displayCommunityRankings();
             } else if (roll < 0.6) {
                 // 60% for underrated
-                const sortedByVotes = [...availableSongs].sort((a, b) => a.comparisons - b.comparisons);
+                const sortedByVotes = [...availableSongs].sort((a, b) => getComparisons(a) - getComparisons(b));
                 const uncertaintyPoolSize = Math.max(5, Math.floor(availableSongs.length * 0.25));
                 const uncertaintyPool = sortedByVotes.slice(0, uncertaintyPoolSize);
                 song1 = uncertaintyPool[Math.floor(Math.random() * uncertaintyPool.length)];
             } else if (roll < 0.9) {
                 // 30% for top rated
-                const sortedByRating = [...availableSongs].sort((a, b) => b.rating - a.rating);
+                const sortedByRating = [...availableSongs].sort((a, b) => getRating(b) - getRating(a));
                 const topPoolSize = Math.min(20, availableSongs.length);
                 const topPool = sortedByRating.slice(0, topPoolSize);
                 song1 = topPool[Math.floor(Math.random() * topPool.length)];
@@ -876,7 +908,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // next victim.
             const sortedOpponents = [...availableSongs]
                 .filter(s => s.id !== song1.id)
-                .sort((a, b) => Math.abs(a.rating - song1.rating) - Math.abs(b.rating - song1.rating));
+                .sort((a, b) => Math.abs(getRating(a) - getRating(song1)) - Math.abs(getRating(b) - getRating(song1)));
 
             // neighbors. whatever.
             const neighborPoolSize = 10;
@@ -930,9 +962,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // save history before we mess it up.
         state.history = {
-            songA: { id: currentSongA.id, rating: currentSongA.rating, comparisons: currentSongA.comparisons },
-            songB: { id: currentSongB.id, rating: currentSongB.rating, comparisons: currentSongB.comparisons },
-            totalComparisons: state.comparisons
+            songA: {
+                id: currentSongA.id,
+                rating: getRating(currentSongA),
+                comparisons: getComparisons(currentSongA)
+            },
+            songB: {
+                id: currentSongB.id,
+                rating: getRating(currentSongB),
+                comparisons: getComparisons(currentSongB)
+            },
+            totalComparisons: state.comparisons,
+            wasFelfeb: isFelfebRanker()
         };
 
         if (winner) {
@@ -940,27 +981,32 @@ document.addEventListener('DOMContentLoaded', () => {
             const loserSong = (winner === 'A') ? currentSongB : currentSongA;
 
             const { newWinnerRating, newLoserRating } = updateElo(
-                winnerSong.rating,
-                loserSong.rating,
-                winnerSong.comparisons,
-                loserSong.comparisons
+                getRating(winnerSong),
+                getRating(loserSong),
+                getComparisons(winnerSong),
+                getComparisons(loserSong)
             );
 
-            const winnerChange = newWinnerRating - winnerSong.rating;
-            const loserChange = newLoserRating - loserSong.rating;
+            const winnerChange = newWinnerRating - getRating(winnerSong);
+            const loserChange = newLoserRating - getRating(loserSong);
 
             recordMatchHistory(winnerSong, loserSong, false, winnerChange, loserChange);
 
-            winnerSong.rating = newWinnerRating;
-            loserSong.rating = newLoserRating;
+            if (isFelfebRanker()) {
+                winnerSong.felfebRating = newWinnerRating;
+                loserSong.felfebRating = newLoserRating;
+                winnerSong.felfebComparisons++;
+                loserSong.felfebComparisons++;
+            } else {
+                winnerSong.rating = newWinnerRating;
+                loserSong.rating = newLoserRating;
+                winnerSong.comparisons++;
+                loserSong.comparisons++;
+                syncCombinedVote(winnerSong, loserSong);
+                recordCommunityVote(winnerSong.id, loserSong.id);
+            }
 
-            winnerSong.comparisons++;
-            loserSong.comparisons++;
             state.comparisons++;
-
-            syncCombinedVote(winnerSong, loserSong);
-
-            recordCommunityVote(winnerSong.id, loserSong.id);
 
             // only fetch total votes every 15 personal votes. my egress is crying.
             votesSinceLastRefresh++;
@@ -993,10 +1039,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const changeA = isTie ? 0 : (winner === currentSongA ? winnerChange : loserChange);
         const changeB = isTie ? 0 : (winner === currentSongB ? winnerChange : loserChange);
 
-        if (!currentSongA.matchHistory) currentSongA.matchHistory = [];
-        if (!currentSongB.matchHistory) currentSongB.matchHistory = [];
+        const historyListA = getMatchHistory(currentSongA);
+        const historyListB = getMatchHistory(currentSongB);
 
-        currentSongA.matchHistory.unshift({
+        historyListA.unshift({
             opponent: currentSongB.name,
             opponentId: currentSongB.id,
             result: resultA,
@@ -1004,7 +1050,7 @@ document.addEventListener('DOMContentLoaded', () => {
             time: timestamp
         });
 
-        currentSongB.matchHistory.unshift({
+        historyListB.unshift({
             opponent: currentSongA.name,
             opponentId: currentSongA.id,
             result: resultB,
@@ -1013,8 +1059,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // cap history to 100 entries. i'm not a database.
-        if (currentSongA.matchHistory.length > 100) currentSongA.matchHistory.pop();
-        if (currentSongB.matchHistory.length > 100) currentSongB.matchHistory.pop();
+        if (historyListA.length > 100) historyListA.pop();
+        if (historyListB.length > 100) historyListB.pop();
+
+        // making sure these arrays exist because javascript is terrible.
+        if (isFelfebRanker()) {
+            currentSongA.felfebMatchHistory = historyListA;
+            currentSongB.felfebMatchHistory = historyListB;
+        } else {
+            currentSongA.matchHistory = historyListA;
+            currentSongB.matchHistory = historyListB;
+        }
     }
 
     function syncCombinedVote(winnerSong, loserSong) {
@@ -1093,8 +1148,10 @@ document.addEventListener('DOMContentLoaded', () => {
         currentActiveAudio = audioEl;
 
         let previewFile = songData.file;
-        if (state.felfebMode && songData.felfebFile && Math.random() < 0.1) {
-            previewFile = songData.felfebFile;
+        if (state.felfebMode && songData.felfebFile) {
+            if (isFelfebRanker() || Math.random() < 0.1) {
+                previewFile = songData.felfebFile;
+            }
         }
         audioEl.src = encodeURI(previewFile);
         audioEl.load();
@@ -1142,8 +1199,10 @@ document.addEventListener('DOMContentLoaded', () => {
         currentActiveAudio = audioEl;
 
         let fullFile = songData.file;
-        if (state.felfebMode && songData.felfebFile && Math.random() < 0.1) {
-            fullFile = songData.felfebFile;
+        if (state.felfebMode && songData.felfebFile) {
+            if (isFelfebRanker() || Math.random() < 0.1) {
+                fullFile = songData.felfebFile;
+            }
         }
         audioEl.src = encodeURI(fullFile);
         audioEl.load();
@@ -1315,7 +1374,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // console.log("Rendering rankings at " + timestamp); 
 
         const filteredSongs = filterSongsByChapter(state.songs, currentChapterFilter);
-        const sortedSongs = [...filteredSongs].sort((a, b) => b.rating - a.rating);
+        const sortedSongs = [...filteredSongs].sort((a, b) => getRating(b) - getRating(a));
 
         sortedSongs.forEach((song, index) => {
             const li = document.createElement('li');
@@ -1328,7 +1387,7 @@ document.addEventListener('DOMContentLoaded', () => {
             li.appendChild(nameSpan);
 
             const details = document.createElement('small');
-            details.textContent = Math.round(song.rating);
+            details.textContent = Math.round(getRating(song));
             details.style.display = state.showRatings ? 'inline' : 'none';
             li.appendChild(details);
 
@@ -1436,6 +1495,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return songs.filter(s => (!s.hidden || state.secretsUnlocked) && (s.duration && s.duration >= limit));
         }
 
+        if (filter === 'felfeb') {
+            return songs.filter(s => s.felfebFile && (!s.hidden || state.secretsUnlocked));
+        }
+
         if (filter.startsWith('mix_')) {
             const chapters = filter.replace('mix_', '').split('_').map(Number);
             return songs.filter(s => {
@@ -1466,7 +1529,7 @@ document.addEventListener('DOMContentLoaded', () => {
         historySongName.textContent = `HISTORY: ${song.name}`;
         historyList.innerHTML = '';
 
-        const history = song.matchHistory || [];
+        const history = getMatchHistory(song);
         if (history.length === 0) {
             historyList.innerHTML = '<p style="color: #666; text-align: center;">No matches recorded yet.</p>';
         } else {
@@ -1511,24 +1574,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function swapMatchResult(song, index) {
-        const match = song.matchHistory[index];
+        const historyList = getMatchHistory(song);
+        const match = historyList[index];
         if (!match || !match.opponentId) return;
 
         const opponent = state.songs.find(s => s.id === match.opponentId);
-        if (!opponent || !opponent.matchHistory) return;
+        const opponentHistoryList = opponent ? getMatchHistory(opponent) : null;
+        if (!opponent || !opponentHistoryList) return;
 
         // find the counterpart. why do they have to click things wrong.
-        const opponentMatchIndex = opponent.matchHistory.findIndex(m => m.time === match.time && m.opponentId === song.id);
+        const opponentMatchIndex = opponentHistoryList.findIndex(m => m.time === match.time && m.opponentId === song.id);
         if (opponentMatchIndex === -1) {
             alert("Record lost in the void. Pruning happened or something.");
             return;
         }
 
-        const opponentMatch = opponent.matchHistory[opponentMatchIndex];
+        const opponentMatch = opponentHistoryList[opponentMatchIndex];
 
         // undo the damage if we have the numbers.
-        if (match.ratingChange !== undefined) song.rating -= match.ratingChange;
-        if (opponentMatch.ratingChange !== undefined) opponent.rating -= opponentMatch.ratingChange;
+        if (match.ratingChange !== undefined) {
+            if (isFelfebRanker()) song.felfebRating -= match.ratingChange;
+            else song.rating -= match.ratingChange;
+        }
+        if (opponentMatch.ratingChange !== undefined) {
+            if (isFelfebRanker()) opponent.felfebRating -= opponentMatch.ratingChange;
+            else opponent.rating -= opponentMatch.ratingChange;
+        }
 
         // rewrite history. i'm not a time traveler.
         const oldResult = match.result;
@@ -1541,17 +1612,22 @@ document.addEventListener('DOMContentLoaded', () => {
             const loserSong = (match.result === 'win') ? opponent : song;
 
             const { newWinnerRating, newLoserRating } = updateElo(
-                winnerSong.rating,
-                loserSong.rating,
-                winnerSong.comparisons - 1,
-                opponent.comparisons - 1
+                getRating(winnerSong),
+                getRating(loserSong),
+                getComparisons(winnerSong) - 1,
+                getComparisons(opponent) - 1
             );
 
-            const winnerChange = newWinnerRating - winnerSong.rating;
-            const loserChange = newLoserRating - loserSong.rating;
+            const winnerChange = newWinnerRating - getRating(winnerSong);
+            const loserChange = newLoserRating - getRating(loserSong);
 
-            winnerSong.rating = newWinnerRating;
-            loserSong.rating = newLoserRating;
+            if (isFelfebRanker()) {
+                winnerSong.felfebRating = newWinnerRating;
+                loserSong.felfebRating = newLoserRating;
+            } else {
+                winnerSong.rating = newWinnerRating;
+                loserSong.rating = newLoserRating;
+            }
 
             // store the new mistakes.
             if (match.result === 'win') {
@@ -1564,7 +1640,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // dump everything back to storage.
-        syncCombinedVote(song, opponent);
+        if (!isFelfebRanker()) {
+            syncCombinedVote(song, opponent);
+        }
         saveState();
         showMatchHistory(song);
         if (myRankingBtn.classList.contains('active')) displayRankings();
@@ -1607,10 +1685,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const songB = state.songs.find(s => s.id === state.history.songB.id);
 
         if (songA && songB) {
-            songA.rating = state.history.songA.rating;
-            songA.comparisons = state.history.songA.comparisons;
-            songB.rating = state.history.songB.rating;
-            songB.comparisons = state.history.songB.comparisons;
+            if (state.history.wasFelfeb) {
+                songA.felfebRating = state.history.songA.rating;
+                songA.felfebComparisons = state.history.songA.comparisons;
+                songB.felfebRating = state.history.songB.rating;
+                songB.felfebComparisons = state.history.songB.comparisons;
+            } else {
+                songA.rating = state.history.songA.rating;
+                songA.comparisons = state.history.songA.comparisons;
+                songB.rating = state.history.songB.rating;
+                songB.comparisons = state.history.songB.comparisons;
+            }
             state.comparisons = state.history.totalComparisons;
 
             // go back to the scene of the crime.
@@ -1618,8 +1703,10 @@ document.addEventListener('DOMContentLoaded', () => {
             currentSongB = songB;
 
             // cleanup history. i'm not leaving tracks.
-            if (songA.matchHistory) songA.matchHistory.shift();
-            if (songB.matchHistory) songB.matchHistory.shift();
+            const historyListA = state.history.wasFelfeb ? (songA.felfebMatchHistory || []) : (songA.matchHistory || []);
+            const historyListB = state.history.wasFelfeb ? (songB.felfebMatchHistory || []) : (songB.matchHistory || []);
+            if (historyListA.length > 0) historyListA.shift();
+            if (historyListB.length > 0) historyListB.shift();
         }
 
         state.history = null; // one time use. don't get greedy.
@@ -1893,6 +1980,11 @@ document.addEventListener('DOMContentLoaded', () => {
             standardOptions.push({ val: 'hidden', text: 'Hidden Tracks' });
         }
 
+        // felfeb filter. uty doesn't have any so skip it.
+        if (state.currentGame !== 'undertale_yellow' && state.currentGame !== 'uty') {
+            standardOptions.push({ val: 'felfeb', text: 'Felfeb Songs' });
+        }
+
         standardOptions.forEach(opt => {
             const el = document.createElement('option');
             el.value = opt.val;
@@ -1975,7 +2067,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const filteredData = filterSongsByChapter(sourceData, currentChapterFilter);
-        const sortedData = [...filteredData].sort((a, b) => b.rating - a.rating);
+        const sortedData = [...filteredData].sort((a, b) => getRating(b) - getRating(a));
 
         const songCount = shareCountInput ? parseInt(shareCountInput.value) : 10;
         const topSongs = sortedData.slice(0, songCount);
@@ -2097,7 +2189,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
         } else {
-            sourceSongs = [...state.songs].sort((a, b) => b.rating - a.rating);
+            sourceSongs = [...state.songs].sort((a, b) => getRating(b) - getRating(a));
         }
 
         // apply the filter. why did i even have that conditional check? i'm actually losing it.
@@ -2126,7 +2218,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (communityRankingBtn.classList.contains('active')) {
             sourceSongs = [...cachedCommunitySongs];
         } else {
-            sourceSongs = [...state.songs].sort((a, b) => b.rating - a.rating);
+            sourceSongs = [...state.songs].sort((a, b) => getRating(b) - getRating(a));
         }
 
         // filter the songs. i'm not dealing with hidden stuff if the user didn't ask for it.
@@ -2154,8 +2246,10 @@ document.addEventListener('DOMContentLoaded', () => {
         playerSongName.textContent = `${index + 1}. ${song.name}`;
         // felfeb jumpscare in the playlist too. nowhere is safe.
         let playFile = song.file;
-        if (state.felfebMode && song.felfebFile && Math.random() < 0.1) {
-            playFile = song.felfebFile;
+        if (state.felfebMode && song.felfebFile) {
+            if (isFelfebRanker() || Math.random() < 0.1) {
+                playFile = song.felfebFile;
+            }
         }
         playlistAudio.src = encodeURI(playFile);
         playlistAudio.play().then(() => {
@@ -2217,7 +2311,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let filtered = filterSongsByChapter(pool, currentChapterFilter);
 
         // Sort by rating (global or personal)
-        return [...filtered].sort((a, b) => b.rating - a.rating);
+        return [...filtered].sort((a, b) => getRating(b) - getRating(a));
     }
 
     exportM3UBtn.addEventListener('click', () => {
