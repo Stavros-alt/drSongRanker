@@ -1362,10 +1362,96 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 li.appendChild(boostBtn);
 
+                const historyBtn = document.createElement('button');
+                historyBtn.className = 'history-rank-btn';
+                historyBtn.innerHTML = '📜';
+                historyBtn.title = "View global match history";
+                historyBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    showGlobalMatchHistory(song);
+                });
+                li.appendChild(historyBtn);
+
                 rankingList.appendChild(li);
             });
         } catch (error) {
             rankingList.innerHTML = `<li>Error loading rankings: ${error.message}</li>`;
+        }
+    }
+
+    async function showGlobalMatchHistory(song) {
+        historySongName.textContent = `GLOBAL HISTORY: ${song.name}`;
+        historyList.innerHTML = '<p style="color: #666; text-align: center;">Fetching global matchup data...</p>';
+        historyModal.style.display = 'flex';
+
+        try {
+            const { data, error } = await supabaseClient.rpc('get_global_matchups', { target_song_id: song.id });
+            if (error) throw error;
+
+            if (!data || data.length === 0) {
+                historyList.innerHTML = '<p style="color: #666; text-align: center;">No global matchups recorded yet.</p>';
+                return;
+            }
+
+            // sort by total matches
+            const sortedData = data.sort((a, b) => (b.wins + b.losses) - (a.wins + a.losses));
+
+            historyList.innerHTML = '';
+
+            // i guess i have to map ids to names manually. wonderful.
+            // uty ids > 2000, ut > 1000, dr < 1000
+            let allSongsMeta = [...state.songs];
+            if (state.currentGame === 'combined') {
+                // already have all of them if combined, probably, but let's be safe.
+                // actually state.songs only has current game.
+            }
+
+            sortedData.forEach(match => {
+                const total = match.wins + match.losses;
+                if (total === 0) return; // shouldn't happen but whatever.
+                const winRatio = ((match.wins / total) * 100).toFixed(1);
+
+                let opponentName = "Unknown Song";
+                // find the name. brute force it.
+                if (typeof utSongList !== 'undefined') {
+                    const drMatch = window.songList ? window.songList.find(s => s.id === match.opponent_id) : null;
+                    const utMatch = utSongList.find(s => s.id === match.opponent_id);
+                    const utyMatch = typeof utySongList !== 'undefined' ? utySongList.find(s => s.id === match.opponent_id) : null;
+                    if (drMatch) opponentName = drMatch.name;
+                    else if (utMatch) opponentName = utMatch.name;
+                    else if (utyMatch) opponentName = utyMatch.name;
+                } else {
+                    // fallback if global vars aren't available
+                    const s = state.songs.find(s => s.id === match.opponent_id);
+                    if (s) opponentName = s.name;
+                }
+
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                item.style.padding = '10px';
+                item.style.borderBottom = '1px solid #222';
+                item.style.display = 'flex';
+                item.style.justifyContent = 'space-between';
+                item.style.alignItems = 'center';
+
+                const resultColor = winRatio >= 50 ? '#00ff9d' : '#ff4444';
+
+                item.innerHTML = `
+                    <div style="flex: 1;">
+                        <span style="color: ${resultColor}; font-weight: bold;">[${winRatio}% WIN]</span>
+                        <span> vs ${opponentName}</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; font-family: 'Roboto Mono', monospace; font-size: 0.85em;">
+                        <span style="color: #00ff9d;">${match.wins} W</span>
+                        <span style="color: #ff4444;">${match.losses} L</span>
+                    </div>
+                `;
+                historyList.appendChild(item);
+            });
+
+        } catch (error) {
+            console.error("Error fetching global matchups:", error);
+            historyList.innerHTML = `<p style="color: #ff4444; text-align: center;">Failed to load data: ${error.message}</p>`;
         }
     }
 
