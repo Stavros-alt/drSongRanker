@@ -6,6 +6,7 @@ Elo-based ranking for Deltarune, Undertale, and Undertale Yellow music. It works
 
 - Ranks songs using Elo.
 - Stats dashboard.
+- Global matchups and history for all games.
 - Global sync via Supabase.
 - MP3 export.
 - Mix and Match chapters.
