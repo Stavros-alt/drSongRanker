@@ -997,35 +997,38 @@ document.addEventListener('DOMContentLoaded', () => {
                 loserSong.felfebRating = newLoserRating;
                 winnerSong.felfebComparisons++;
                 loserSong.felfebComparisons++;
+                recordCommunityVote(winnerSong.id, loserSong.id);
             } else {
                 winnerSong.rating = newWinnerRating;
                 loserSong.rating = newLoserRating;
                 winnerSong.comparisons++;
                 loserSong.comparisons++;
-                syncCombinedVote(winnerSong, loserSong);
-                recordCommunityVote(winnerSong.id, loserSong.id);
-            }
-
-            state.comparisons++;
-
-            // only fetch total votes every 15 personal votes. my egress is crying.
-            votesSinceLastRefresh++;
-            if (votesSinceLastRefresh >= 15) {
-                fetchAndDisplayAllTimeStats();
-                votesSinceLastRefresh = 0;
-            } else {
-                // incrementing locally because the api is too slow/expensive.
-                if (voteStat) {
-                    const currentText = voteStat.textContent || "";
-                    const match = currentText.match(/\d+/);
-                    if (match) {
-                        const newTotal = parseInt(match[0]) + 1;
-                        voteStat.textContent = `Total Votes: ${newTotal}`;
-                    }
+                if (state.currentGame === 'combined') { // Only sync if in combined mode
+                    syncCombinedVote(winnerSong, loserSong);
                 }
+                recordCommunityVote(winnerSong.id, loserSong.id);
             }
         } else {
             recordMatchHistory(null, null, true);
+        }
+
+        state.comparisons++;
+
+        // i'm only fetching total votes every 15 personal votes because the database cost is killing me.
+        votesSinceLastRefresh++;
+        if (votesSinceLastRefresh >= 15) {
+            fetchAndDisplayAllTimeStats();
+            votesSinceLastRefresh = 0;
+        } else {
+            // incrementing locally because the api is too slow and i have no patience.
+            if (voteStat) {
+                const currentText = voteStat.textContent || "";
+                const match = currentText.match(/\d+/);
+                if (match) {
+                    const newTotal = parseInt(match[0]) + 1;
+                    voteStat.textContent = (isFelfebRanker() ? "Total Felfeb Votes: " : "Total Votes: ") + newTotal;
+                }
+            }
         }
 
         updateApp();
@@ -1225,8 +1228,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-    // recording votes. joy.
+    // recording votes. what a joy.
     async function recordCommunityVote(winnerId, loserId) {
+        if (isFelfebRanker()) {
+            try {
+                const { error } = await supabaseClient.rpc('handle_felfeb_vote', {
+                    winner_id: winnerId,
+                    loser_id: loserId
+                });
+                if (error) throw error;
+            } catch (error) {
+                console.error(`Error recording Felfeb community vote:`, error.message);
+            }
+            return;
+        }
+
         // mixed votes don't exist in the database. yet.
         const winnerDeltarune = winnerId < 1000;
         const loserDeltarune = loserId < 1000;
@@ -1250,9 +1266,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-    // fetching stats because numbers are fun.
+    // fetching stats because i'm obsessed with numbers for some reason.
     async function fetchAndDisplayAllTimeStats() {
         try {
+            if (currentChapterFilter === 'felfeb' || isFelfebRanker()) {
+                const { data, error } = await supabaseClient.rpc('get_total_felfeb_votes');
+                if (error) throw error;
+                if (voteStat) voteStat.textContent = `Total Felfeb Votes: ${data || 0}`;
+                return;
+            }
+
             if (state.currentGame === 'combined') {
                 const [drRes, utRes, utyRes] = await Promise.all([
                     supabaseClient.rpc('get_total_votes'),
@@ -1272,8 +1295,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let rpcName = 'get_total_votes';
             if (state.currentGame === 'undertale') rpcName = 'get_total_ut_votes';
             else if (state.currentGame === 'undertale_yellow' || state.currentGame === 'uty') rpcName = 'get_total_uty_votes';
-            const { data: voteData, error: voteError } = await supabaseClient
-                .rpc(rpcName);
+            const { data: voteData, error: voteError } = await supabaseClient.rpc(rpcName);
 
             if (voteError) {
                 throw voteError;
@@ -1290,13 +1312,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let cachedCommunitySongs = [];
 
-    // displaying community rankings. finally.
+    // displaying community rankings. i'm finally getting around to this.
     async function displayCommunityRankings() {
         rankingList.innerHTML = '<li>Loading community data...</li>';
 
         try {
             let combinedData = [];
-            if (state.currentGame === 'combined') {
+            if (currentChapterFilter === 'felfeb' || isFelfebRanker()) {
+                const { data, error } = await supabaseClient
+                    .from('felfeb_songs')
+                    .select('name, id, rating')
+                    .order('rating', { ascending: false });
+                if (error) throw error;
+                combinedData = data;
+            } else if (state.currentGame === 'combined') {
                 const [drRes, utRes, utyRes] = await Promise.all([
                     supabaseClient.from('songs').select('name, id, rating').order('rating', { ascending: false }),
                     supabaseClient.from('ut_songs').select('name, id, rating').order('rating', { ascending: false }),
@@ -1320,7 +1349,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 combinedData = data;
             }
 
-            // paths. whatever.
+            // fixing paths. whatever. i don't even care anymore.
             cachedCommunitySongs = combinedData.map(cSong => {
                 const localSong = state.songs.find(s => s.id === cSong.id);
                 return {
@@ -1385,7 +1414,8 @@ document.addEventListener('DOMContentLoaded', () => {
         historyModal.style.display = 'flex';
 
         try {
-            const { data, error } = await supabaseClient.rpc('get_global_matchups', { target_song_id: song.id });
+            const rpcName = isFelfebRanker() ? 'get_felfeb_global_matchups' : 'get_global_matchups';
+            const { data, error } = await supabaseClient.rpc(rpcName, { target_song_id: song.id });
             if (error) throw error;
 
             if (!data || data.length === 0) {
@@ -1398,7 +1428,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             historyList.innerHTML = '';
 
-            // i guess i have to map ids to names manually. wonderful.
+            // i guess i have to map ids to names manually. wonderful. my life is a cycle of mapping ids.
             // uty ids > 2000, ut > 1000, dr < 1000
             let allSongsMeta = [...state.songs];
             if (state.currentGame === 'combined') {

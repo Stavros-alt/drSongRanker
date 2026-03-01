@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // chart defaults. still never gonna look perfect.
+    // chart defaults. i'm never gonna get these to look perfect anyway.
     Chart.defaults.color = '#fff';
     Chart.defaults.borderColor = '#333';
     Chart.defaults.font.family = "'Roboto Mono', monospace";
@@ -24,10 +24,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         return [...drRes.data, ...utRes.data, ...utyRes.data].sort((a, b) => b.rating - a.rating);
     }
 
+    async function fetchFelfebStats() {
+        const { data, error } = await supabase.rpc('get_total_felfeb_votes');
+        if (error) {
+            console.error("Error fetching Felfeb votes:", error);
+            return 0;
+        }
+        return data || 0;
+    }
+
     const dbSongs = await fetchData();
     if (!dbSongs.length) return;
 
-    // merge with local metadata. this is still a disaster.
+    // merging with local metadata. this feels like a disaster waiting to happen.
     const localSongs = [...(window.songList || []), ...(window.utSongList || []), ...(window.utySongList || [])];
     const songs = dbSongs.map(dbS => {
         const local = localSongs.find(l => l.id === dbS.id);
@@ -38,14 +47,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
     });
 
-    // game classification. straightforward for once.
+    // game classification. i managed to make this straightforward for once.
     function getGame(song) {
         if (song.id < 1000) return 'DR';
         if (song.id < 2000) return 'UT';
         return 'UTY';
     }
 
-    // section classification. copy-pasted from app.js because i'm not refactoring that right now.
+    // section classification. i just copy-pasted this from app.js because i'm not refactoring everything today.
     function getSection(song) {
         if (song.id < 1000) {
             if (song.id <= 40) return 'Ch 1';
@@ -69,17 +78,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (track <= 72) return 'Wild East';
         if (track <= 94) return 'Steamworks';
         if (track <= 125) return 'New Home';
-        if (track === 126) return 'New Home'; // asgore. finally over.
-        if (track === 127) return 'Ruins'; // enemy retreating. starts in ruins but covers everything. still messy.
+        if (track === 126) return 'New Home'; // asgore. i'm finally over this.
+        if (track === 127) return 'Ruins'; // enemy retreating. this starts in ruins but covers everything. still messy as hell.
         if (track === 128) return 'Snowdin'; // apprehension. Genocide martlet is exhausting.
         if (track === 129 || track === 130) return 'Wild East'; // starlo and ceroba are too much for me right now.
-        if (track === 131) return 'Steamworks'; // axis. whatever.
+        if (track === 131) return 'Steamworks'; // axis. whatever. i don't care.
         return 'New Home'; // zenith tracks. i'm done.
     }
 
     const publicSongs = songs;
 
-    // split by game. this should have been done from the start.
+    // split by game. i really should have done this from the start.
     const drSongs = publicSongs.filter(s => getGame(s) === 'DR');
     const utSongs = publicSongs.filter(s => getGame(s) === 'UT');
     const utySongs = publicSongs.filter(s => getGame(s) === 'UTY');
@@ -95,7 +104,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         { value: publicSongs.length, label: 'Total Songs' },
         { value: drSongs.length, label: 'Deltarune' },
         { value: utSongs.length, label: 'Undertale' },
-        { value: utySongs.length, label: 'UT Yellow' }
+        { value: utySongs.length, label: 'UT Yellow' },
+        { value: await fetchFelfebStats(), label: 'Felfeb Votes' }
     ];
 
     statsData.forEach(stat => {
