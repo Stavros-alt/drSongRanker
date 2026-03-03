@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const showRatingsToggle = document.getElementById('show-ratings-toggle');
     const preventDuplicatesToggle = document.getElementById('prevent-duplicates-toggle');
     const felfebModeToggle = document.getElementById('felfeb-mode-toggle');
+    const includeBonusToggle = document.getElementById('include-bonus-toggle');
     const arena = document.querySelector('.arena');
     const songACard = document.getElementById('songA-card');
     const songBCard = document.getElementById('songB-card');
@@ -214,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return (yiq >= 128) ? 'black' : 'white';
     }
 
-    let globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{"currentGame": "deltarune", "showRatings": false, "preventDuplicates": false, "combinedDiscovered": false, "felfebMode": true}');
+    let globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{"currentGame": "deltarune", "showRatings": false, "preventDuplicates": false, "combinedDiscovered": false, "felfebMode": true, "includeBonus": false}');
 
     let state = {
         currentGame: globalState.currentGame,
@@ -230,7 +231,8 @@ document.addEventListener('DOMContentLoaded', () => {
         preventDuplicates: globalState.preventDuplicates || false,
         recentMatches: [], // keeping track of what we just saw.
         volume: parseFloat(localStorage.getItem('drSongRankerVolume') || '0.5'),
-        felfebMode: globalState.felfebMode !== undefined ? globalState.felfebMode : true
+        felfebMode: globalState.felfebMode !== undefined ? globalState.felfebMode : true,
+        includeBonus: globalState.includeBonus || false
     };
 
     function saveState() {
@@ -243,7 +245,8 @@ document.addEventListener('DOMContentLoaded', () => {
             showRatings: state.showRatings,
             preventDuplicates: state.preventDuplicates,
             combinedDiscovered: globalState.combinedDiscovered,
-            felfebMode: state.felfebMode
+            felfebMode: state.felfebMode,
+            includeBonus: state.includeBonus
         }));
     }
 
@@ -283,6 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
             state.customLists = parsed.customLists || {};
             state.boostedSongId = parsed.boostedSongId || null;
             state.felfebMode = parsed.felfebMode !== undefined ? parsed.felfebMode : state.felfebMode;
+            state.includeBonus = parsed.includeBonus !== undefined ? parsed.includeBonus : state.includeBonus;
 
             state.songs = sourceList.map(baseSong => {
                 const possibleStates = [
@@ -627,6 +631,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    if (includeBonusToggle) {
+        includeBonusToggle.checked = state.includeBonus;
+        includeBonusToggle.addEventListener('change', (e) => {
+            state.includeBonus = e.target.checked;
+            saveState();
+            presentNewPair(); // refresh the current pair
+            if (myRankingBtn.classList.contains('active')) displayRankings();
+            else displayCommunityRankings();
+        });
+    }
+
     saveCustomBtn.addEventListener('click', () => {
         const name = state.currentCustomListName;
         if (!name) return;
@@ -768,6 +783,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const filter = state.activeRankerList;
 
         let pool = state.songs;
+
+        // exclude bonus songs if disabled
+        if (!state.includeBonus) {
+            pool = pool.filter(s => !s.isBonus);
+        }
 
         if (filter === 'all' || filter === 'combined_all') {
             // normal OST only. no secrets.
@@ -1357,7 +1377,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     file: localSong ? localSong.file : '',
                     hidden: localSong ? localSong.hidden : false,
                     duration: localSong ? localSong.duration : 0, // include duration. don't forget it again.
-                    felfebFile: localSong ? localSong.felfebFile : undefined // global felfeb. finally.
+                    felfebFile: localSong ? localSong.felfebFile : undefined, // global felfeb. finally.
+                    isBonus: localSong ? localSong.isBonus : false
                 };
             });
 
@@ -1574,8 +1595,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // sync the filters. automation for the lazy.    // i'm not doing full reactive state, deal with it.
     function filterSongsByChapter(songs, filter) {
+        let pool = songs;
+        if (!state.includeBonus) {
+            pool = pool.filter(s => !s.isBonus);
+        }
+
         if (filter === 'all' || filter === 'combined_all') {
-            return songs.filter(s => !s.hidden);
+            return pool.filter(s => !s.hidden);
         }
         if (filter === 'all_plus') {
             return state.secretsUnlocked ? songs : songs.filter(s => !s.hidden);

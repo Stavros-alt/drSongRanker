@@ -1019,6 +1019,132 @@ const utSongList = [
         "comparisons": 0,
         "duration": 25.31,
         "hidden": true
+    },
+    {
+        "id": 1201,
+        "name": "Mad Mew Mew",
+        "file": "UNDERTALEsoundtrack/bonus/Mad Mew Mew.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 144.26,
+        "isBonus": true
+    },
+    {
+        "id": 1202,
+        "name": "Abandoned Town (10th Anniversary)",
+        "file": "UNDERTALEsoundtrack/bonus/10th_Anniversary/01_Abandoned_Town.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 62.57,
+        "isBonus": true
+    },
+    {
+        "id": 1203,
+        "name": "Doghole (10th Anniversary)",
+        "file": "UNDERTALEsoundtrack/bonus/10th_Anniversary/02_Doghole.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 43.75,
+        "isBonus": true
+    },
+    {
+        "id": 1204,
+        "name": "Memory (10 Years Later)",
+        "file": "UNDERTALEsoundtrack/bonus/10th_Anniversary/03_Memory_10_Years_Later.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 105.02,
+        "isBonus": true
+    },
+    {
+        "id": 1205,
+        "name": "Pseudo Legendary Tree (10th Anniversary)",
+        "file": "UNDERTALEsoundtrack/bonus/10th_Anniversary/04_Pseudo_Legendary_Tree.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 26.52,
+        "isBonus": true
+    },
+    {
+        "id": 1206,
+        "name": "School (10th Anniversary)",
+        "file": "UNDERTALEsoundtrack/bonus/10th_Anniversary/05_School.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 81.77,
+        "isBonus": true
+    },
+    {
+        "id": 1207,
+        "name": "Snowdrift (10th Anniversary)",
+        "file": "UNDERTALEsoundtrack/bonus/10th_Anniversary/06_Snowdrift.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 76.92,
+        "isBonus": true
+    },
+    {
+        "id": 1208,
+        "name": "Snowed Inn Jazz (10th Anniversary)",
+        "file": "UNDERTALEsoundtrack/bonus/10th_Anniversary/07_Snowed_Inn_Jazz.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 42.46,
+        "isBonus": true
+    },
+    {
+        "id": 1209,
+        "name": "Song That Plays When Somebody Verses Sans (10th Anniversary)",
+        "file": "UNDERTALEsoundtrack/bonus/10th_Anniversary/08_Song_That_Plays_When_Somebody_Verses_Sans.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 105.31,
+        "isBonus": true
+    },
+    {
+        "id": 1210,
+        "name": "Strongerer Monsters (10th Anniversary)",
+        "file": "UNDERTALEsoundtrack/bonus/10th_Anniversary/09_Strongerer_Monsters.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 71.14,
+        "isBonus": true
+    },
+    {
+        "id": 1211,
+        "name": "Ultranap (10th Anniversary)",
+        "file": "UNDERTALEsoundtrack/bonus/10th_Anniversary/10_Ultranap.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 10.7,
+        "isBonus": true
+    },
+    {
+        "id": 1212,
+        "name": "Underwater Town (10th Anniversary)",
+        "file": "UNDERTALEsoundtrack/bonus/10th_Anniversary/11_Underwater_Town.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 80.04,
+        "isBonus": true
+    },
+    {
+        "id": 1213,
+        "name": "What's up? (10th Anniversary)",
+        "file": "UNDERTALEsoundtrack/bonus/10th_Anniversary/12_Whats_up.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 114.7,
+        "isBonus": true
+    },
+    {
+        "id": 1214,
+        "name": "Wrong Number (Remix) (10th Anniversary)",
+        "file": "UNDERTALEsoundtrack/bonus/10th_Anniversary/13_Wrong_Number_Remix.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 6.74,
+        "isBonus": true
     }
 ];
 
