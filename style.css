@@ -46,36 +46,37 @@ body {
 .custom-cursor {
     display: none;
     /* Hidden by default for mobile safety */
-    width: 32px;
-    height: 32px;
-    background-image: url('Art/soul_cursor.png');
+    width: 25px;
+    height: 21px;
+    background-image: url('Art/cursor.webp');
     background-size: contain;
     background-repeat: no-repeat;
     position: fixed;
     pointer-events: none;
     z-index: 9999;
-    transform: translate(-50%, -50%);
+    transform: translate(-3px, -2px);
+    /* hotspot adjustment */
     transition: transform 0.1s ease, filter 0.1s ease;
 }
 
 /* making things shiny */
 .custom-cursor.active {
     filter: drop-shadow(0 0 8px #ff0000);
-    transform: translate(-50%, -50%) scale(1.2);
+    transform: translate(-3px, -2px) scale(1.2);
     animation: pulse 1s infinite;
 }
 
 @keyframes pulse {
     0% {
-        transform: translate(-50%, -50%) scale(1.2);
+        transform: translate(-3px, -2px) scale(1.2);
     }
 
     50% {
-        transform: translate(-50%, -50%) scale(1.3);
+        transform: translate(-3px, -2px) scale(1.3);
     }
 
     100% {
-        transform: translate(-50%, -50%) scale(1.2);
+        transform: translate(-3px, -2px) scale(1.2);
     }
 }
 
