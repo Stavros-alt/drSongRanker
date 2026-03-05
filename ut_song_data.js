@@ -1027,7 +1027,8 @@ const utSongList = [
         "rating": 1500,
         "comparisons": 0,
         "duration": 144.26,
-        "isBonus": true
+        "isBonus": true,
+        "hidden": true
     },
     {
         "id": 1202,
@@ -1036,7 +1037,8 @@ const utSongList = [
         "rating": 1500,
         "comparisons": 0,
         "duration": 62.57,
-        "isBonus": true
+        "isBonus": true,
+        "hidden": true
     },
     {
         "id": 1203,
@@ -1045,7 +1047,8 @@ const utSongList = [
         "rating": 1500,
         "comparisons": 0,
         "duration": 43.75,
-        "isBonus": true
+        "isBonus": true,
+        "hidden": true
     },
     {
         "id": 1204,
@@ -1054,7 +1057,8 @@ const utSongList = [
         "rating": 1500,
         "comparisons": 0,
         "duration": 105.02,
-        "isBonus": true
+        "isBonus": true,
+        "hidden": true
     },
     {
         "id": 1205,
@@ -1063,7 +1067,8 @@ const utSongList = [
         "rating": 1500,
         "comparisons": 0,
         "duration": 26.52,
-        "isBonus": true
+        "isBonus": true,
+        "hidden": true
     },
     {
         "id": 1206,
@@ -1072,7 +1077,8 @@ const utSongList = [
         "rating": 1500,
         "comparisons": 0,
         "duration": 81.77,
-        "isBonus": true
+        "isBonus": true,
+        "hidden": true
     },
     {
         "id": 1207,
@@ -1081,7 +1087,8 @@ const utSongList = [
         "rating": 1500,
         "comparisons": 0,
         "duration": 76.92,
-        "isBonus": true
+        "isBonus": true,
+        "hidden": true
     },
     {
         "id": 1208,
@@ -1090,7 +1097,8 @@ const utSongList = [
         "rating": 1500,
         "comparisons": 0,
         "duration": 42.46,
-        "isBonus": true
+        "isBonus": true,
+        "hidden": true
     },
     {
         "id": 1209,
@@ -1099,7 +1107,8 @@ const utSongList = [
         "rating": 1500,
         "comparisons": 0,
         "duration": 105.31,
-        "isBonus": true
+        "isBonus": true,
+        "hidden": true
     },
     {
         "id": 1210,
@@ -1108,7 +1117,8 @@ const utSongList = [
         "rating": 1500,
         "comparisons": 0,
         "duration": 71.14,
-        "isBonus": true
+        "isBonus": true,
+        "hidden": true
     },
     {
         "id": 1211,
@@ -1117,7 +1127,8 @@ const utSongList = [
         "rating": 1500,
         "comparisons": 0,
         "duration": 10.7,
-        "isBonus": true
+        "isBonus": true,
+        "hidden": true
     },
     {
         "id": 1212,
@@ -1126,7 +1137,8 @@ const utSongList = [
         "rating": 1500,
         "comparisons": 0,
         "duration": 80.04,
-        "isBonus": true
+        "isBonus": true,
+        "hidden": true
     },
     {
         "id": 1213,
@@ -1135,7 +1147,8 @@ const utSongList = [
         "rating": 1500,
         "comparisons": 0,
         "duration": 114.7,
-        "isBonus": true
+        "isBonus": true,
+        "hidden": true
     },
     {
         "id": 1214,
@@ -1144,8 +1157,172 @@ const utSongList = [
         "rating": 1500,
         "comparisons": 0,
         "duration": 6.74,
-        "isBonus": true
+        "isBonus": true,
+        "hidden": true
+    },
+    {
+        "id": 1301,
+        "name": "Ball Chime",
+        "file": "UNDERTALEsoundtrack/hidden/Ball Chime.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 5.04,
+        "hidden": true
+    },
+    {
+        "id": 1302,
+        "name": "Bereavement",
+        "file": "UNDERTALEsoundtrack/hidden/Bereavement.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 357.72,
+        "hidden": true
+    },
+    {
+        "id": 1303,
+        "name": "Megalo Strike Back",
+        "file": "UNDERTALEsoundtrack/hidden/Megalo Strike Back.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 163.39,
+        "hidden": true
+    },
+    {
+        "id": 1304,
+        "name": "Undertale Release Trailer",
+        "file": "UNDERTALEsoundtrack/hidden/Undertale Release Trailer.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 74.93,
+        "hidden": true
+    },
+    {
+        "id": 1305,
+        "name": "Undertale Xbox One Announce Trailer",
+        "file": "UNDERTALEsoundtrack/hidden/Undertale Xbox One Announce Trailer.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 64.25,
+        "hidden": true
+    },
+    {
+        "id": 1306,
+        "name": "Papyrus' Cool Song",
+        "file": "UNDERTALEsoundtrack/hidden/Papyrus' Cool Song.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 14.33,
+        "hidden": true
+    },
+    {
+        "id": 1307,
+        "name": "Ice Cream",
+        "file": "UNDERTALEsoundtrack/hidden/Ice Cream.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 61.82,
+        "hidden": true
+    },
+    {
+        "id": 1308,
+        "name": "Undertale Nintendo Switch Trailer",
+        "file": "UNDERTALEsoundtrack/hidden/Undertale Nintendo Switch Trailer.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 87.6,
+        "hidden": true
+    },
+    {
+        "id": 1309,
+        "name": "mus_toomuch",
+        "file": "UNDERTALEsoundtrack/hidden/mus_toomuch.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 50.11,
+        "hidden": true
+    },
+    {
+        "id": 1310,
+        "name": "mus_zzz_c",
+        "file": "UNDERTALEsoundtrack/hidden/mus_zzz_c.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 8.11,
+        "hidden": true
+    },
+    {
+        "id": 1311,
+        "name": "Ball Chime (Mystery)",
+        "file": "UNDERTALEsoundtrack/hidden/Ball Chime (Mystery).mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 36.48,
+        "hidden": true
+    },
+    {
+        "id": 1312,
+        "name": "Pre-Dummy",
+        "file": "UNDERTALEsoundtrack/hidden/Pre-Dummy.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 28.06,
+        "hidden": true
+    },
+    {
+        "id": 1313,
+        "name": "Room Of Dog",
+        "file": "UNDERTALEsoundtrack/hidden/Room Of Dog.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 72.19,
+        "hidden": true
+    },
+    {
+        "id": 1314,
+        "name": "Mysterious Shrine",
+        "file": "UNDERTALEsoundtrack/hidden/Mysterious Shrine.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 48.79,
+        "hidden": true
+    },
+    {
+        "id": 1315,
+        "name": "Absolutely Overfamiliar Shrine",
+        "file": "UNDERTALEsoundtrack/hidden/Absolutely Overfamiliar Shrine.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 18.89,
+        "hidden": true
+    },
+    {
+        "id": 1316,
+        "name": "Dog Dating",
+        "file": "UNDERTALEsoundtrack/hidden/Dog Dating.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 22.85,
+        "hidden": true
+    },
+    {
+        "id": 1317,
+        "name": "mus_bad",
+        "file": "UNDERTALEsoundtrack/hidden/mus_bad.mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 10.13,
+        "hidden": true
+    },
+    {
+        "id": 1318,
+        "name": "Dating Start! (FM Ver)",
+        "file": "UNDERTALEsoundtrack/hidden/Dating Start! (FM Ver).mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 167.63,
+        "hidden": true
     }
 ];
 
+// i'm done adding songs. stop asking. this list is long enough.
 window.utSongList = utSongList;
