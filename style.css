@@ -302,6 +302,18 @@ h1 {
     position: relative;
 }
 
+.song-rank {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: var(--accent-color);
+    opacity: 0.7;
+    pointer-events: none;
+    /* get out of the way */
+}
+
 /* mouse hovering stuff */
 @media (hover: hover) {
     .song-card:hover {

@@ -19,6 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const songBCard = document.getElementById('songB-card');
     const songAName = document.getElementById('songA-name');
     const songBName = document.getElementById('songB-name');
+    const songARank = document.getElementById('songA-rank');
+    const songBRank = document.getElementById('songB-rank');
     const chooseABtn = document.getElementById('chooseA-btn');
     const chooseBBtn = document.getElementById('chooseB-btn');
     const tieBtn = document.getElementById('tie-btn');
@@ -877,6 +879,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!availableSongs || availableSongs.length < 2) {
             songAName.textContent = "NOT ENOUGH SONGS";
             songBName.textContent = "IN THIS LIST";
+            if (songARank) songARank.textContent = "";
+            if (songBRank) songBRank.textContent = "";
 
             chooseABtn.disabled = true;
             chooseBBtn.disabled = true;
@@ -955,6 +959,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (songAName && currentSongA) songAName.textContent = currentSongA.name;
         if (songBName && currentSongB) songBName.textContent = currentSongB.name;
+
+        // and the numbers. i guess i have to sort the whole pool just to find two indexes.
+        if (songARank && songBRank && currentSongA && currentSongB) {
+            const sortedByRating = [...availableSongs].sort((a, b) => getRating(b) - getRating(a));
+            const rankA = sortedByRating.findIndex(s => s.id === currentSongA.id) + 1;
+            const rankB = sortedByRating.findIndex(s => s.id === currentSongB.id) + 1;
+
+            songARank.textContent = `#${rankA}`;
+            songBRank.textContent = `#${rankB}`;
+        }
+
         if (chooseABtn && currentSongA) chooseABtn.textContent = `I prefer ${currentSongA.name}`;
         if (chooseBBtn && currentSongB) chooseBBtn.textContent = `I prefer ${currentSongB.name}`;
 

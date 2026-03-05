@@ -30,3 +30,5 @@ Search strings are optimized for Spotify. If it breaks elsewhere, not my problem
 
 - Toby Fox (Audio/IP)
 - Me (Everything else)
+
+Latest addition: song ranks on the vs screen. Because apparently people can't remember where their favorites are.
