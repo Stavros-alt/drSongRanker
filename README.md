@@ -1,6 +1,6 @@
 # drSongRanker
 
-Elo-based ranking for Deltarune, Undertale, and Undertale Yellow music. It works. Don't touch the code.
+Elo-based ranking for Deltarune, Undertale, Undertale Yellow, and TS!Underswap music. It works. Don't touch the code.
 
 ## Features
 
@@ -10,6 +10,7 @@ Elo-based ranking for Deltarune, Undertale, and Undertale Yellow music. It works
 - Global sync via Supabase.
 - MP3 export.
 - Mix and Match chapters.
+- Regional filters (UTY regions, TS!Underswap areas).
 - Volume slider. (Finally.)
 - Probability boost for underrated songs.
 
@@ -29,6 +30,7 @@ Search strings are optimized for Spotify. If it breaks elsewhere, not my problem
 ## Credits
 
 - Toby Fox (Audio/IP)
+- Team Switched (TS!Underswap)
 - Me (Everything else)
 
-Latest addition: song ranks on the vs screen. Because apparently people can't remember where their favorites are.
+Latest addition: TS!Underswap with 69 main tracks, regional filters, and global leaderboard support.

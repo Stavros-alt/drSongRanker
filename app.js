@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const combinedToggle = document.getElementById('combined-toggle'); // finally.
     const utToggle = document.getElementById('ut-toggle');
     const utyToggle = document.getElementById('uty-toggle');
+    const tsusToggle = document.getElementById('tsus-toggle');
     const showRatingsToggle = document.getElementById('show-ratings-toggle');
     const preventDuplicatesToggle = document.getElementById('prevent-duplicates-toggle');
     const felfebModeToggle = document.getElementById('felfeb-mode-toggle');
@@ -238,7 +239,14 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     function saveState() {
-        const key = state.currentGame === 'combined' ? 'combinedSongRankerState' : (state.currentGame === 'deltarune' ? 'drSongRankerState' : (state.currentGame === 'undertale' ? 'utSongRankerState' : 'utySongRankerState'));
+        const keyMap = {
+            'combined': 'combinedSongRankerState',
+            'deltarune': 'drSongRankerState',
+            'undertale': 'utSongRankerState',
+            'uty': 'utySongRankerState',
+            'tsus': 'tsusSongRankerState'
+        };
+        const key = keyMap[state.currentGame] || 'drSongRankerState';
         localStorage.setItem(key, JSON.stringify(state));
 
         // why am i saving this twice? whatever.
@@ -253,7 +261,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function loadState() {
-        const key = state.currentGame === 'combined' ? 'combinedSongRankerState' : (state.currentGame === 'deltarune' ? 'drSongRankerState' : (state.currentGame === 'undertale' ? 'utSongRankerState' : 'utySongRankerState'));
+        const keyMap = {
+            'combined': 'combinedSongRankerState',
+            'deltarune': 'drSongRankerState',
+            'undertale': 'utSongRankerState',
+            'uty': 'utySongRankerState',
+            'tsus': 'tsusSongRankerState'
+        };
+        const key = keyMap[state.currentGame] || 'drSongRankerState';
         const saved = localStorage.getItem(key);
 
         // choose the source list based on game. i hate this.
@@ -262,23 +277,29 @@ document.addEventListener('DOMContentLoaded', () => {
             const drList = (typeof songList !== 'undefined') ? songList : (window.songList || []);
             const utList = (typeof utSongList !== 'undefined') ? utSongList : (window.utSongList || []);
             const utyList = (typeof utySongList !== 'undefined') ? utySongList : (window.utySongList || []);
-            sourceList = [...drList, ...utList, ...utyList];
+            const tsusList = (typeof tsusSongList !== 'undefined') ? tsusSongList : (window.tsusSongList || []);
+            sourceList = [...drList, ...utList, ...utyList, ...tsusList];
         } else if (state.currentGame === 'deltarune') {
             sourceList = (typeof songList !== 'undefined') ? songList : (window.songList || []);
         } else if (state.currentGame === 'undertale') {
             sourceList = (typeof utSongList !== 'undefined') ? utSongList : (window.utSongList || []);
-        } else {
+        } else if (state.currentGame === 'uty') {
             sourceList = (typeof utySongList !== 'undefined') ? utySongList : (window.utySongList || []);
+        } else {
+            sourceList = (typeof tsusSongList !== 'undefined') ? tsusSongList : (window.tsusSongList || []);
         }
 
         const drSaved = localStorage.getItem('drSongRankerState');
         const utSaved = localStorage.getItem('utSongRankerState');
-        const combinedSaved = localStorage.getItem('combinedSongRankerState');
         const utySaved = localStorage.getItem('utySongRankerState');
+        const tsusSaved = localStorage.getItem('tsusSongRankerState');
+        const combinedSaved = localStorage.getItem('combinedSongRankerState');
+        
         const drParsed = drSaved ? JSON.parse(drSaved) : null;
         const utParsed = utSaved ? JSON.parse(utSaved) : null;
-        const combinedParsed = combinedSaved ? JSON.parse(combinedSaved) : null;
         const utyParsed = utySaved ? JSON.parse(utySaved) : null;
+        const tsusParsed = tsusSaved ? JSON.parse(tsusSaved) : null;
+        const combinedParsed = combinedSaved ? JSON.parse(combinedSaved) : null;
 
         if (saved) {
             const parsed = JSON.parse(saved);
@@ -296,6 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     drParsed && drParsed.songs ? drParsed.songs.find(s => s.id === baseSong.id) : null,
                     utParsed && utParsed.songs ? utParsed.songs.find(s => s.id === baseSong.id) : null,
                     utyParsed && utyParsed.songs ? utyParsed.songs.find(s => s.id === baseSong.id) : null,
+                    tsusParsed && tsusParsed.songs ? tsusParsed.songs.find(s => s.id === baseSong.id) : null,
                     combinedParsed && combinedParsed.songs ? combinedParsed.songs.find(s => s.id === baseSong.id) : null
                 ].filter(s => s !== null);
 
@@ -328,6 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     drParsed && drParsed.songs ? drParsed.songs.find(s => s.id === baseSong.id) : null,
                     utParsed && utParsed.songs ? utParsed.songs.find(s => s.id === baseSong.id) : null,
                     utyParsed && utyParsed.songs ? utyParsed.songs.find(s => s.id === baseSong.id) : null,
+                    tsusParsed && tsusParsed.songs ? tsusParsed.songs.find(s => s.id === baseSong.id) : null,
                     combinedParsed && combinedParsed.songs ? combinedParsed.songs.find(s => s.id === baseSong.id) : null
                 ].filter(s => s !== null);
 
@@ -367,9 +390,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const drValid = ['all', '1', '2', '3', '4', 'hidden', 'duration_30', 'duration_20', 'duration_10', 'felfeb'];
         const utValid = ['all', '1', '2', '3', '4', '5', 'hidden', 'duration_30', 'duration_20', 'duration_10', 'felfeb'];
         const utyValid = ['all', 'ruins', 'snowdin', 'dunes', 'wild_east', 'steamworks', 'new_home', 'hidden', 'duration_30', 'duration_20', 'duration_10'];
-        let validLists = state.currentGame === 'deltarune' ? drValid : (state.currentGame === 'undertale' ? utValid : utyValid);
+        const tsusValid = ['all', 'ruined_home', 'stardust_woods', 'koffin_keep', 'starstruck_village', 'crystal_springs', 'extras', 'duration_30', 'duration_20', 'duration_10'];
+        let validLists = state.currentGame === 'deltarune' ? drValid : (state.currentGame === 'undertale' ? utValid : (state.currentGame === 'uty' ? utyValid : tsusValid));
         if (state.currentGame === 'combined') {
-            validLists = Array.from(new Set([...drValid, ...utValid, ...utyValid, 'combined_all', 'felfeb']));
+            validLists = Array.from(new Set([...drValid, ...utValid, ...utyValid, ...tsusValid, 'combined_all', 'felfeb']));
         }
 
         if (!validLists.includes(state.activeRankerList) && !state.customLists[state.activeRankerList]) {
@@ -402,13 +426,27 @@ document.addEventListener('DOMContentLoaded', () => {
             if (utToggle) utToggle.classList.add('active');
             if (utyToggle) utyToggle.classList.remove('active');
             if (mainTitle) mainTitle.textContent = "Which Undertale song is better?";
-        } else {
+        } else if (state.currentGame === 'uty') {
             if (drToggle) drToggle.classList.remove('active');
             if (combinedToggle) combinedToggle.classList.remove('active');
             if (utToggle) utToggle.classList.remove('active');
             if (utyToggle) utyToggle.classList.add('active');
+            if (tsusToggle) tsusToggle.classList.remove('active');
             if (mainTitle) mainTitle.textContent = "Which Undertale Yellow song is better?";
+        } else {
+            if (drToggle) drToggle.classList.remove('active');
+            if (combinedToggle) combinedToggle.classList.remove('active');
+            if (utToggle) utToggle.classList.remove('active');
+            if (utyToggle) utyToggle.classList.remove('active');
+            if (tsusToggle) tsusToggle.classList.add('active');
+            if (mainTitle) mainTitle.textContent = "Which TS!Underswap song is better?";
         }
+
+        if (drToggle && state.currentGame !== 'deltarune') drToggle.classList.remove('active');
+        if (utToggle && state.currentGame !== 'undertale') utToggle.classList.remove('active');
+        if (utyToggle && state.currentGame !== 'uty') utyToggle.classList.remove('active');
+        if (tsusToggle && state.currentGame !== 'tsus') tsusToggle.classList.remove('active');
+        if (combinedToggle && state.currentGame !== 'combined') combinedToggle.classList.remove('active');
 
         if (combinedToggle) {
             combinedToggle.style.display = globalState.combinedDiscovered ? 'inline-block' : 'none';
@@ -800,7 +838,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (['1', '2', '3', '4', '5'].includes(filter)) {
             const ch = parseInt(filter);
             return pool.filter(s => (!s.hidden || state.secretsUnlocked) && getChaptersForSong(s).includes(ch));
-        } else if (['ruins', 'snowdin', 'dunes', 'wild_east', 'steamworks', 'new_home'].includes(filter)) {
+        } else if (['ruins', 'snowdin', 'dunes', 'wild_east', 'steamworks', 'new_home', 'ruined_home', 'stardust_woods', 'koffin_keep', 'starstruck_village', 'crystal_springs', 'extras'].includes(filter)) {
             return pool.filter(s => (!s.hidden || state.secretsUnlocked) && getChaptersForSong(s).includes(filter));
         } else if (filter.startsWith('duration_')) {
             const limit = parseInt(filter.split('_')[1]);
@@ -830,6 +868,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function getChaptersForSong(song) {
+        if (song.id >= 4000) {
+            // TS!Underswap regional filters as requested
+            if (song.region) return [song.region.toLowerCase().replace(/ /g, '_')];
+            return ['all'];
+        }
         if (song.id >= 2000) {
             const track = song.id - 2000;
             if (track <= 16) return ['ruins'];
@@ -1287,7 +1330,9 @@ document.addEventListener('DOMContentLoaded', () => {
         let rpcName;
         if (winnerDeltarune) rpcName = 'handle_vote';
         else if (winnerId > 1000 && winnerId < 2000) rpcName = 'handle_ut_vote';
-        else if (winnerId >= 2000) rpcName = 'handle_uty_vote';
+        else if (winnerId >= 2000 && winnerId < 4000) rpcName = 'handle_uty_vote';
+        else if (winnerId >= 4000) rpcName = 'handle_tsus_vote';
+        else return; // what even is this song? i don't care.
         try {
             const { error } = await supabaseClient.rpc(rpcName, {
                 winner_id: winnerId,
@@ -1312,17 +1357,19 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (state.currentGame === 'combined') {
-                const [drRes, utRes, utyRes] = await Promise.all([
+                const [drRes, utRes, utyRes, tsusRes] = await Promise.all([
                     supabaseClient.rpc('get_total_votes'),
                     supabaseClient.rpc('get_total_ut_votes'),
-                    supabaseClient.rpc('get_total_uty_votes')
+                    supabaseClient.rpc('get_total_uty_votes'),
+                    supabaseClient.rpc('get_total_tsus_votes')
                 ]);
 
                 if (drRes.error) throw drRes.error;
                 if (utRes.error) throw utRes.error;
                 if (utyRes.error) throw utyRes.error;
+                if (tsusRes.error) throw tsusRes.error;
 
-                const total = (drRes.data || 0) + (utRes.data || 0) + (utyRes.data || 0);
+                const total = (drRes.data || 0) + (utRes.data || 0) + (utyRes.data || 0) + (tsusRes.data || 0);
                 if (voteStat) voteStat.textContent = `Total Votes: ${total}`;
                 return;
             }
@@ -1330,6 +1377,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let rpcName = 'get_total_votes';
             if (state.currentGame === 'undertale') rpcName = 'get_total_ut_votes';
             else if (state.currentGame === 'undertale_yellow' || state.currentGame === 'uty') rpcName = 'get_total_uty_votes';
+            else if (state.currentGame === 'tsus') rpcName = 'get_total_tsus_votes';
             const { data: voteData, error: voteError } = await supabaseClient.rpc(rpcName);
 
             if (voteError) {
@@ -1361,24 +1409,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (error) throw error;
                 combinedData = data;
             } else if (state.currentGame === 'combined') {
-                const [drRes, utRes, utyRes] = await Promise.all([
-                    supabaseClient.from('songs').select('name, id, rating').order('rating', { ascending: false }),
-                    supabaseClient.from('ut_songs').select('name, id, rating').order('rating', { ascending: false }),
-                    supabaseClient.from('uty_songs').select('name, id, rating').order('rating', { ascending: false })
+                const [drRes, utRes, utyRes, tsusRes] = await Promise.all([
+                    supabaseClient.from('songs').select('name, id, rating, hidden').order('rating', { ascending: false }),
+                    supabaseClient.from('ut_songs').select('name, id, rating, hidden').order('rating', { ascending: false }),
+                    supabaseClient.from('uty_songs').select('name, id, rating, hidden').order('rating', { ascending: false }),
+                    supabaseClient.from('tsus_songs').select('name, id, rating, hidden').order('rating', { ascending: false })
                 ]);
 
                 if (drRes.error) throw drRes.error;
                 if (utRes.error) throw utRes.error;
                 if (utyRes.error) throw utyRes.error;
+                if (tsusRes.error) throw tsusRes.error;
 
-                combinedData = [...drRes.data, ...utRes.data, ...utyRes.data].sort((a, b) => b.rating - a.rating);
+                combinedData = [...drRes.data, ...utRes.data, ...utyRes.data, ...tsusRes.data].sort((a, b) => b.rating - a.rating);
             } else {
                 let tableName = 'songs';
                 if (state.currentGame === 'undertale') tableName = 'ut_songs';
                 else if (state.currentGame === 'undertale_yellow' || state.currentGame === 'uty') tableName = 'uty_songs';
+                else if (state.currentGame === 'tsus') tableName = 'tsus_songs';
                 const { data, error } = await supabaseClient
                     .from(tableName)
-                    .select('name, id, rating')
+                    .select('name, id, rating, hidden')
                     .order('rating', { ascending: false });
                 if (error) throw error;
                 combinedData = data;
@@ -1393,7 +1444,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     hidden: localSong ? localSong.hidden : false,
                     duration: localSong ? localSong.duration : 0, // include duration. don't forget it again.
                     felfebFile: localSong ? localSong.felfebFile : undefined, // global felfeb. finally.
-                    isBonus: localSong ? localSong.isBonus : false
+                    isBonus: localSong ? localSong.isBonus : false,
+                    region: localSong ? localSong.region : undefined // regions for tsus/uty filtering. i can't believe i forgot this.
                 };
             });
 
@@ -1483,9 +1535,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     const drMatch = window.songList ? window.songList.find(s => s.id === match.opponent_id) : null;
                     const utMatch = utSongList.find(s => s.id === match.opponent_id);
                     const utyMatch = typeof utySongList !== 'undefined' ? utySongList.find(s => s.id === match.opponent_id) : null;
+                    const tsusMatch = typeof tsusSongList !== 'undefined' ? tsusSongList.find(s => s.id === match.opponent_id) : null;
                     if (drMatch) opponentName = drMatch.name;
                     else if (utMatch) opponentName = utMatch.name;
                     else if (utyMatch) opponentName = utyMatch.name;
+                    else if (tsusMatch) opponentName = tsusMatch.name;
                 } else {
                     // fallback if global vars aren't available
                     const s = state.songs.find(s => s.id === match.opponent_id);
@@ -1637,8 +1691,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // uty locations. more work for me.
-        if (['ruins', 'snowdin', 'dunes', 'wild_east', 'steamworks', 'new_home'].includes(filter)) {
+        // locations/regions (UTY and TS!Underswap)
+        if (['ruins', 'snowdin', 'dunes', 'wild_east', 'steamworks', 'new_home', 'ruined_home', 'stardust_woods', 'koffin_keep', 'starstruck_village', 'crystal_springs', 'extras'].includes(filter)) {
             return songs.filter(s => {
                 const visible = !s.hidden || state.secretsUnlocked;
                 if (!visible) return false;
@@ -1914,6 +1968,7 @@ document.addEventListener('DOMContentLoaded', () => {
             state.currentGame = 'deltarune';
             loadState();
             saveState(); // save new currentGame to globalState
+            updateMainFilterOptions();
             presentNewPair();
             fetchAndDisplayAllTimeStats();
             if (myRankingBtn.classList.contains('active')) displayRankings();
@@ -1928,6 +1983,7 @@ document.addEventListener('DOMContentLoaded', () => {
             state.currentGame = 'undertale';
             loadState();
             saveState(); // save new currentGame to globalState
+            updateMainFilterOptions();
             presentNewPair();
             fetchAndDisplayAllTimeStats();
             if (myRankingBtn.classList.contains('active')) displayRankings();
@@ -1958,6 +2014,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (mainFilterSelect) mainFilterSelect.value = 'combined_all';
             loadState();
             saveState();
+            updateMainFilterOptions();
             presentNewPair();
             fetchAndDisplayAllTimeStats();
             if (myRankingBtn.classList.contains('active')) displayRankings();
@@ -1972,6 +2029,7 @@ document.addEventListener('DOMContentLoaded', () => {
             state.currentGame = 'uty';
             loadState();
             saveState();
+            updateMainFilterOptions();
             presentNewPair();
             fetchAndDisplayAllTimeStats();
             if (myRankingBtn.classList.contains('active')) displayRankings();
@@ -1979,28 +2037,116 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    if (tsusToggle) {
+        tsusToggle.addEventListener('click', () => {
+            if (state.currentGame === 'tsus') return;
+            saveState();
+            state.currentGame = 'tsus';
+            loadState();
+            saveState();
+            updateMainFilterOptions();
+            presentNewPair();
+            fetchAndDisplayAllTimeStats();
+            if (myRankingBtn.classList.contains('active')) displayRankings();
+            else displayCommunityRankings();
+        });
+    }
+
+    function updateMainFilterOptions() {
+        if (!mainFilterSelect) return;
+        
+        const prevValue = mainFilterSelect.value;
+        let html = `<option value="all">All Songs (Original)</option>`;
+        
+        if (state.currentGame === 'deltarune') {
+            html += `
+                <option value="1">Chapter 1</option>
+                <option value="2">Chapter 2</option>
+                <option value="3">Chapter 3</option>
+                <option value="4">Chapter 4</option>
+                <option value="mix_chapters" style="color: var(--accent-color); font-weight: bold;">Mix Chapters...</option>
+            `;
+        } else if (state.currentGame === 'undertale') {
+            html += `
+                <option value="1">Ruins</option>
+                <option value="2">Snowdin</option>
+                <option value="3">Waterfall</option>
+                <option value="4">Hotland/CORE</option>
+                <option value="5">New Home</option>
+            `;
+        } else if (state.currentGame === 'uty') {
+            html += `
+                <optgroup label="Undertale Yellow">
+                    <option value="ruins">Ruins</option>
+                    <option value="snowdin">Snowdin</option>
+                    <option value="dunes">Dunes</option>
+                    <option value="wild_east">Wild East</option>
+                    <option value="steamworks">Steamworks</option>
+                    <option value="new_home">New Home</option>
+                </optgroup>
+            `;
+        } else if (state.currentGame === 'tsus') {
+            html += `
+                <optgroup label="TS!Underswap">
+                    <option value="ruined_home">Ruined Home</option>
+                    <option value="stardust_woods">Stardust Woods</option>
+                    <option value="koffin_keep">Koffin Keep</option>
+                    <option value="starstruck_village">Starstruck Village</option>
+                    <option value="crystal_springs">Crystal Springs</option>
+                    <option value="extras">Extras</option>
+                </optgroup>
+            `;
+        }
+        
+        html += `
+            <optgroup label="Filter by Length">
+                <option value="duration_30">Hide songs < 30s</option>
+                <option value="duration_20">Hide songs < 20s</option>
+                <option value="duration_10">Hide songs < 10s</option>
+            </optgroup>
+            <optgroup label="Custom Lists" id="custom-lists-optgroup">
+            </optgroup>
+        `;
+        
+        mainFilterSelect.innerHTML = html;
+        
+        // restore custom lists
+        const customOptgroup = document.getElementById('custom-lists-optgroup');
+        if (customOptgroup) {
+            Object.keys(state.customLists).forEach(listName => {
+                const opt = document.createElement('option');
+                opt.value = listName;
+                opt.textContent = listName;
+                customOptgroup.appendChild(opt);
+            });
+        }
+        
+        if (html.includes(`value="${state.activeRankerList}"`)) {
+            mainFilterSelect.value = state.activeRankerList;
+            currentChapterFilter = state.activeRankerList;
+        } else {
+            mainFilterSelect.value = 'all';
+            currentChapterFilter = 'all';
+            state.activeRankerList = 'all';
+        }
+    }
+
     if (mainFilterSelect) {
         mainFilterSelect.addEventListener('change', (e) => {
-            if (e.target.value === 'combined_all') return; // ignored now.
+            if (e.target.value === 'combined_all') return;
 
             if (e.target.value === 'mix_chapters') {
                 chapterMixModal.style.display = 'flex';
-                // reset checkboxes. start fresh.
                 mixCheckboxes.forEach(cb => cb.checked = false);
                 return;
             }
 
             currentChapterFilter = e.target.value;
             state.activeRankerList = currentChapterFilter;
-            saveState(); // actually record this.
+            saveState();
 
-            // Show/Hide Edit Button
             if (editListBtn) {
-                if (state.customLists[currentChapterFilter]) {
-                    editListBtn.style.display = 'inline-block';
-                } else {
-                    editListBtn.style.display = 'none';
-                }
+                editListBtn.style.display = state.customLists[currentChapterFilter] ? 'inline-block' : 'none';
             }
 
             if (myRankingBtn.classList.contains('active')) {
@@ -2011,6 +2157,9 @@ document.addEventListener('DOMContentLoaded', () => {
             presentNewPair();
         });
     }
+
+    // initial filter setup
+    updateMainFilterOptions();
 
     fetchAndDisplayAllTimeStats();
 
@@ -2657,6 +2806,7 @@ document.addEventListener('DOMContentLoaded', () => {
     checkSecretsGlobal();
     // populateCustomDropdown is already called inside loadState. 
     // Just ensure the select value is synced one last time.
+    updateMainFilterOptions();
     if (mainFilterSelect) mainFilterSelect.value = state.activeRankerList;
     updateApp();
     // refresh on back button because browsers are annoying.

@@ -10,18 +10,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     Chart.defaults.font.family = "'Roboto Mono', monospace";
 
     async function fetchData() {
-        const [drRes, utRes, utyRes] = await Promise.all([
+        const [drRes, utRes, utyRes, tsusRes] = await Promise.all([
             supabase.from('songs').select('id, name, rating, comparisons').order('rating', { ascending: false }),
             supabase.from('ut_songs').select('id, name, rating, comparisons').order('rating', { ascending: false }),
-            supabase.from('uty_songs').select('id, name, rating, comparisons').order('rating', { ascending: false })
+            supabase.from('uty_songs').select('id, name, rating, comparisons').order('rating', { ascending: false }),
+            supabase.from('tsus_songs').select('id, name, rating, comparisons').order('rating', { ascending: false })
         ]);
 
-        if (drRes.error || utRes.error || utyRes.error) {
-            console.error("Error fetching data:", drRes.error || utRes.error || utyRes.error);
+        if (drRes.error || utRes.error || utyRes.error || tsusRes.error) {
+            console.error("Error fetching data:", drRes.error || utRes.error || utyRes.error || tsusRes.error);
             alert("Failed to load stats.");
             return [];
         }
-        return [...drRes.data, ...utRes.data, ...utyRes.data].sort((a, b) => b.rating - a.rating);
+        return [...drRes.data, ...utRes.data, ...utyRes.data, ...tsusRes.data].sort((a, b) => b.rating - a.rating);
     }
 
     async function fetchFelfebStats() {
@@ -37,7 +38,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!dbSongs.length) return;
 
     // merging with local metadata. this feels like a disaster waiting to happen.
-    const localSongs = [...(window.songList || []), ...(window.utSongList || []), ...(window.utySongList || [])];
+    const localSongs = [...(window.songList || []), ...(window.utSongList || []), ...(window.utySongList || []), ...(window.tsusSongList || [])];
     const songs = dbSongs.map(dbS => {
         const local = localSongs.find(l => l.id === dbS.id);
         return {
@@ -51,7 +52,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     function getGame(song) {
         if (song.id < 1000) return 'DR';
         if (song.id < 2000) return 'UT';
-        return 'UTY';
+        if (song.id < 4000) return 'UTY';
+        return 'TSUS';
     }
 
     // section classification. i just copy-pasted this from app.js because i'm not refactoring everything today.
@@ -70,6 +72,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (track <= 70) return 'Hotland / CORE';
             return 'New Home';
         }
+        if (song.id >= 4000) return song.region || 'Unknown';
+
         // uty
         const track = song.id - 2000;
         if (track <= 16) return 'Ruins';
@@ -82,7 +86,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (track === 127) return 'Ruins'; // enemy retreating. this starts in ruins but covers everything. still messy as hell.
         if (track === 128) return 'Snowdin'; // apprehension. Genocide martlet is exhausting.
         if (track === 129 || track === 130) return 'Wild East'; // starlo and ceroba are too much for me right now.
-        if (track === 131) return 'Steamworks'; // axis. whatever. i don't care.
+        if (track >= 131) return 'Steamworks'; // axis. whatever. i don't care.
         return 'New Home'; // zenith tracks. i'm done.
     }
 
@@ -92,6 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const drSongs = publicSongs.filter(s => getGame(s) === 'DR');
     const utSongs = publicSongs.filter(s => getGame(s) === 'UT');
     const utySongs = publicSongs.filter(s => getGame(s) === 'UTY');
+    const tsusSongs = publicSongs.filter(s => getGame(s) === 'TSUS');
 
     // ──────────────────────────────────────────────
     // quick stats row
@@ -105,6 +110,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         { value: drSongs.length, label: 'Deltarune' },
         { value: utSongs.length, label: 'Undertale' },
         { value: utySongs.length, label: 'UT Yellow' },
+        { value: tsusSongs.length, label: 'TS!Underswap' },
         { value: await fetchFelfebStats(), label: 'Felfeb Votes' }
     ];
 
@@ -220,9 +226,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ──────────────────────────────────────────────
     // average rating by game
     // ──────────────────────────────────────────────
-    const gameLabels = ['Deltarune', 'Undertale', 'UT Yellow'];
-    const gameAvgs = [drSongs, utSongs, utySongs].map(set =>
-        set.reduce((sum, s) => sum + s.rating, 0) / set.length
+    const gameLabels = ['Deltarune', 'Undertale', 'UT Yellow', 'TS!Underswap'];
+    const gameAvgs = [drSongs, utSongs, utySongs, tsusSongs].map(set =>
+        set.length ? set.reduce((sum, s) => sum + s.rating, 0) / set.length : 0
     );
 
     new Chart(document.getElementById('avgByGameChart'), {
@@ -331,7 +337,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ──────────────────────────────────────────────
     // most volatile (biggest outliers from game mean)
     // ──────────────────────────────────────────────
-    const gameMeans = { DR: gameAvgs[0], UT: gameAvgs[1], UTY: gameAvgs[2] };
+    const gameMeans = { DR: gameAvgs[0], UT: gameAvgs[1], UTY: gameAvgs[2], TSUS: gameAvgs[3] };
 
     const withDeviation = publicSongs.map(s => ({
         ...s,
@@ -529,7 +535,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ──────────────────────────────────────────────
     // radar chart. keeping it because it looks cool.
     // ──────────────────────────────────────────────
-    const radarLabels = ['Ch 1', 'Ch 2', 'Ch 3', 'Ch 4', 'UT', 'UTY'];
+    const radarLabels = ['Ch 1', 'Ch 2', 'Ch 3', 'Ch 4', 'UT', 'UTY', 'TSUS'];
     const radarStats = {};
     radarLabels.forEach(l => { radarStats[l] = { sum: 0, count: 0 }; });
 
@@ -544,9 +550,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else if (game === 'UT') {
             radarStats['UT'].sum += s.rating;
             radarStats['UT'].count++;
-        } else {
+        } else if (game === 'UTY') {
             radarStats['UTY'].sum += s.rating;
             radarStats['UTY'].count++;
+        } else {
+            radarStats['TSUS'].sum += s.rating;
+            radarStats['TSUS'].count++;
         }
     });
 

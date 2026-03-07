@@ -44,6 +44,7 @@
                 <button id="combined-toggle" class="game-btn">Combined</button>
                 <button id="ut-toggle" class="game-btn">Undertale</button>
                 <button id="uty-toggle" class="game-btn">U.T. Yellow</button>
+                <button id="tsus-toggle" class="game-btn">TS!Underswap</button>
             </div>
             <h1 id="main-title">Which song is better?</h1>
             <div class="arena">
@@ -110,14 +111,13 @@
                     <option value="4">Chapter 4</option>
                     <option value="mix_chapters" style="color: var(--accent-color); font-weight: bold;">Mix Chapters...
                     </option>
-                    <optgroup label="Undertale Yellow" id="uty-filters-optgroup">
-                        <option value="ruins">Ruins (UTY)</option>
-                        <option value="snowdin">Snowdin (UTY)</option>
-                        <option value="dunes">Dunes (UTY)</option>
-                        <option value="wild_east">Wild East (UTY)</option>
-                        <option value="steamworks">Steamworks (UTY)</option>
-                        <option value="post_game">Post-Game (UTY)</option>
-                        <option value="genocide">Genocide (UTY)</option>
+                    <optgroup label="TS!Underswap" id="tsus-filters-optgroup">
+                        <option value="ruined_home">Ruined Home</option>
+                        <option value="stardust_woods">Stardust Woods</option>
+                        <option value="koffin_keep">Koffin Keep</option>
+                        <option value="starstruck_village">Starstruck Village</option>
+                        <option value="crystal_springs">Crystal Springs</option>
+                        <option value="extras">Extras</option>
                     </optgroup>
                     <optgroup label="Filter by Length">
                         <option value="duration_30">Hide songs < 30s</option>
@@ -421,8 +421,9 @@
     <script src="app_song_data.js"></script>
     <script src="ut_song_data.js"></script>
     <script src="uty_song_data.js"></script>
+    <script src="tsus_song_data.js"></script>
     <script src="cursor.js"></script>
-    <script src="app.js?v=uty"></script>
+    <script src="app.js?v=tsus"></script>
     <script>
         // Konami Code: Up, Up, Down, Down, Left, Right, Left, Right, B, A
         const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
