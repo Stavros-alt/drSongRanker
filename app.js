@@ -387,10 +387,10 @@ document.addEventListener('DOMContentLoaded', () => {
         populateCustomDropdown();
 
         // validation.
-        const drValid = ['all', '1', '2', '3', '4', 'hidden', 'duration_30', 'duration_20', 'duration_10', 'felfeb'];
-        const utValid = ['all', '1', '2', '3', '4', '5', 'hidden', 'duration_30', 'duration_20', 'duration_10', 'felfeb'];
-        const utyValid = ['all', 'ruins', 'snowdin', 'dunes', 'wild_east', 'steamworks', 'new_home', 'hidden', 'duration_30', 'duration_20', 'duration_10'];
-        const tsusValid = ['all', 'ruined_home', 'stardust_woods', 'koffin_keep', 'starstruck_village', 'crystal_springs', 'extras', 'duration_30', 'duration_20', 'duration_10'];
+        const drValid = ['all', 'all_plus', '1', '2', '3', '4', 'hidden', 'duration_30', 'duration_20', 'duration_10', 'felfeb'];
+        const utValid = ['all', 'all_plus', '1', '2', '3', '4', '5', 'hidden', 'duration_30', 'duration_20', 'duration_10', 'felfeb'];
+        const utyValid = ['all', 'all_plus', 'ruins', 'snowdin', 'dunes', 'wild_east', 'steamworks', 'new_home', 'hidden', 'duration_30', 'duration_20', 'duration_10'];
+        const tsusValid = ['all', 'all_plus', 'ruined_home', 'stardust_woods', 'koffin_keep', 'starstruck_village', 'crystal_springs', 'extras', 'hidden', 'duration_30', 'duration_20', 'duration_10'];
         let validLists = state.currentGame === 'deltarune' ? drValid : (state.currentGame === 'undertale' ? utValid : (state.currentGame === 'uty' ? utyValid : tsusValid));
         if (state.currentGame === 'combined') {
             validLists = Array.from(new Set([...drValid, ...utValid, ...utyValid, ...tsusValid, 'combined_all', 'felfeb']));
@@ -1410,9 +1410,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 combinedData = data;
             } else if (state.currentGame === 'combined') {
                 const [drRes, utRes, utyRes, tsusRes] = await Promise.all([
-                    supabaseClient.from('songs').select('name, id, rating, hidden').order('rating', { ascending: false }),
-                    supabaseClient.from('ut_songs').select('name, id, rating, hidden').order('rating', { ascending: false }),
-                    supabaseClient.from('uty_songs').select('name, id, rating, hidden').order('rating', { ascending: false }),
+                    supabaseClient.from('songs').select('name, id, rating').order('rating', { ascending: false }),
+                    supabaseClient.from('ut_songs').select('name, id, rating').order('rating', { ascending: false }),
+                    supabaseClient.from('uty_songs').select('name, id, rating').order('rating', { ascending: false }),
                     supabaseClient.from('tsus_songs').select('name, id, rating, hidden').order('rating', { ascending: false })
                 ]);
 
@@ -1424,12 +1424,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 combinedData = [...drRes.data, ...utRes.data, ...utyRes.data, ...tsusRes.data].sort((a, b) => b.rating - a.rating);
             } else {
                 let tableName = 'songs';
+                let selectCols = 'name, id, rating';
                 if (state.currentGame === 'undertale') tableName = 'ut_songs';
                 else if (state.currentGame === 'undertale_yellow' || state.currentGame === 'uty') tableName = 'uty_songs';
-                else if (state.currentGame === 'tsus') tableName = 'tsus_songs';
+                else if (state.currentGame === 'tsus') { tableName = 'tsus_songs'; selectCols = 'name, id, rating, hidden'; }
                 const { data, error } = await supabaseClient
                     .from(tableName)
-                    .select('name, id, rating, hidden')
+                    .select(selectCols)
                     .order('rating', { ascending: false });
                 if (error) throw error;
                 combinedData = data;
@@ -2055,8 +2056,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateMainFilterOptions() {
         if (!mainFilterSelect) return;
         
-        const prevValue = mainFilterSelect.value;
-        let html = `<option value="all">All Songs (Original)</option>`;
+        let html = '';
+        
+        if (state.currentGame === 'combined') {
+            // combined mode gets its own default
+            html += `<option value="combined_all">All Songs (Combined)</option>`;
+        } else {
+            html += `<option value="all">All Songs (Original)</option>`;
+        }
         
         if (state.currentGame === 'deltarune') {
             html += `
@@ -2098,6 +2105,17 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         }
         
+        // hidden filter. only if secrets are unlocked.
+        if (state.secretsUnlocked) {
+            html += `<option value="all_plus">All + Hidden</option>`;
+            html += `<option value="hidden">Hidden Tracks Only</option>`;
+        }
+        
+        // felfeb. if applicable.
+        if (state.currentGame === 'deltarune' || state.currentGame === 'undertale' || state.currentGame === 'combined') {
+            html += `<option value="felfeb">Felfeb Versions</option>`;
+        }
+        
         html += `
             <optgroup label="Filter by Length">
                 <option value="duration_30">Hide songs < 30s</option>
@@ -2121,19 +2139,25 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
         
-        if (html.includes(`value="${state.activeRankerList}"`)) {
-            mainFilterSelect.value = state.activeRankerList;
-            currentChapterFilter = state.activeRankerList;
+        // restore selection or fallback
+        const currentFilter = state.activeRankerList;
+        const allOptionValues = Array.from(mainFilterSelect.options).map(o => o.value);
+        if (allOptionValues.includes(currentFilter)) {
+            mainFilterSelect.value = currentFilter;
+            currentChapterFilter = currentFilter;
         } else {
-            mainFilterSelect.value = 'all';
-            currentChapterFilter = 'all';
-            state.activeRankerList = 'all';
+            // combined_all doesn't exist outside combined mode, so fall back
+            const defaultVal = state.currentGame === 'combined' ? 'combined_all' : 'all';
+            mainFilterSelect.value = defaultVal;
+            currentChapterFilter = defaultVal;
+            state.activeRankerList = defaultVal;
         }
     }
 
+
+
     if (mainFilterSelect) {
         mainFilterSelect.addEventListener('change', (e) => {
-            if (e.target.value === 'combined_all') return;
 
             if (e.target.value === 'mix_chapters') {
                 chapterMixModal.style.display = 'flex';
