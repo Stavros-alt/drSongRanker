@@ -69,6 +69,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const historySongName = document.getElementById('history-song-name');
     const historyList = document.getElementById('history-list');
     const closeHistoryBtn = document.getElementById('close-history-btn');
+
+    // finish modal elements for overachievers
+    const finishModal = document.getElementById('finish-modal');
+    const finishShowRankingsBtn = document.getElementById('finish-show-rankings-btn');
+    const closeFinishBtn = document.getElementById('close-finish-btn');
     const volumeSlider = document.getElementById('volume-slider');
     const playerProgress = document.getElementById('player-progress');
     const playerCurrentTime = document.getElementById('player-current-time');
@@ -235,7 +240,8 @@ document.addEventListener('DOMContentLoaded', () => {
         recentMatches: [], // keeping track of what we just saw.
         volume: parseFloat(localStorage.getItem('drSongRankerVolume') || '0.5'),
         felfebMode: globalState.felfebMode !== undefined ? globalState.felfebMode : true,
-        includeBonus: globalState.includeBonus || false
+        includeBonus: globalState.includeBonus || false,
+        hasSeenFinishScreen: false // don't spam them with this every second
     };
 
     function saveState() {
@@ -1644,6 +1650,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (personalVoteStat) {
             personalVoteStat.textContent = `YOUR VOTES: ${state.comparisons}`;
         }
+
+        // popup for 100% completion so they stop complaining
+        if (accuracy.toFixed(1) === "100.0" && !state.hasSeenFinishScreen) {
+            state.hasSeenFinishScreen = true;
+            saveState();
+            if (finishModal) finishModal.style.display = 'flex';
+        }
     }
 
 
@@ -1875,10 +1888,29 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    if (finishShowRankingsBtn) {
+        finishShowRankingsBtn.addEventListener('click', () => {
+            if (finishModal) finishModal.style.display = 'none';
+            communityRankingBtn.classList.remove('active');
+            myRankingBtn.classList.add('active');
+            displayRankings();
+            rankingContainer.scrollIntoView({ behavior: 'smooth' }); // nice touch i guess
+        });
+    }
+
+    if (closeFinishBtn) {
+        closeFinishBtn.addEventListener('click', () => {
+            if (finishModal) finishModal.style.display = 'none';
+        });
+    }
+
     // close on click outside.
     window.addEventListener('click', (e) => {
         if (e.target === historyModal) {
             historyModal.style.display = 'none';
+        }
+        if (finishModal && e.target === finishModal) {
+            finishModal.style.display = 'none';
         }
     });
 
@@ -2849,5 +2881,12 @@ document.addEventListener('DOMContentLoaded', () => {
             updateApp();
         }
     });
+
+    // debug function for testing the finish screen.
+    window.debugTriggerFinish = () => {
+        state.comparisons = 761; // close enough to 100%
+        state.hasSeenFinishScreen = false;
+        updateProgress();
+    };
 
 });
