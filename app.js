@@ -218,7 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return (yiq >= 128) ? 'black' : 'white';
     }
 
-    let globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{"currentGame": "deltarune", "showRatings": false, "preventDuplicates": false, "combinedDiscovered": false, "felfebMode": true, "includeBonus": false}');
+    let globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{"currentGame": "deltarune", "showRatings": false, "preventDuplicates": true, "combinedDiscovered": false, "felfebMode": true, "includeBonus": false}');
 
     let state = {
         currentGame: globalState.currentGame,
@@ -231,7 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentCustomListName: null, // which one are we editing right now
         boostedSongId: null, // i guess we're rigging the election now.
         showRatings: globalState.showRatings, // nobody wants to see the numbers apparently.
-        preventDuplicates: globalState.preventDuplicates || false,
+        preventDuplicates: globalState.preventDuplicates !== undefined ? globalState.preventDuplicates : true,
         recentMatches: [], // keeping track of what we just saw.
         volume: parseFloat(localStorage.getItem('drSongRankerVolume') || '0.5'),
         felfebMode: globalState.felfebMode !== undefined ? globalState.felfebMode : true,
@@ -403,6 +403,14 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             currentChapterFilter = state.activeRankerList;
             if (mainFilterSelect) mainFilterSelect.value = state.activeRankerList;
+        }
+
+        // force this setting on for everyone at least once. i hate dealing with legacy saves.
+        if (!localStorage.getItem('drSongRankerPreventDuplicatesForcedOn_v2')) {
+            state.preventDuplicates = true;
+            localStorage.setItem('drSongRankerPreventDuplicatesForcedOn_v2', 'true');
+            saveState();
+            if (preventDuplicatesToggle) preventDuplicatesToggle.checked = true;
         }
 
         updateGameUI();
