@@ -316,6 +316,7 @@ document.addEventListener('DOMContentLoaded', () => {
             state.boostedSongId = parsed.boostedSongId || null;
             state.felfebMode = parsed.felfebMode !== undefined ? parsed.felfebMode : state.felfebMode;
             state.includeBonus = parsed.includeBonus !== undefined ? parsed.includeBonus : state.includeBonus;
+            state.hasSeenFinishScreen = parsed.hasSeenFinishScreen || false;
 
             state.songs = sourceList.map(baseSong => {
                 const possibleStates = [
@@ -1919,6 +1920,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const source = window.songList || songList || [];
         state.songs = JSON.parse(JSON.stringify(source));
         state.comparisons = 0;
+        state.hasSeenFinishScreen = false;
     }
 
     function resetState() {
