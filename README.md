@@ -11,7 +11,7 @@ Elo-based ranking for Deltarune, Undertale, Undertale Yellow, and TS!Underswap m
 - MP3 export.
 - Mix and Match chapters.
 - Regional filters (UTY regions, TS!Underswap areas).
-- Volume slider. (Finally.)
+- Volume slider. 
 - Probability boost for underrated songs.
 
 ## Setup
