@@ -1260,12 +1260,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         musicPlayerBar.classList.remove('hidden');
 
-        audioEl.currentTime = PREVIEW_START_TIME;
-
-        // fix for short songs because they're special apparently.
-        if (!isNaN(audioEl.duration) && audioEl.duration < PREVIEW_START_TIME + 5) {
-            audioEl.currentTime = 0;
+        // if it's short, play the last 10 seconds. otherwise the usual 30s mark.
+        let startTime = PREVIEW_START_TIME;
+        if (songData.duration && songData.duration < 30) {
+            startTime = Math.max(0, songData.duration - 10);
         }
+        audioEl.currentTime = startTime;
 
         const playPromise = audioEl.play();
 
