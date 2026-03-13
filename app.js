@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const preventDuplicatesToggle = document.getElementById('prevent-duplicates-toggle');
     const felfebModeToggle = document.getElementById('felfeb-mode-toggle');
     const includeBonusToggle = document.getElementById('include-bonus-toggle');
+    const systemCursorToggle = document.getElementById('system-cursor-toggle');
     const arena = document.querySelector('.arena');
     const songACard = document.getElementById('songA-card');
     const songBCard = document.getElementById('songB-card');
@@ -223,7 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return (yiq >= 128) ? 'black' : 'white';
     }
 
-    let globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{"currentGame": "deltarune", "showRatings": false, "preventDuplicates": true, "combinedDiscovered": false, "felfebMode": true, "includeBonus": false}');
+    let globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{"currentGame": "deltarune", "showRatings": false, "preventDuplicates": true, "combinedDiscovered": false, "felfebMode": true, "includeBonus": false, "useSystemCursor": false}');
 
     let state = {
         currentGame: globalState.currentGame,
@@ -241,6 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
         volume: parseFloat(localStorage.getItem('drSongRankerVolume') || '0.5'),
         felfebMode: globalState.felfebMode !== undefined ? globalState.felfebMode : true,
         includeBonus: globalState.includeBonus || false,
+        useSystemCursor: globalState.useSystemCursor || false,
         hasSeenFinishScreen: false // don't spam them with this every second
     };
 
@@ -262,7 +264,8 @@ document.addEventListener('DOMContentLoaded', () => {
             preventDuplicates: state.preventDuplicates,
             combinedDiscovered: globalState.combinedDiscovered,
             felfebMode: state.felfebMode,
-            includeBonus: state.includeBonus
+            includeBonus: state.includeBonus,
+            useSystemCursor: state.useSystemCursor
         }));
     }
 
@@ -316,6 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
             state.boostedSongId = parsed.boostedSongId || null;
             state.felfebMode = parsed.felfebMode !== undefined ? parsed.felfebMode : state.felfebMode;
             state.includeBonus = parsed.includeBonus !== undefined ? parsed.includeBonus : state.includeBonus;
+            state.useSystemCursor = parsed.useSystemCursor !== undefined ? parsed.useSystemCursor : state.useSystemCursor;
             state.hasSeenFinishScreen = parsed.hasSeenFinishScreen || false;
 
             state.songs = sourceList.map(baseSong => {
@@ -418,6 +422,13 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('drSongRankerPreventDuplicatesForcedOn_v2', 'true');
             saveState();
             if (preventDuplicatesToggle) preventDuplicatesToggle.checked = true;
+        }
+
+        // apply system cursor class if enabled. because some people hate fun.
+        if (state.useSystemCursor) {
+            document.body.classList.add('system-cursor');
+        } else {
+            document.body.classList.remove('system-cursor');
         }
 
         updateGameUI();
@@ -694,6 +705,19 @@ document.addEventListener('DOMContentLoaded', () => {
             presentNewPair(); // refresh the current pair
             if (myRankingBtn.classList.contains('active')) displayRankings();
             else displayCommunityRankings();
+        });
+    }
+
+    if (systemCursorToggle) {
+        systemCursorToggle.checked = state.useSystemCursor;
+        systemCursorToggle.addEventListener('change', (e) => {
+            state.useSystemCursor = e.target.checked;
+            if (state.useSystemCursor) {
+                document.body.classList.add('system-cursor');
+            } else {
+                document.body.classList.remove('system-cursor');
+            }
+            saveState();
         });
     }
 

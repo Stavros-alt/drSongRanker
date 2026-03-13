@@ -13,6 +13,7 @@ Elo-based ranking for Deltarune, Undertale, Undertale Yellow, and TS!Underswap m
 - Regional filters (UTY regions, TS!Underswap areas).
 - Volume slider. 
 - Probability boost for underrated songs.
+- Site-wide system cursor option (because some people hate the heart).
 
 ## Setup
 

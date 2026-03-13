@@ -81,6 +81,7 @@ body {
 }
 
 /* mouse privilege */
+/* mouse privilege */
 @media (hover: hover) and (pointer: fine) {
     .custom-cursor {
         display: block;
@@ -89,6 +90,29 @@ body {
     * {
         cursor: none !important;
     }
+}
+
+/* site-wide system cursor override. because sometimes simplicity is better. fine. i don't care. */
+body.system-cursor .custom-cursor {
+    display: none !important;
+}
+
+body.system-cursor,
+body.system-cursor * {
+    cursor: auto !important;
+}
+
+body.system-cursor button,
+body.system-cursor a,
+body.system-cursor .song-card,
+body.system-cursor .filter-btn,
+body.system-cursor .ranking-toggle-btn,
+body.system-cursor .boost-rank-btn,
+body.system-cursor .history-rank-btn,
+body.system-cursor .icon-btn,
+body.system-cursor .color-btn,
+body.system-cursor [style*="cursor: pointer"] {
+    cursor: pointer !important;
 }
 
 /* holding it all together with duct tape */

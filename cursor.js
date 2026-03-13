@@ -1,4 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // some people just want to use their regular cursor. fine.
+    try {
+        const globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{}');
+        if (globalState.useSystemCursor) {
+            document.body.classList.add('system-cursor');
+        }
+    } catch (e) {
+        // storage is hard apparently
+    }
+
     // vanity heart. because why not.
     const cursor = document.createElement('div');
     cursor.classList.add('custom-cursor');
