@@ -101,6 +101,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const secretLink = document.getElementById('secret-stats-link');
     const hiddenTab = document.getElementById('hidden-filter-btn');
 
+    const gameMixModal = document.getElementById('game-mix-modal');
+    const applyGameMixBtn = document.getElementById('apply-game-mix-btn');
+    const cancelGameMixBtn = document.getElementById('cancel-game-mix-btn');
+    const gameMixCheckboxes = document.querySelectorAll('.mix-game-cb');
+
     const suggestBtn = document.getElementById('suggest-btn');
 
 
@@ -224,7 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return (yiq >= 128) ? 'black' : 'white';
     }
 
-    let globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{"currentGame": "deltarune", "showRatings": false, "preventDuplicates": true, "combinedDiscovered": false, "felfebMode": true, "includeBonus": false, "useSystemCursor": false}');
+    let globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{"currentGame": "deltarune", "showRatings": false, "preventDuplicates": true, "combinedDiscovered": false, "felfebMode": true, "includeBonus": false, "useSystemCursor": false, "selectedFranchises": ["deltarune", "undertale", "uty", "tsus"]}');
 
     let state = {
         currentGame: globalState.currentGame,
@@ -243,6 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
         felfebMode: globalState.felfebMode !== undefined ? globalState.felfebMode : true,
         includeBonus: globalState.includeBonus || false,
         useSystemCursor: globalState.useSystemCursor || false,
+        selectedFranchises: globalState.selectedFranchises || ["deltarune", "undertale", "uty", "tsus"],
         hasSeenFinishScreen: false // don't spam them with this every second
     };
 
@@ -265,7 +271,8 @@ document.addEventListener('DOMContentLoaded', () => {
             combinedDiscovered: globalState.combinedDiscovered,
             felfebMode: state.felfebMode,
             includeBonus: state.includeBonus,
-            useSystemCursor: state.useSystemCursor
+            useSystemCursor: state.useSystemCursor,
+            selectedFranchises: state.selectedFranchises
         }));
     }
 
@@ -287,7 +294,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const utList = (typeof utSongList !== 'undefined') ? utSongList : (window.utSongList || []);
             const utyList = (typeof utySongList !== 'undefined') ? utySongList : (window.utySongList || []);
             const tsusList = (typeof tsusSongList !== 'undefined') ? tsusSongList : (window.tsusSongList || []);
-            sourceList = [...drList, ...utList, ...utyList, ...tsusList];
+            
+            if (state.selectedFranchises.includes('deltarune')) sourceList.push(...drList);
+            if (state.selectedFranchises.includes('undertale')) sourceList.push(...utList);
+            if (state.selectedFranchises.includes('uty')) sourceList.push(...utyList);
+            if (state.selectedFranchises.includes('tsus')) sourceList.push(...tsusList);
+
+            // if they somehow uncheck everything, just give them deltarune. i don't constant-check this.
+            if (sourceList.length === 0) sourceList = drList;
         } else if (state.currentGame === 'deltarune') {
             sourceList = (typeof songList !== 'undefined') ? songList : (window.songList || []);
         } else if (state.currentGame === 'undertale') {
@@ -2125,8 +2139,15 @@ document.addEventListener('DOMContentLoaded', () => {
         let html = '';
         
         if (state.currentGame === 'combined') {
-            // combined mode gets its own default
-            html += `<option value="combined_all">All Songs (Combined)</option>`;
+            const franchises = [];
+            if (state.selectedFranchises.includes('deltarune')) franchises.push('DR');
+            if (state.selectedFranchises.includes('undertale')) franchises.push('UT');
+            if (state.selectedFranchises.includes('uty')) franchises.push('UTY');
+            if (state.selectedFranchises.includes('tsus')) franchises.push('TS!US');
+
+            const mixLabel = franchises.length > 0 ? franchises.join(' + ') : 'Empty Mix';
+            html += `<option value="combined_all">All Games (${mixLabel})</option>`;
+            html += `<option value="mix_games" style="color: var(--accent-color); font-weight: bold;">Mix Franchises...</option>`;
         } else {
             html += `<option value="all">All Songs (Original)</option>`;
         }
@@ -2224,14 +2245,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (mainFilterSelect) {
         mainFilterSelect.addEventListener('change', (e) => {
+            const val = e.target.value;
 
-            if (e.target.value === 'mix_chapters') {
+            if (val === 'mix_games') {
+                gameMixModal.style.display = 'flex';
+                // sync checkboxes
+                gameMixCheckboxes.forEach(cb => {
+                    cb.checked = state.selectedFranchises.includes(cb.value);
+                });
+                // reset select so it doesn't stay on "Mix Franchises..."
+                mainFilterSelect.value = state.activeRankerList === 'all' ? 'combined_all' : state.activeRankerList;
+                return;
+            }
+
+            if (val === 'mix_chapters') {
                 chapterMixModal.style.display = 'flex';
                 mixCheckboxes.forEach(cb => cb.checked = false);
                 return;
             }
 
-            currentChapterFilter = e.target.value;
+            currentChapterFilter = val;
             state.activeRankerList = currentChapterFilter;
             saveState();
 
@@ -2247,6 +2280,33 @@ document.addEventListener('DOMContentLoaded', () => {
             presentNewPair();
         });
     }
+
+    applyGameMixBtn.addEventListener('click', () => {
+        const selected = [];
+        gameMixCheckboxes.forEach(cb => {
+            if (cb.checked) selected.push(cb.value);
+        });
+
+        if (selected.length === 0) {
+            alert("Select at least one game.");
+            return;
+        }
+
+        state.selectedFranchises = selected;
+        state.activeRankerList = 'combined_all';
+        gameMixModal.style.display = 'none';
+
+        saveState();
+        loadState();
+        updateMainFilterOptions();
+        presentNewPair();
+        if (myRankingBtn.classList.contains('active')) displayRankings();
+        else displayCommunityRankings();
+    });
+
+    cancelGameMixBtn.addEventListener('click', () => {
+        gameMixModal.style.display = 'none';
+    });
 
     // initial filter setup
     updateMainFilterOptions();
