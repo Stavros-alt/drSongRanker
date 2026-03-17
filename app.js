@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const SUPABASE_URL = 'https://tsqubxgafnzmxejwknbm.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzcXVieGdhZm56bXhlandrbmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwNzA2ODcsImV4cCI6MjA2ODY0NjY4N30.YY78tWRNQsK6OZREh-8w2fAxiLBbBaG4kZfVYROkirY';
+    const SUPABASE_KEY = 'sb_publishable_ZYm_PTc6nIPS6t7MKsWKrQ_pwSiLCq2';
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     // DOM cache. i'm done with these IDs.
@@ -71,7 +71,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const historyList = document.getElementById('history-list');
     const closeHistoryBtn = document.getElementById('close-history-btn');
 
-    // finish modal elements for overachievers
+    // finish modal for overachievers. because apparently picking a song isn't enough.
+
     const finishModal = document.getElementById('finish-modal');
     const finishShowRankingsBtn = document.getElementById('finish-show-rankings-btn');
     const closeFinishBtn = document.getElementById('close-finish-btn');
@@ -113,7 +114,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const personalVoteStat = document.getElementById('personal-vote-stat');
     const exportLimitInput = document.getElementById('export-limit');
 
-    // Global state variables for the session
+    // global variables. i'm tired of tracking this.
+
     let currentSongA = null;
     let currentSongB = null;
     let previousRanking = [];
@@ -143,7 +145,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     loadTheme();
 
-    // settings ui stuff. i hate dom manipulation.
+    // settings ui stuff. i hate dom manipulation. why do i have to do this manually.
+
 
     if (vsText) {
         vsText.addEventListener('click', () => {

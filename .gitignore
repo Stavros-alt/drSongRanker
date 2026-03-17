@@ -4,7 +4,10 @@
 *~
 *.log
 .tmp/
-.idea/
+
+# web garbage
+node_modules/
+.env
 
 # python cruft
 __pycache__/

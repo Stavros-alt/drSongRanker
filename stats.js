@@ -1,10 +1,11 @@
 document.addEventListener('DOMContentLoaded', async () => {
     const SUPABASE_URL = 'https://tsqubxgafnzmxejwknbm.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzcXVieGdhZm56bXhlandrbmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwNzA2ODcsImV4cCI6MjA2ODY0NjY4N30.YY78tWRNQsK6OZREh-8w2fAxiLBbBaG4kZfVYROkirY';
+    const SUPABASE_KEY = 'sb_publishable_ZYm_PTc6nIPS6t7MKsWKrQ_pwSiLCq2';
 
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     // chart defaults. i'm never gonna get these to look perfect anyway.
+
     Chart.defaults.color = '#fff';
     Chart.defaults.borderColor = '#333';
     Chart.defaults.font.family = "'Roboto Mono', monospace";

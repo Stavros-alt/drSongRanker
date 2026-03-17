@@ -9,7 +9,7 @@ Use a local server: `python3 -m http.server`
 ## Exporting Playlists
 
 1. Click **Export Playlist** -> **Copy Text**.
-2. Use [TuneMyMusic](https://www.tunemymusic.com/transfer).
+2. Use TuneMyMusic.
 
 ## Credits
 
