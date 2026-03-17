@@ -216,6 +216,16 @@ const songList = [
     { id: 249, name: "wet_tapdancing2", file: "DELTARUNESoundtrack/wet_tapdancing2.ogg", rating: 1500, comparisons: 0, hidden: true, duration: 9.23 },
     { id: 250, name: "wet_tapdancing_failed", file: "DELTARUNESoundtrack/wet_tapdancing_failed.ogg", rating: 1500, comparisons: 0, hidden: true, duration: 9.23 },
     { id: 251, name: "dogcheck", file: "DELTARUNESoundtrack/dogcheck.ogg", rating: 1500, comparisons: 0, hidden: true, duration: 15.16 },
+    // scrapped songs from tby fox newsletter. i hate being a completionsist.
+    { id: 301, name: "Castle Town Unfinished", file: "DELTARUNESoundtrack/Castle Town Unfinished.mp3", rating: 1500, comparisons: 0, hidden: true, duration: 128.11 },
+    { id: 302, name: "GIGA Queen Old", file: "DELTARUNESoundtrack/GIGA Queen Old.mp3", rating: 1500, comparisons: 0, hidden: true, duration: 88.7 },
+    { id: 303, name: "Power of SPAMTON", file: "DELTARUNESoundtrack/Power of SPAMTON.mp3", rating: 1500, comparisons: 0, hidden: true, duration: 135.84 },
+    { id: 304, name: "Power of SPAMTON Older", file: "DELTARUNESoundtrack/Power of SPAMTON Older.mp3", rating: 1500, comparisons: 0, hidden: true, duration: 135.84 },
+    { id: 305, name: "Printer Noise", file: "DELTARUNESoundtrack/Printer Noise.mp3", rating: 1500, comparisons: 0, hidden: true, duration: 5.38 },
+    { id: 306, name: "Queen Battle Original", file: "DELTARUNESoundtrack/Queen Battle Original.mp3", rating: 1500, comparisons: 0, hidden: true, duration: 96.12 },
+    { id: 307, name: "Rouxls Battle Old", file: "DELTARUNESoundtrack/Rouxls Battle Old.mp3", rating: 1500, comparisons: 0, hidden: true, duration: 96.1 },
+    { id: 308, name: "Spamton Battle Forgotten", file: "DELTARUNESoundtrack/Spamton Battle Forgotten.mp3", rating: 1500, comparisons: 0, hidden: true, duration: 60.98 },
+    { id: 309, name: "Unused Power of NEO", file: "DELTARUNESoundtrack/Unused Power of NEO.mp3", rating: 1500, comparisons: 0, hidden: true, duration: 162.31 },
 ];
 
 // expose to the world. or just the window. whatever.

@@ -62,6 +62,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (song.id <= 40) return 'Ch 1';
             if (song.id <= 87 || song.id === 38 || song.id === 40) return 'Ch 2';
             if (song.id <= 125) return 'Ch 3';
+            if (song.id >= 300) return 'Scrapped';
             return 'Ch 4';
         }
         if (song.id < 2000) {
