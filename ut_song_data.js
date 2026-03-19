@@ -1166,7 +1166,7 @@ const utSongList = [
         "file": "UNDERTALEsoundtrack/hidden/Ball Chime.mp3",
         "rating": 1500,
         "comparisons": 0,
-        "duration": 5.04,
+        "duration": 3.18,
         "hidden": true
     },
     {
