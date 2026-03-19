@@ -55,6 +55,7 @@
                         <button class="preview-btn" data-song="A">Preview</button>
                         <button class="full-play-btn" data-song="A">Play Full</button>
                     </div>
+                    <div class="agreement-percent" id="songA-agreement"></div>
                 </div>
                 <div class="vs" id="vs-text">VS</div>
                 <div id="songB-card" class="song-card">
@@ -64,8 +65,10 @@
                         <button class="preview-btn" data-song="B">Preview</button>
                         <button class="full-play-btn" data-song="B">Play Full</button>
                     </div>
+                    <div class="agreement-percent" id="songB-agreement"></div>
                 </div>
             </div>
+            <button id="next-matchup-btn" class="choice-btn" style="display: none; margin-bottom: 20px;">Next Matchup</button>
             <div class="choices">
                 <button id="chooseA-btn" class="choice-btn">Choose A</button>
                 <button id="undo-btn" class="choice-btn" disabled>Undo</button>
@@ -407,6 +410,11 @@
                     <input type="checkbox" id="system-cursor-toggle" style="width: 18px; height: 18px; cursor: pointer;">
                     Use System Cursor
                 </label>
+                <label
+                    style="display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; font-size: 0.9em; margin-top: 10px;">
+                    <input type="checkbox" id="show-agreement-toggle" style="width: 18px; height: 18px; cursor: pointer;">
+                    Show Agreement Statistics
+                </label>
             </div>
 
             <div class="setting-group" style="margin-top: 20px; border-top: 1px solid #333; padding-top: 20px;">
@@ -461,7 +469,7 @@
     <script src="uty_song_data.js"></script>
     <script src="tsus_song_data.js"></script>
     <script src="cursor.js"></script>
-    <script src="app.js?v=tsus"></script>
+    <script src="app.js?v=fixed_agreement"></script>
     <script>
         // Konami Code: Up, Up, Down, Down, Left, Right, Left, Right, B, A
         const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];

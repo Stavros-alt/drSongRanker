@@ -65,7 +65,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const exportTextBtn = document.getElementById('export-text-btn');
     const rankingSearch = document.getElementById('ranking-search');
     const rankingList = document.getElementById('ranking-list');
-    const vsText = document.getElementById('vs-text'); // i guess we need this now.
+    const vsText = document.getElementById('vs-text');
+    const nextMatchupBtn = document.getElementById('next-matchup-btn');
+    const showAgreementToggle = document.getElementById('show-agreement-toggle');
     const historyModal = document.getElementById('history-modal');
     const historySongName = document.getElementById('history-song-name');
     const historyList = document.getElementById('history-list');
@@ -232,7 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return (yiq >= 128) ? 'black' : 'white';
     }
 
-    let globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{"currentGame": "deltarune", "showRatings": false, "preventDuplicates": true, "combinedDiscovered": false, "felfebMode": true, "includeBonus": false, "useSystemCursor": false, "selectedFranchises": ["deltarune", "undertale", "uty", "tsus"]}');
+    let globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{"currentGame": "deltarune", "showRatings": false, "showAgreement": false, "preventDuplicates": true, "combinedDiscovered": false, "felfebMode": true, "includeBonus": false, "useSystemCursor": false, "selectedFranchises": ["deltarune", "undertale", "uty", "tsus"]}');
 
     let state = {
         currentGame: globalState.currentGame,
@@ -240,11 +242,12 @@ document.addEventListener('DOMContentLoaded', () => {
         comparisons: 0,
         history: null,
         secretsUnlocked: false,
-        activeRankerList: 'all', // all, 1, 2, 3, 4, hidden, or [customListName]
-        customLists: {}, // { "Cool List": [1, 2, 5], ... }
-        currentCustomListName: null, // which one are we editing right now
-        boostedSongId: null, // i guess we're rigging the election now.
-        showRatings: globalState.showRatings, // nobody wants to see the numbers apparently.
+        activeRankerList: 'all',
+        customLists: {},
+        currentCustomListName: null,
+        boostedSongId: null,
+        showRatings: globalState.showRatings,
+        showAgreement: globalState.showAgreement || false,
         preventDuplicates: globalState.preventDuplicates !== undefined ? globalState.preventDuplicates : true,
         recentMatches: [], // keeping track of what we just saw.
         volume: parseFloat(localStorage.getItem('drSongRankerVolume') || '0.5'),
@@ -275,6 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
             felfebMode: state.felfebMode,
             includeBonus: state.includeBonus,
             useSystemCursor: state.useSystemCursor,
+            showAgreement: state.showAgreement,
             selectedFranchises: state.selectedFranchises
         }));
     }
@@ -738,6 +742,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    if (showAgreementToggle) {
+        showAgreementToggle.checked = state.showAgreement;
+        showAgreementToggle.addEventListener('change', (e) => {
+            state.showAgreement = e.target.checked;
+            saveState();
+        });
+    }
+
     saveCustomBtn.addEventListener('click', () => {
         const name = state.currentCustomListName;
         if (!name) return;
@@ -1089,10 +1101,112 @@ document.addEventListener('DOMContentLoaded', () => {
         if (undoBtn) undoBtn.disabled = !state.history;
     }
 
-    function handleChoice(winner) {
+
+
+    async function displayAgreementStats(winner) {
+        // disable buttons. i don't want them clicking like crazy.
+        chooseABtn.disabled = true;
+        chooseBBtn.disabled = true;
+        tieBtn.disabled = true;
+
+        const songAStats = await fetchMatchupStats(currentSongA, currentSongB);
+        
+        const total = songAStats.wins + songAStats.losses;
+        let percentA = 50;
+        let percentB = 50;
+
+        if (total > 0) {
+            percentA = (songAStats.wins / total) * 100;
+            percentB = (songAStats.losses / total) * 100;
+        }
+
+        const elA = document.getElementById('songA-agreement');
+        const elB = document.getElementById('songB-agreement');
+
+        if (elA) {
+            elA.textContent = `${Math.round(percentA)}%`;
+            elA.classList.add('visible');
+        }
+        if (elB) {
+            elB.textContent = `${Math.round(percentB)}%`;
+            elB.classList.add('visible');
+        }
+
+        // highlight the user's choice. because validation is nice.
+        if (winner === 'A') songACard.style.borderColor = 'var(--accent-color)';
+        else if (winner === 'B') songBCard.style.borderColor = 'var(--accent-color)';
+
+        if (nextMatchupBtn) nextMatchupBtn.style.display = 'block';
+    }
+
+    async function fetchMatchupStats(songA, songB) {
+        if (!songA || !songB) return { wins: 0, losses: 0 };
+        try {
+            const rpcName = isFelfebRanker() ? 'get_felfeb_global_matchups' : 'get_song_agreement_stats';
+            console.log(`[Agreement] Fetching stats for target=${songA.id} (${songA.name}) against opponent=${songB.id} (${songB.name})`);
+            
+            const { data, error } = await supabaseClient.rpc(rpcName, { target_song_id: parseInt(songA.id) });
+            if (error) throw error;
+
+            console.log(`[Agreement] Data for ${songA.id}:`, data);
+
+            if (data && Array.isArray(data)) {
+                // use loose equality because sometimes those ids come back as strings from the database
+                const matchup = data.find(m => m.opponent_id == songB.id);
+                if (matchup) {
+                    console.log(`[Agreement] Match found in primary search:`, matchup);
+                    return { wins: parseInt(matchup.wins), losses: parseInt(matchup.losses) };
+                }
+            }
+
+            // fallback: sometimes the database is just being difficult. let's check the other way around.
+            console.log(`[Agreement] Match not found for song A as target. Trying song B: ${songB.id}`);
+            const { data: dataB, error: errorB } = await supabaseClient.rpc(rpcName, { target_song_id: parseInt(songB.id) });
+            if (!errorB && dataB && Array.isArray(dataB)) {
+                console.log(`[Agreement] Data for ${songB.id}:`, dataB);
+                const matchupB = dataB.find(m => m.opponent_id == songA.id);
+                if (matchupB) {
+                    console.log(`[Agreement] Match found in fallback:`, matchupB);
+                    // inverse wins and losses for song A perspective
+                    return { wins: parseInt(matchupB.losses), losses: parseInt(matchupB.wins) };
+                }
+            }
+        } catch (err) {
+            console.error("Failed to fetch agreement stats:", err);
+        }
+        return { wins: 0, losses: 0 };
+    }
+
+    if (nextMatchupBtn) {
+        nextMatchupBtn.addEventListener('click', () => {
+            nextMatchupBtn.style.display = 'none';
+            // clean up UI
+            const elA = document.getElementById('songA-agreement');
+            const elB = document.getElementById('songB-agreement');
+            if (elA) elA.classList.remove('visible');
+            if (elB) elB.classList.remove('visible');
+            songACard.style.borderColor = '';
+            songBCard.style.borderColor = '';
+            
+            // re-enable buttons for next round
+            chooseABtn.disabled = false;
+            chooseBBtn.disabled = false;
+            tieBtn.disabled = false;
+
+            updateApp();
+            saveState();
+        });
+    }
+
+    async function handleChoice(winner) {
         if (!currentSongA || !currentSongB) {
             return;
         }
+
+        // disable everything. i don't want you spamming the database.
+        chooseABtn.disabled = true;
+        chooseBBtn.disabled = true;
+        tieBtn.disabled = true;
 
         // save history before we mess it up.
         state.history = {
@@ -1131,7 +1245,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 loserSong.felfebRating = newLoserRating;
                 winnerSong.felfebComparisons++;
                 loserSong.felfebComparisons++;
-                recordCommunityVote(winnerSong.id, loserSong.id);
+                await recordCommunityVote(winnerSong.id, loserSong.id);
             } else {
                 winnerSong.rating = newWinnerRating;
                 loserSong.rating = newLoserRating;
@@ -1140,7 +1254,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (state.currentGame === 'combined') { // Only sync if in combined mode
                     syncCombinedVote(winnerSong, loserSong);
                 }
-                recordCommunityVote(winnerSong.id, loserSong.id);
+                await recordCommunityVote(winnerSong.id, loserSong.id);
             }
         } else {
             recordMatchHistory(null, null, true);
@@ -1165,7 +1279,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        updateApp();
+        if (state.showAgreement && winner) {
+            await displayAgreementStats(winner);
+        } else {
+            // re-enable buttons if not showing agreement
+            chooseABtn.disabled = false;
+            chooseBBtn.disabled = false;
+            tieBtn.disabled = false;
+            updateApp();
+        }
         saveState();
     }
 
@@ -1254,7 +1376,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem('utSongRankerState', JSON.stringify(utState));
             }
         } catch (e) {
-            console.error("Sync error. LocalStorage is haunting me.", e);
+            console.error("sync error. localstorage is haunting me.", e);
         }
     }
 
@@ -1559,8 +1681,8 @@ document.addEventListener('DOMContentLoaded', () => {
         historyModal.style.display = 'flex';
 
         try {
-            const rpcName = isFelfebRanker() ? 'get_felfeb_global_matchups' : 'get_global_matchups';
-            const { data, error } = await supabaseClient.rpc(rpcName, { target_song_id: song.id });
+            const rpcName = isFelfebRanker() ? 'get_felfeb_global_matchups' : 'get_song_agreement_stats';
+            const { data, error } = await supabaseClient.rpc(rpcName, { target_song_id: parseInt(song.id) });
             if (error) throw error;
 
             if (!data || data.length === 0) {
@@ -1587,19 +1709,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 const winRatio = ((match.wins / total) * 100).toFixed(1);
 
                 let opponentName = "Unknown Song";
-                // find the name. brute force it.
-                if (typeof utSongList !== 'undefined') {
-                    const drMatch = window.songList ? window.songList.find(s => s.id === match.opponent_id) : null;
-                    const utMatch = utSongList.find(s => s.id === match.opponent_id);
-                    const utyMatch = typeof utySongList !== 'undefined' ? utySongList.find(s => s.id === match.opponent_id) : null;
-                    const tsusMatch = typeof tsusSongList !== 'undefined' ? tsusSongList.find(s => s.id === match.opponent_id) : null;
-                    if (drMatch) opponentName = drMatch.name;
-                    else if (utMatch) opponentName = utMatch.name;
-                    else if (utyMatch) opponentName = utyMatch.name;
-                    else if (tsusMatch) opponentName = tsusMatch.name;
-                } else {
-                    // fallback if global vars aren't available
-                    const s = state.songs.find(s => s.id === match.opponent_id);
+                // find the name. brute force it because of course the ids aren't consistent.
+                const drMatch = (typeof window.songList !== 'undefined') ? window.songList.find(s => s.id == match.opponent_id) : null;
+                const utMatch = (typeof utSongList !== 'undefined') ? utSongList.find(s => s.id == match.opponent_id) : null;
+                const utyMatch = (typeof utySongList !== 'undefined') ? utySongList.find(s => s.id == match.opponent_id) : null;
+                const tsusMatch = (typeof tsusSongList !== 'undefined') ? tsusSongList.find(s => s.id == match.opponent_id) : null;
+
+                if (drMatch) opponentName = drMatch.name;
+                else if (utMatch) opponentName = utMatch.name;
+                else if (utyMatch) opponentName = utyMatch.name;
+                else if (tsusMatch) opponentName = tsusMatch.name;
+                else {
+                    // search in the combined list if not found in specific lists
+                    const s = state.songs.find(s => s.id == match.opponent_id);
                     if (s) opponentName = s.name;
                 }
 

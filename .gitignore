@@ -6,7 +6,6 @@
 .tmp/
 
 # web garbage
-node_modules/
 .env
 
 # python cruft

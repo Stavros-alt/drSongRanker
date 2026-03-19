@@ -324,6 +324,7 @@ h1 {
     background: #000;
     transition: transform 0.1s;
     position: relative;
+    overflow: hidden; /* contain the agreement overlay */
 }
 
 .song-rank {
@@ -1476,6 +1477,17 @@ footer {
     letter-spacing: 2px;
 }
 
+#next-matchup-btn {
+    animation: pulse-glow 1.5s infinite;
+    margin-top: 10px;
+}
+
+@keyframes pulse-glow {
+    0% { box-shadow: 0 0 5px var(--accent-color); }
+    50% { box-shadow: 0 0 20px var(--accent-color); }
+    100% { box-shadow: 0 0 5px var(--accent-color); }
+}
+
 .secret-btn:hover {
     color: #fff;
     text-shadow: 0 0 5px #fff;
@@ -1523,4 +1535,37 @@ footer {
         top: 20px;
         opacity: 1;
     }
+}
+
+/* agreement stats mess */
+.agreement-percent {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.5em; /* big numbers because people like numbers */
+    font-weight: 700;
+    color: #fff;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 10;
+}
+
+.agreement-percent.visible {
+    opacity: 1;
+}
+
+.agreement-percent::after {
+    content: 'AGREE';
+    font-size: 0.2em;
+    margin-top: 10px;
+    color: var(--accent-color);
+    letter-spacing: 2px;
 }
