@@ -362,21 +362,35 @@
             <div class="setting-group">
                 <p>UI Theme Color</p>
                 <div class="color-options">
-                    <button class="color-btn" data-color="#00ff9d" style="background: #00ff9d;"></button>
+                    <button class="color-btn theme-option" data-color="#00ff9d" style="background: #00ff9d;"></button>
                     <!-- Ralsei -->
-                    <button class="color-btn" data-color="#00f2ff" style="background: #00f2ff;"></button> <!-- Kris -->
-                    <button class="color-btn" data-color="#ff00ff" style="background: #ff00ff;"></button> <!-- Susie -->
-                    <button class="color-btn" data-color="random"
+                    <button class="color-btn theme-option" data-color="#00f2ff" style="background: #00f2ff;"></button> <!-- Kris -->
+                    <button class="color-btn theme-option" data-color="#ff00ff" style="background: #ff00ff;"></button> <!-- Susie -->
+                    <button class="color-btn theme-option" data-color="random"
                         style="background: linear-gradient(45deg, #fff, #888); color: #000;">?</button>
 
                     <!-- Custom Color Picker -->
-                    <label class="color-btn custom-color-label" style="background: #333; color: #fff; cursor: pointer;">
+                    <label for="custom-theme-picker" class="color-btn custom-color-label" style="background: #333; color: #fff; cursor: pointer;">
                         +
-                        <input type="color" id="custom-theme-picker"
-                            style="opacity: 0; position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: pointer;">
+                        <input type="color" id="custom-theme-picker" style="display: none;">
                     </label>
                 </div>
             </div>
+            <div class="setting-group" style="margin-top: 20px; border-top: 1px solid #333; padding-top: 20px;">
+                <p>Background Color</p>
+                <div class="color-options">
+                    <button class="color-btn bg-option" data-bg="#000000" style="background: #000000;" title="Void"></button>
+                    <button class="color-btn bg-option" data-bg="#1a001a" style="background: #1a001a;" title="Darkest Purple"></button>
+                    <button class="color-btn bg-option" data-bg="#000022" style="background: #000022;" title="Darkest Blue"></button>
+                    <button class="color-btn bg-option" data-bg="#220000" style="background: #220000;" title="Darkest Red"></button>
+                    <!-- Custom BG Color Picker -->
+                    <label for="custom-bg-picker" class="color-btn custom-bg-label" style="background: #333; color: #fff; cursor: pointer;" title="Custom Background">
+                        +
+                        <input type="color" id="custom-bg-picker" style="display: none;">
+                    </label>
+                </div>
+            </div>
+
             <div class="setting-group" style="margin-top: 20px; border-top: 1px solid #333; padding-top: 20px;">
                 <p>Leaderboard Settings</p>
                 <label

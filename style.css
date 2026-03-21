@@ -1,12 +1,16 @@
 /* more styles i guess */
 
-/* expensive fonts from google */
-@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
+/* font imports. because i have to. */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Roboto+Mono:wght@400;700&family=Outfit:wght@400;700&display=swap');
 
 :root {
     --bg-color: #000000;
-    --text-color: #ffffff;
+    --card-bg: #111;
+    --text-color: #fff;
     --accent-color: #00ff9d;
+    /* default ralsei green */
+    --accent-hover: #00cc7e;
+    --danger-color: #ff4444;
     /* Defaults */
     --grid-color: #330033;
     --grid-line: #660066;
@@ -21,6 +25,7 @@
 
 body {
     background-color: var(--bg-color);
+    transition: background-color 0.3s ease;
     /* pretend this looks like a cool grid */
     background-image:
         linear-gradient(var(--grid-line) 1px, transparent 1px),

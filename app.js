@@ -89,7 +89,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeSettingsBtn = document.getElementById('close-settings-btn');
     const customColorPicker = document.getElementById('custom-theme-picker');
     const customColorLabel = document.querySelector('.custom-color-label');
-    const colorBtns = document.querySelectorAll('.color-btn:not(.custom-color-label)');
+    const colorBtns = document.querySelectorAll('.theme-option');
+    
+    // background color stuff. because apparently the theme wasn't enough work.
+    const customBgPicker = document.getElementById('custom-bg-picker');
+    const customBgLabel = document.querySelector('.custom-bg-label');
+    const bgBtns = document.querySelectorAll('.bg-option');
 
     const customRankerModal = document.getElementById('custom-ranker-modal');
     const closeCustomBtn = document.getElementById('close-custom-btn');
@@ -129,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let vsClickCount = 0;
     let vsClickTimer = null;
 
-    // theme stuff. i don't care if it's pink or green.
+    // accent colors. i don't care if it's pink or green.
     const accentColors = [
         '#00ff9d', // green i guess
         '#00f2ff', // cyan
@@ -147,6 +152,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     loadTheme();
+
+    function loadBackgroundColor() {
+        const savedBg = localStorage.getItem('drSongRankerBackground');
+        if (savedBg) {
+            document.documentElement.style.setProperty('--bg-color', savedBg);
+            // highlight the active one. i hate this.
+            bgBtns.forEach(btn => {
+                if (btn.dataset.bg === savedBg) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+            if (customBgLabel && !Array.from(bgBtns).some(b => b.dataset.bg === savedBg)) {
+                customBgLabel.classList.add('active');
+                customBgLabel.style.background = savedBg;
+                customBgLabel.style.color = getContrastColor(savedBg);
+            }
+        } else {
+            document.documentElement.style.setProperty('--bg-color', '#000000');
+            bgBtns.forEach(btn => {
+                if (btn.dataset.bg === '#000000') btn.classList.add('active');
+            });
+        }
+    }
+    loadBackgroundColor();
 
     // settings ui stuff. i hate dom manipulation. why do i have to do this manually.
 
@@ -224,6 +252,30 @@ document.addEventListener('DOMContentLoaded', () => {
         customColorLabel.classList.add('active');
         customColorLabel.style.background = color;
         customColorLabel.style.color = getContrastColor(color);
+    });
+
+    // bg color logic. i'm muttering under my breath.
+    bgBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const color = btn.dataset.bg;
+            localStorage.setItem('drSongRankerBackground', color);
+            document.documentElement.style.setProperty('--bg-color', color);
+
+            bgBtns.forEach(b => b.classList.remove('active'));
+            customBgLabel.classList.remove('active');
+            btn.classList.add('active');
+        });
+    });
+
+    customBgPicker.addEventListener('input', (e) => {
+        const color = e.target.value;
+        document.documentElement.style.setProperty('--bg-color', color);
+        localStorage.setItem('drSongRankerBackground', color);
+
+        bgBtns.forEach(b => b.classList.remove('active'));
+        customBgLabel.classList.add('active');
+        customBgLabel.style.background = color;
+        customBgLabel.style.color = getContrastColor(color);
     });
 
     // math. i'm done with this.
@@ -2111,11 +2163,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function resetState() {
-        if (confirm("Are you sure you want to reset all progress? This cannot be undone.")) {
+        if (confirm("THIS WILL ERASE ALL YOUR VOTES AND RANKINGS FOREVER. ARE YOU SURE?")) {
             localStorage.removeItem('drSongRankerState');
-            initializeNewState();
-            state.history = null;
-            updateApp();
+            localStorage.removeItem('utSongRankerState');
+            localStorage.removeItem('utySongRankerState');
+            localStorage.removeItem('tsusSongRankerState');
+            localStorage.removeItem('combinedSongRankerState');
+            localStorage.removeItem('drSongRankerTheme');
+            localStorage.removeItem('drSongRankerBackground');
+            location.reload();
         }
     }
 
