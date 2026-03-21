@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const myRankingBtn = document.getElementById('my-ranking-btn');
     const communityRankingBtn = document.getElementById('community-ranking-btn');
     const toggleRankingsBtn = document.getElementById('toggle-rankings-btn');
+    const hideLeaderboardToggle = document.getElementById('hide-leaderboard-toggle');
     const audioA = document.getElementById('audioA');
     const audioB = document.getElementById('audioB');
     const previewBtns = document.querySelectorAll('.preview-btn');
@@ -234,7 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return (yiq >= 128) ? 'black' : 'white';
     }
 
-    let globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{"currentGame": "deltarune", "showRatings": false, "showAgreement": false, "preventDuplicates": true, "combinedDiscovered": false, "felfebMode": true, "includeBonus": false, "useSystemCursor": false, "selectedFranchises": ["deltarune", "undertale", "uty", "tsus"]}');
+    let globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{"currentGame": "deltarune", "showRatings": false, "hideLeaderboard": false, "showAgreement": false, "preventDuplicates": true, "combinedDiscovered": false, "felfebMode": true, "includeBonus": false, "useSystemCursor": false, "selectedFranchises": ["deltarune", "undertale", "uty", "tsus"]}');
 
     let state = {
         currentGame: globalState.currentGame,
@@ -255,7 +256,8 @@ document.addEventListener('DOMContentLoaded', () => {
         includeBonus: globalState.includeBonus || false,
         useSystemCursor: globalState.useSystemCursor || false,
         selectedFranchises: globalState.selectedFranchises || ["deltarune", "undertale", "uty", "tsus"],
-        hasSeenFinishScreen: false // don't spam them with this every second
+        hasSeenFinishScreen: false, // don't spam them with this every second
+        hideLeaderboard: globalState.hideLeaderboard || false
     };
 
     function saveState() {
@@ -279,8 +281,19 @@ document.addEventListener('DOMContentLoaded', () => {
             includeBonus: state.includeBonus,
             useSystemCursor: state.useSystemCursor,
             showAgreement: state.showAgreement,
-            selectedFranchises: state.selectedFranchises
+            selectedFranchises: state.selectedFranchises,
+            hideLeaderboard: state.hideLeaderboard
         }));
+    }
+
+    // why am i even hiding this. just look at the screen.
+    function updateLeaderboardVisibility() {
+        if (!rankingContainer) return;
+        if (state.hideLeaderboard) {
+            rankingContainer.classList.add('force-hidden');
+        } else {
+            rankingContainer.classList.remove('force-hidden');
+        }
     }
 
     function loadState() {
@@ -453,6 +466,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         updateGameUI();
+        updateLeaderboardVisibility();
     }
 
     function updateGameUI() {
@@ -747,6 +761,16 @@ document.addEventListener('DOMContentLoaded', () => {
         showAgreementToggle.addEventListener('change', (e) => {
             state.showAgreement = e.target.checked;
             saveState();
+        });
+    }
+
+    if (hideLeaderboardToggle) {
+        hideLeaderboardToggle.checked = state.hideLeaderboard;
+        // great, another toggle to manage. like i don't have enough to do.
+        hideLeaderboardToggle.addEventListener('change', (e) => {
+            state.hideLeaderboard = e.target.checked;
+            saveState();
+            updateLeaderboardVisibility();
         });
     }
 

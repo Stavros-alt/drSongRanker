@@ -529,6 +529,15 @@ button:active {
     background: #000;
 }
 
+/* if this doesn't hide it, i'm retiring. */
+.ranking-container.force-hidden {
+    display: none !important;
+}
+
+.ranking-container.visible {
+    display: block;
+}
+
 .ranking-header {
     display: flex;
     border-bottom: var(--border-width) solid #fff;
