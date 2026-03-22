@@ -1499,10 +1499,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         musicPlayerBar.classList.remove('hidden');
 
-        // if it's short, play the last 10 seconds. otherwise the usual 30s mark.
+        // if it's short, play the last 10 seconds.
+        // if it's 30-60s, play from the start. 
+        // otherwise skip the first 30s because i only care about the middle bit.
         let startTime = PREVIEW_START_TIME;
-        if (songData.duration && songData.duration < 30) {
-            startTime = Math.max(0, songData.duration - 10);
+        if (songData.duration) {
+            if (songData.duration < 30) {
+                startTime = Math.max(0, songData.duration - 10);
+            } else if (songData.duration <= 60) {
+                startTime = 0;
+            }
         }
         audioEl.currentTime = startTime;
 
