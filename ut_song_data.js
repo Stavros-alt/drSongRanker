@@ -850,15 +850,6 @@ const utSongList = [
         "hidden": true
     },
     {
-        "id": 1106,
-        "name": "Dog Hole",
-        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 106 Dog Hole.mp3",
-        "rating": 1500,
-        "comparisons": 0,
-        "duration": 43.76,
-        "hidden": true
-    },
-    {
         "id": 1107,
         "name": "Dogtroid",
         "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 107 Dogtroid.mp3",
@@ -883,15 +874,6 @@ const utSongList = [
         "rating": 1500,
         "comparisons": 0,
         "duration": 17.53,
-        "hidden": true
-    },
-    {
-        "id": 1110,
-        "name": "Mus piano",
-        "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 110 Good Night.mp3",
-        "rating": 1500,
-        "comparisons": 0,
-        "duration": 31.01,
         "hidden": true
     },
     {
