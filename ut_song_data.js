@@ -1,4 +1,4 @@
-const utSongList = [ 
+const utSongList = [
     {
         "id": 1001,
         "name": "Once Upon a Time",
