@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const felfebModeToggle = document.getElementById('felfeb-mode-toggle');
     const includeBonusToggle = document.getElementById('include-bonus-toggle');
     const systemCursorToggle = document.getElementById('system-cursor-toggle');
+    const includeGenocideToggle = document.getElementById('include-genocide-toggle');
     const arena = document.querySelector('.arena');
     const songACard = document.getElementById('songA-card');
     const songBCard = document.getElementById('songB-card');
@@ -280,6 +281,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // math. i'm done with this.
     function getContrastColor(hexColor) {
+        if (!hexColor) return 'white'; // whatever
         const r = parseInt(hexColor.substr(1, 2), 16);
         const g = parseInt(hexColor.substr(3, 2), 16);
         const b = parseInt(hexColor.substr(5, 2), 16);
@@ -287,7 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return (yiq >= 128) ? 'black' : 'white';
     }
 
-    let globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{"currentGame": "deltarune", "showRatings": false, "hideLeaderboard": false, "showAgreement": false, "preventDuplicates": true, "combinedDiscovered": false, "felfebMode": true, "includeBonus": false, "useSystemCursor": false, "selectedFranchises": ["deltarune", "undertale", "uty", "tsus"]}');
+    let globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{"currentGame": "deltarune", "showRatings": false, "hideLeaderboard": false, "showAgreement": false, "preventDuplicates": true, "combinedDiscovered": false, "felfebMode": true, "includeBonus": false, "includeGenocide": false, "useSystemCursor": false, "selectedFranchises": ["deltarune", "undertale", "uty", "tsus"]}');
 
     let state = {
         currentGame: globalState.currentGame,
@@ -306,6 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
         volume: parseFloat(localStorage.getItem('drSongRankerVolume') || '0.5'),
         felfebMode: globalState.felfebMode !== undefined ? globalState.felfebMode : true,
         includeBonus: globalState.includeBonus || false,
+        includeGenocide: globalState.includeGenocide || false,
         useSystemCursor: globalState.useSystemCursor || false,
         selectedFranchises: globalState.selectedFranchises || ["deltarune", "undertale", "uty", "tsus"],
         hasSeenFinishScreen: false, // don't spam them with this every second
@@ -331,6 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
             combinedDiscovered: globalState.combinedDiscovered,
             felfebMode: state.felfebMode,
             includeBonus: state.includeBonus,
+            includeGenocide: state.includeGenocide,
             useSystemCursor: state.useSystemCursor,
             showAgreement: state.showAgreement,
             selectedFranchises: state.selectedFranchises,
@@ -405,6 +409,7 @@ document.addEventListener('DOMContentLoaded', () => {
             state.boostedSongId = parsed.boostedSongId || null;
             state.felfebMode = parsed.felfebMode !== undefined ? parsed.felfebMode : state.felfebMode;
             state.includeBonus = parsed.includeBonus !== undefined ? parsed.includeBonus : state.includeBonus;
+            state.includeGenocide = parsed.includeGenocide !== undefined ? parsed.includeGenocide : state.includeGenocide;
             state.useSystemCursor = parsed.useSystemCursor !== undefined ? parsed.useSystemCursor : state.useSystemCursor;
             state.hasSeenFinishScreen = parsed.hasSeenFinishScreen || false;
 
@@ -816,6 +821,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    if (includeGenocideToggle) {
+        includeGenocideToggle.checked = state.includeGenocide;
+        // more tracks to filter through. just what i needed.
+        includeGenocideToggle.addEventListener('change', (e) => {
+            state.includeGenocide = e.target.checked;
+            saveState();
+            presentNewPair();
+            if (myRankingBtn.classList.contains('active')) displayRankings();
+            else displayCommunityRankings();
+        });
+    }
+
     if (hideLeaderboardToggle) {
         hideLeaderboardToggle.checked = state.hideLeaderboard;
         // great, another toggle to manage. like i don't have enough to do.
@@ -971,6 +988,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // exclude bonus songs if disabled
         if (!state.includeBonus) {
             pool = pool.filter(s => !s.isBonus);
+        }
+
+        // exclude genocide songs if disabled
+        if (!state.includeGenocide) {
+            pool = pool.filter(s => !s.name.includes('(Genocide)') && !s.name.includes('(Post-Genocide)') && !s.name.includes('(Anticipation Slow Ver.)'));
         }
 
         if (filter === 'all' || filter === 'combined_all') {

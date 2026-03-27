@@ -1303,6 +1303,137 @@ const utSongList = [
         "comparisons": 0,
         "duration": 167.63,
         "hidden": true
+    },
+// genocide tracks. because apparently the original 100+ songs weren't enough.
+    {
+        "id": 1401,
+        "name": "Another Medium (Genocide)",
+        "file": "Undertale - Genocide OST/Undertale - Another Medium (Genocide) [Q7gUvvWWiUQ].mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 284.64,
+        "isBonus": true,
+        "hidden": true
+    },
+    {
+        "id": 1402,
+        "name": "Anticipation (Post-Genocide)",
+        "file": "Undertale - Genocide OST/Undertale - Anticipation (Post-Genocide) [7e18anERknc].mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 112.27,
+        "isBonus": true,
+        "hidden": true
+    },
+    {
+        "id": 1403,
+        "name": "Bonetrousle (Genocide)",
+        "file": "Undertale - Genocide OST/Undertale - Bonetrousle (Genocide) [RIqkAlcoT6k].mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 288.72,
+        "isBonus": true,
+        "hidden": true
+    },
+    {
+        "id": 1405,
+        "name": "CORE (Genocide)",
+        "file": "Undertale - Genocide OST/Undertale - CORE (Genocide) [suOL_xKSx0k].mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 333.17,
+        "isBonus": true,
+        "hidden": true
+    },
+    {
+        "id": 1406,
+        "name": "Dating Start! (Genocide)",
+        "file": "Undertale - Genocide OST/Undertale - Dating Start! (Genocide) [72E7D24dN_o].mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 468.17,
+        "isBonus": true,
+        "hidden": true
+    },
+    {
+        "id": 1407,
+        "name": "Hotel (Genocide)",
+        "file": "Undertale - Genocide OST/Undertale - Hotel (Genocide) [aSg7nl4dyvg].mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 175.9,
+        "isBonus": true,
+        "hidden": true
+    },
+    {
+        "id": 1408,
+        "name": "In My Way (Anticipation Slow Ver.)",
+        "file": "Undertale - Genocide OST/Undertale - In My Way (Anticipation Slow Ver.) [CL_LLpyM2sE].mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 89.81,
+        "isBonus": true,
+        "hidden": true
+    },
+    {
+        "id": 1409,
+        "name": "Quiet Water (Genocide)",
+        "file": "Undertale - Genocide OST/Undertale - Quiet Water (Genocide) [Nd5Q_0cN5wA].mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 58.56,
+        "isBonus": true,
+        "hidden": true
+    },
+    {
+        "id": 1410,
+        "name": "Small Shock (Genocide)",
+        "file": "Undertale - Genocide OST/Undertale - Small Shock (Genocide) [RjbJ2ASRUA4].mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 23.88,
+        "isBonus": true,
+        "hidden": true
+    },
+    {
+        "id": 1411,
+        "name": "Snowdin Town (Genocide)",
+        "file": "Undertale - Genocide OST/Undertale - Snowdin Town (Genocide) [k-nATYGDCwo].mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 305.28,
+        "isBonus": true,
+        "hidden": true
+    },
+    {
+        "id": 1412,
+        "name": "Snowy (Genocide)",
+        "file": "Undertale - Genocide OST/Undertale - Snowy (Genocide) [qF58N1wQ8g4].mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 174.12,
+        "isBonus": true,
+        "hidden": true
+    },
+    {
+        "id": 1413,
+        "name": "Temmie Village (Genocide)",
+        "file": "Undertale - Genocide OST/Undertale - Temmie Village (Genocide) [rB48hLdu4AA].mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 116.04,
+        "isBonus": true,
+        "hidden": true
+    },
+    {
+        "id": 1414,
+        "name": "Waterfall (Genocide)",
+        "file": "Undertale - Genocide OST/Undertale - Waterfall (Genocide) [vXlzzF-s5c4].mp3",
+        "rating": 1500,
+        "comparisons": 0,
+        "duration": 977.26,
+        "isBonus": true,
+        "hidden": true
     }
 ];
 
