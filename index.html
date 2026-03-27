@@ -96,6 +96,9 @@
 
 
         <div class="ranking-container">
+            <div id="top-donor-slot" class="donor-spotlight" style="display: none;">
+                <!-- JS will inject actual data here. or maybe I won't. don't count on it. -->
+            </div>
             <div class="ranking-header">
                 <button id="my-ranking-btn" class="ranking-toggle-btn active">My Rank</button>
                 <button id="community-ranking-btn" class="ranking-toggle-btn">Global</button>
@@ -344,6 +347,7 @@
     <footer>
         <p class="credits">
             Fan Project. Music & IP © Toby Fox. |
+            <a href="donors.html" style="color: #ff9d00; text-decoration: none; margin-right: 10px; font-weight: bold;">Yearbook</a>
             <a href="stats.html" id="secret-stats-link"
                 style="display: none; color: var(--accent-color); text-decoration: none; margin-right: 10px;">Stats</a>
             <a href="https://ko-fi.com/stavros916" target="_blank" rel="noopener noreferrer"
@@ -488,6 +492,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="donor_data.js"></script>
     <script src="app_song_data.js"></script>
     <script src="ut_song_data.js"></script>
     <script src="uty_song_data.js"></script>
@@ -495,7 +500,7 @@
     <script src="cursor.js"></script>
     <script src="app.js?v=fixed_agreement"></script>
     <script>
-        // Konami Code: Up, Up, Down, Down, Left, Right, Left, Right, B, A
+        // konami code. everyone knows this. why am i commenting it.
         const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
         let konamiIndex = 0;
 
@@ -525,7 +530,7 @@
             }
         }
 
-        // NES Controller Logic
+        // nes controller. looks cool, works okay. don't ask about mobile.
         const nesOverlay = document.getElementById('nes-controller-overlay');
         const btnUp = document.getElementById('btn-up');
         const btnDown = document.getElementById('btn-down');
@@ -546,7 +551,7 @@
             nesOverlay.style.display = 'none';
         });
 
-        // Trigger mechanism: Explicit button
+        // actual button to open the nes overlay because i'm a nice person maybe.
         const openNesBtn = document.getElementById('open-nes-btn');
         openNesBtn.addEventListener('click', () => {
             nesOverlay.style.display = 'block';

@@ -1583,3 +1583,178 @@ footer {
     color: var(--accent-color);
     letter-spacing: 2px;
 }
+
+/* donor spotlight - above the leaderboard */
+.donor-spotlight {
+    border-bottom: var(--border-width) solid #fff;
+    padding: 15px;
+    background: #050505;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 20px 5px var(--accent-color); /* switching to accent color as requested. much better. */
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.donor-spotlight:hover {
+    transform: scale(1.005);
+    box-shadow: 0 0 25px 8px var(--accent-color);
+}
+
+.donor-spotlight-title {
+    font-size: 0.7em;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.donor-card-mini {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    text-align: left;
+}
+
+.donor-pfp-mini {
+    width: 60px;
+    height: 60px;
+    border: 2px solid #fff;
+    flex-shrink: 0;
+    image-rendering: auto;
+    background: #222;
+    object-fit: cover;
+}
+
+.donor-info-mini h3 {
+    margin: 0;
+    font-size: 1.1em;
+    text-transform: uppercase;
+    color: var(--accent-color);
+}
+
+.donor-info-mini p {
+    margin: 3px 0 0 0;
+    font-size: 0.8em;
+    color: #aaa;
+    font-style: italic;
+    line-height: 1.2;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+/* Yearbook page styles */
+.yearbook-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    flex-grow: 1;
+}
+
+.yearbook-header {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.yearbook-header h1 {
+    display: inline-block;
+}
+
+.month-section {
+    margin-bottom: 80px;
+}
+
+.month-title {
+    font-size: 1.5em;
+    border-bottom: 2px solid #333;
+    padding-bottom: 10px;
+    margin-bottom: 30px;
+    color: #fff;
+    text-transform: uppercase;
+}
+
+.donor-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px;
+}
+
+.donor-card {
+    background: #000;
+    border: var(--border-width) solid #fff;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    box-shadow: 0 0 15px var(--accent-color); /* accent color glow for yearbook cards. */
+}
+
+.donor-card:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 2px 2px 0 rgba(255, 255, 255, 0.2);
+}
+
+.donor-pfp {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border: 2px solid #fff;
+    background: #111;
+    object-fit: cover;
+}
+
+.donor-name {
+    font-size: 1.2em;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+.donor-quote {
+    font-size: 0.85em;
+    color: #aaa;
+    font-style: italic;
+    margin: 0;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.donor-quote::before { content: '"'; }
+.donor-quote::after { content: '"'; }
+
+.nav-links {
+    margin-top: 40px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.back-btn {
+    text-decoration: none;
+    color: #666;
+    border: 2px solid #333;
+    padding: 10px 20px;
+    font-size: 0.8em;
+    text-transform: uppercase;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.back-btn:hover {
+    border-color: #fff;
+    color: #fff;
+    background: #111;
+}
+
+@media (max-width: 600px) {
+    .donor-grid {
+        grid-template-columns: 1fr;
+    }
+}

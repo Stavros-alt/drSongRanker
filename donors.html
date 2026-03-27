@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deltarune Ranker - Donor Yearbook</title>
+    <link rel="icon" type="image/x-icon" href="Art/favicon.ico">
+    <meta name="darkreader-lock">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* page-specific overrides because i'm lazy */
+        body {
+            background-attachment: fixed;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="yearbook-container">
+        <header class="yearbook-header">
+            <h1>Donor Yearbook</h1>
+            <p style="color: #888; margin-top: 10px;">The legends who keep this site running.</p>
+        </header>
+
+        <div id="yearbook-content">
+            <!-- JS will dump the months and donors here -->
+        </div>
+
+        <nav class="nav-links">
+            <a href="index.html" class="back-btn">Back to Ranker</a>
+            <a href="https://ko-fi.com/stavros916" target="_blank" rel="noopener noreferrer" class="back-btn" style="border-color: #29b6f6; color: #29b6f6;">Support on Ko-fi</a>
+        </nav>
+    </div>
+
+    <!-- custom cursor because we must maintain the theme -->
+    <div class="custom-cursor"></div>
+
+    <script src="donor_data.js"></script>
+    <script src="cursor.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('yearbook-content');
+            
+            if (!DONOR_DATA || !DONOR_DATA.history) {
+                container.innerHTML = '<p style="text-align: center; color: #555;">No records found. Either I broke something or nobody has donated yet. Probably both.</p>';
+                return;
+            }
+
+            DONOR_DATA.history.forEach(section => {
+                const monthDiv = document.createElement('div');
+                monthDiv.className = 'month-section';
+                
+                const title = document.createElement('h2');
+                title.className = 'month-title';
+                title.textContent = section.month;
+                monthDiv.appendChild(title);
+
+                const grid = document.createElement('div');
+                grid.className = 'donor-grid';
+
+                section.donors.forEach(donor => {
+                    const card = document.createElement('div');
+                    card.className = 'donor-card';
+                    
+                    // apply custom styling if provided
+                    if (donor.styling) {
+                        if (donor.styling.borderColor) card.style.borderColor = donor.styling.borderColor;
+                        if (donor.styling.glowColor) card.style.boxShadow = `4px 4px 0 ${donor.styling.glowColor}`;
+                    }
+
+                    card.innerHTML = `
+                        <img src="${donor.pfp}" alt="${donor.name}" class="donor-pfp" onerror="this.src='Art/peeringSoul.png'">
+                        <div class="donor-name" style="${donor.styling?.textColor ? 'color:' + donor.styling.textColor : ''}">${donor.name}</div>
+                        <p class="donor-quote">${donor.quote}</p>
+                    `;
+                    grid.appendChild(card);
+                });
+
+                monthDiv.appendChild(grid);
+                container.appendChild(monthDiv);
+            });
+        });
+
+        // cursor logic because everything is a mess
+        const cursorSettings = JSON.parse(localStorage.getItem('rankerSettings') || '{}');
+        if (cursorSettings.systemCursor) {
+            document.body.classList.add('system-cursor');
+        }
+    </script>
+</body>
+
+</html>

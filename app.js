@@ -3208,4 +3208,36 @@ document.addEventListener('DOMContentLoaded', () => {
         updateProgress();
     };
 
+    // --- VANITY UPDATE: DONOR SPOTLIGHT ---
+    function injectTopDonor() {
+        const slot = document.getElementById('top-donor-slot');
+        if (!slot || !window.DONOR_DATA || !window.DONOR_DATA.currentTopDonor) return;
+
+        const donor = window.DONOR_DATA.currentTopDonor;
+        slot.style.display = 'block';
+        
+        // custom styling per request. don't ask.
+        if (donor.styling) {
+            if (donor.styling.borderColor) slot.style.borderColor = donor.styling.borderColor;
+            if (donor.styling.glowColor) slot.style.boxShadow = `0 5px 15px ${donor.styling.glowColor}`;
+        }
+
+        slot.innerHTML = `
+            <a href="donors.html" style="text-decoration: none; color: inherit; display: block;">
+                <span class="donor-spotlight-title">Top Donor of the Month: ${donor.month || ''}</span>
+                <div class="donor-card-mini">
+                    <img src="${donor.pfp}" alt="${donor.name}" class="donor-pfp-mini" onerror="this.src='Art/peeringSoul.png'">
+                    <div class="donor-info-mini">
+                        <h3 style="${donor.styling?.textColor ? 'color:' + donor.styling.textColor : ''}">${donor.name}</h3>
+                        <p>${donor.quote || ''}</p>
+                    </div>
+                </div>
+            </a>
+        `;
+    }
+    
+    // inject on load. hopefully it doesn't break everything.
+    setTimeout(injectTopDonor, 100);
+
+
 });
