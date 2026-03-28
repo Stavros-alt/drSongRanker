@@ -17,3 +17,6 @@ Use a local server: `python3 -m http.server`
 - Team Switched (TS!Underswap)
 - Me (Everything else)
 
+## Skeleton
+
+If you want to build your own ranker, use the [songRankerSkeleton](https://github.com/Stavros-alt/songRankerSkeleton). Or, if you're lazy/rich, pay me to do it for you. I'll even maintain it if the price is right. DM on Discord.

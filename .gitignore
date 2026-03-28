@@ -1,6 +1,5 @@
-# environment garbage i don't want to see
+# environment garbage
 .directory
-.DS_Store
 *~
 *.log
 .tmp/
