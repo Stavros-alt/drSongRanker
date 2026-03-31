@@ -96,6 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const customBgPicker = document.getElementById('custom-bg-picker');
     const customBgLabel = document.querySelector('.custom-bg-label');
     const bgBtns = document.querySelectorAll('.bg-option');
+    const gasterThemeBtn = document.getElementById('gaster-theme-btn');
 
     const customRankerModal = document.getElementById('custom-ranker-modal');
     const closeCustomBtn = document.getElementById('close-custom-btn');
@@ -134,6 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentActiveAudio = null; // tracking what's actually making noise.
     let vsClickCount = 0;
     let vsClickTimer = null;
+    let gasterInterval = null;
 
     // accent colors. i don't care if it's pink or green.
     const accentColors = [
@@ -141,6 +143,18 @@ document.addEventListener('DOMContentLoaded', () => {
         '#00f2ff', // cyan
         '#ff00ff'  // pink. why not.
     ];
+
+    function applySpecialTheme() {
+        const savedSpecial = localStorage.getItem('drSongRankerSpecialTheme');
+        if (savedSpecial === 'gaster') {
+            document.body.classList.add('theme-gaster');
+            if (gasterThemeBtn) gasterThemeBtn.classList.add('active');
+        } else {
+            document.body.classList.remove('theme-gaster');
+            if (gasterThemeBtn) gasterThemeBtn.classList.remove('active');
+        }
+    }
+    applySpecialTheme();
 
     function loadTheme() {
         const savedColor = localStorage.getItem('drSongRankerTheme');
@@ -239,6 +253,14 @@ document.addEventListener('DOMContentLoaded', () => {
             colorBtns.forEach(b => b.classList.remove('active'));
             customColorLabel.classList.remove('active');
             btn.classList.add('active');
+
+            // if you pick a color, gaster mode dies.
+            if (state.specialTheme === 'gaster') {
+                state.specialTheme = null;
+                localStorage.removeItem('drSongRankerSpecialTheme');
+                applySpecialTheme();
+                saveState();
+            }
         });
     });
 
@@ -253,6 +275,14 @@ document.addEventListener('DOMContentLoaded', () => {
         customColorLabel.classList.add('active');
         customColorLabel.style.background = color;
         customColorLabel.style.color = getContrastColor(color);
+
+        // if you pick a custom color, gaster mode dies.
+        if (state.specialTheme === 'gaster') {
+            state.specialTheme = null;
+            localStorage.removeItem('drSongRankerSpecialTheme');
+            applySpecialTheme();
+            saveState();
+        }
     });
 
     // bg color logic. i'm muttering under my breath.
@@ -265,6 +295,14 @@ document.addEventListener('DOMContentLoaded', () => {
             bgBtns.forEach(b => b.classList.remove('active'));
             customBgLabel.classList.remove('active');
             btn.classList.add('active');
+
+            // if you pick a background, gaster mode dies.
+            if (state.specialTheme === 'gaster') {
+                state.specialTheme = null;
+                localStorage.removeItem('drSongRankerSpecialTheme');
+                applySpecialTheme();
+                saveState();
+            }
         });
     });
 
@@ -277,7 +315,35 @@ document.addEventListener('DOMContentLoaded', () => {
         customBgLabel.classList.add('active');
         customBgLabel.style.background = color;
         customBgLabel.style.color = getContrastColor(color);
+
+        // if you pick a custom color, gaster mode dies.
+        if (state.specialTheme === 'gaster') {
+            state.specialTheme = null;
+            localStorage.removeItem('drSongRankerSpecialTheme');
+            applySpecialTheme();
+            saveState();
+        }
     });
+
+    if (gasterThemeBtn) {
+        gasterThemeBtn.addEventListener('click', () => {
+            if (state.specialTheme === 'gaster') {
+                state.specialTheme = null;
+                localStorage.removeItem('drSongRankerSpecialTheme');
+            } else {
+                state.specialTheme = 'gaster';
+                localStorage.setItem('drSongRankerSpecialTheme', 'gaster');
+                
+                // clear other actives. i'm sick of this.
+                colorBtns.forEach(b => b.classList.remove('active'));
+                bgBtns.forEach(b => b.classList.remove('active'));
+                customColorLabel.classList.remove('active');
+                customBgLabel.classList.remove('active');
+            }
+            applySpecialTheme();
+            saveState();
+        });
+    }
 
     // math. i'm done with this.
     function getContrastColor(hexColor) {
@@ -289,7 +355,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return (yiq >= 128) ? 'black' : 'white';
     }
 
-    let globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{"currentGame": "deltarune", "showRatings": false, "hideLeaderboard": false, "showAgreement": false, "preventDuplicates": true, "combinedDiscovered": false, "felfebMode": true, "includeBonus": false, "includeGenocide": false, "useSystemCursor": false, "selectedFranchises": ["deltarune", "undertale", "uty", "tsus"]}');
+    let globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{"currentGame": "deltarune", "showRatings": false, "hideLeaderboard": false, "showAgreement": false, "preventDuplicates": true, "combinedDiscovered": false, "felfebMode": true, "includeBonus": false, "includeGenocide": false, "useSystemCursor": false, "selectedFranchises": ["deltarune", "undertale", "uty", "tsus"], "specialTheme": null}');
 
     let state = {
         currentGame: globalState.currentGame,
@@ -312,7 +378,8 @@ document.addEventListener('DOMContentLoaded', () => {
         useSystemCursor: globalState.useSystemCursor || false,
         selectedFranchises: globalState.selectedFranchises || ["deltarune", "undertale", "uty", "tsus"],
         hasSeenFinishScreen: false, // don't spam them with this every second
-        hideLeaderboard: globalState.hideLeaderboard || false
+        hideLeaderboard: globalState.hideLeaderboard || false,
+        specialTheme: globalState.specialTheme || localStorage.getItem('drSongRankerSpecialTheme') || null
     };
 
     function saveState() {
@@ -338,7 +405,8 @@ document.addEventListener('DOMContentLoaded', () => {
             useSystemCursor: state.useSystemCursor,
             showAgreement: state.showAgreement,
             selectedFranchises: state.selectedFranchises,
-            hideLeaderboard: state.hideLeaderboard
+            hideLeaderboard: state.hideLeaderboard,
+            specialTheme: state.specialTheme
         }));
     }
 

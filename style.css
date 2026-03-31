@@ -18,6 +18,52 @@
     --ui-font: 'Roboto Mono', monospace;
 }
 
+/* gaster / entry 17 theme overrides. dark, glitchy, green accents. */
+body.theme-gaster {
+    --bg-color: #000000;
+    --card-bg: #000000;
+    --text-color: #fff;
+    --accent-color: #00ff41; /* matrix neon green */
+    --accent-hover: #00cc33;
+    /* entry 17: no grid. just the void. */
+    --grid-line: transparent;
+    --grid-color: transparent;
+    background-image: none !important;
+}
+
+body.theme-gaster .song-card {
+    border: 1px solid #fff;
+    box-shadow: none;
+    border-radius: 0; /* sharper edges because gaster */
+}
+
+body.theme-gaster .song-card:hover {
+    box-shadow: 0 0 10px var(--accent-color);
+    border-color: var(--accent-color);
+}
+
+body.theme-gaster button {
+    border-radius: 0;
+}
+
+/* Void theme icon. default deltarune grid look. */
+.bg-option[data-bg="#000000"] {
+    position: relative;
+    overflow: hidden;
+    background: #000 !important;
+}
+
+.bg-option[data-bg="#000000"]::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    background-image: 
+        linear-gradient(rgba(102, 0, 102, 0.4) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(102, 0, 102, 0.4) 1px, transparent 1px);
+    background-size: 8px 8px;
+}
+
 /* resetting things because browsers are inconsistent */
 * {
     box-sizing: border-box;
