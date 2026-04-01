@@ -97,6 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const customBgLabel = document.querySelector('.custom-bg-label');
     const bgBtns = document.querySelectorAll('.bg-option');
     const gasterThemeBtn = document.getElementById('gaster-theme-btn');
+    const cyberThemeBtn = document.getElementById('cyber-theme-btn');
 
     const customRankerModal = document.getElementById('custom-ranker-modal');
     const closeCustomBtn = document.getElementById('close-custom-btn');
@@ -146,12 +147,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function applySpecialTheme() {
         const savedSpecial = localStorage.getItem('drSongRankerSpecialTheme');
+        
+        // i have to clear everything manually because i'm too tired to write a cleaner system.
+        document.body.classList.remove('theme-gaster', 'theme-cyber');
+        if (gasterThemeBtn) gasterThemeBtn.classList.remove('active');
+        if (cyberThemeBtn) cyberThemeBtn.classList.remove('active');
+
         if (savedSpecial === 'gaster') {
             document.body.classList.add('theme-gaster');
             if (gasterThemeBtn) gasterThemeBtn.classList.add('active');
-        } else {
-            document.body.classList.remove('theme-gaster');
-            if (gasterThemeBtn) gasterThemeBtn.classList.remove('active');
+        } else if (savedSpecial === 'cyber') {
+            document.body.classList.add('theme-cyber');
+            if (cyberThemeBtn) cyberThemeBtn.classList.add('active');
         }
     }
     applySpecialTheme();
@@ -254,8 +261,8 @@ document.addEventListener('DOMContentLoaded', () => {
             customColorLabel.classList.remove('active');
             btn.classList.add('active');
 
-            // if you pick a color, gaster mode dies.
-            if (state.specialTheme === 'gaster') {
+            // if you pick a color, special themes die. i'm not dealing with color conflicts.
+            if (state.specialTheme) {
                 state.specialTheme = null;
                 localStorage.removeItem('drSongRankerSpecialTheme');
                 applySpecialTheme();
@@ -276,8 +283,8 @@ document.addEventListener('DOMContentLoaded', () => {
         customColorLabel.style.background = color;
         customColorLabel.style.color = getContrastColor(color);
 
-        // if you pick a custom color, gaster mode dies.
-        if (state.specialTheme === 'gaster') {
+        // special themes are dead to me now.
+        if (state.specialTheme) {
             state.specialTheme = null;
             localStorage.removeItem('drSongRankerSpecialTheme');
             applySpecialTheme();
@@ -296,8 +303,8 @@ document.addEventListener('DOMContentLoaded', () => {
             customBgLabel.classList.remove('active');
             btn.classList.add('active');
 
-            // if you pick a background, gaster mode dies.
-            if (state.specialTheme === 'gaster') {
+            // if you pick a background, special themes die.
+            if (state.specialTheme) {
                 state.specialTheme = null;
                 localStorage.removeItem('drSongRankerSpecialTheme');
                 applySpecialTheme();
@@ -316,8 +323,8 @@ document.addEventListener('DOMContentLoaded', () => {
         customBgLabel.style.background = color;
         customBgLabel.style.color = getContrastColor(color);
 
-        // if you pick a custom color, gaster mode dies.
-        if (state.specialTheme === 'gaster') {
+        // special themes die in the custom picker too.
+        if (state.specialTheme) {
             state.specialTheme = null;
             localStorage.removeItem('drSongRankerSpecialTheme');
             applySpecialTheme();
@@ -335,6 +342,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem('drSongRankerSpecialTheme', 'gaster');
                 
                 // clear other actives. i'm sick of this.
+                colorBtns.forEach(b => b.classList.remove('active'));
+                bgBtns.forEach(b => b.classList.remove('active'));
+                customColorLabel.classList.remove('active');
+                customBgLabel.classList.remove('active');
+            }
+            applySpecialTheme();
+            saveState();
+        });
+    }
+
+    if (cyberThemeBtn) {
+        cyberThemeBtn.addEventListener('click', () => {
+            if (state.specialTheme === 'cyber') {
+                state.specialTheme = null;
+                localStorage.removeItem('drSongRankerSpecialTheme');
+            } else {
+                state.specialTheme = 'cyber';
+                localStorage.setItem('drSongRankerSpecialTheme', 'cyber');
+                
+                // same drill. wipe everything else.
                 colorBtns.forEach(b => b.classList.remove('active'));
                 bgBtns.forEach(b => b.classList.remove('active'));
                 customColorLabel.classList.remove('active');

@@ -46,6 +46,95 @@ body.theme-gaster button {
     border-radius: 0;
 }
 
+/* cyber world theme. neon, glow, and deep blues. */
+body.theme-cyber {
+    --bg-color: #050010;
+    --card-bg: #0a0020;
+    --text-color: #fff;
+    --accent-color: #2be390; /* teal-green from ref */
+    --accent-hover: #1cad6b;
+    --grid-line: #00ff4133; /* neon green lines */
+    --grid-color: transparent;
+    background-image: 
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px) !important;
+    background-size: 60px 60px !important;
+}
+
+body.theme-cyber .song-card {
+    border: 4px solid var(--accent-color);
+    box-shadow: 0 0 20px #2be39033;
+    background: #0a0020;
+    outline: 2px solid var(--accent-color);
+    outline-offset: -8px;
+    border-radius: 0;
+}
+
+body.theme-cyber .song-card:hover {
+    box-shadow: 0 0 30px #2be39044;
+    transform: translate(-4px, -4px) scale(1.02);
+}
+
+body.theme-cyber button {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 10px #2be39022;
+}
+
+body.theme-cyber h1 {
+    border: 4px solid var(--accent-color);
+    background: #0a0020;
+    color: var(--accent-color);
+    clip-path: polygon(0% 0%, 100% 0%, 92% 100%, 8% 100%);
+    padding: 20px 60px;
+    text-shadow: 2px 2px 0 #000;
+    box-shadow: 0 5px 20px #2be39033;
+}
+
+body.theme-cyber #stats-bar {
+    border-bottom: 4px solid var(--accent-color);
+    background: #0a0020;
+}
+
+body.theme-cyber #progress-container {
+    border-color: var(--accent-color);
+    background: #000;
+}
+
+body.theme-cyber #progress-text {
+    top: -35px; /* move up to avoid clipping with the dasher line */
+}
+
+/* yellow/cyan dashed separator line. because detail. */
+body.theme-cyber #progress-container::after {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background-image: linear-gradient(to right, #fffb22 50%, #2be390 50%);
+    background-size: 20px 100%;
+    opacity: 0.8;
+}
+
+body.theme-cyber .ranking-container {
+    border: 4px solid var(--accent-color);
+    background: #0a0020;
+    outline: 2px solid var(--accent-color);
+    outline-offset: -8px;
+}
+
+body.theme-cyber .vs {
+    color: #fffb22; /* yellow accent because chapter 2 */
+    text-shadow: 0 0 15px #fffb2288;
+    font-size: 3em;
+}
+
+body.theme-cyber .ranking-toggle-btn.active {
+    background: var(--accent-color);
+    color: #000;
+}
+
 /* Void theme icon. default deltarune grid look. */
 .bg-option[data-bg="#000000"] {
     position: relative;
