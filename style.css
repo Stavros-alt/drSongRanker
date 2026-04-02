@@ -11,7 +11,7 @@
     /* default ralsei green */
     --accent-hover: #00cc7e;
     --danger-color: #ff4444;
-    /* Defaults */
+    /* or whatever. defaults i guess. */
     --grid-color: #330033;
     --grid-line: #660066;
     --border-width: 3px;
@@ -46,14 +46,80 @@ body.theme-gaster button {
     border-radius: 0;
 }
 
-/* cyber world theme. neon, glow, and deep blues. */
+/* entry 17 / april fools placebo button. big, scary, and absolutely pointless. */
+.gaster-fake-btn {
+    margin-top: 15px;
+    width: 100%;
+    background: #000;
+    color: #00ff41;
+    border: 2px solid #00ff41;
+    font-family: 'Roboto Mono', monospace;
+    font-weight: bold;
+    font-size: 1.1em;
+    padding: 15px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.1s;
+    box-shadow: 0 0 0 2px #000, 0 0 0 4px #00ff41;
+}
+
+.gaster-fake-btn:hover {
+    background: #00ff41;
+    color: #000;
+    box-shadow: 0 0 20px #00ff41;
+    animation: gaster-vibrate 0.1s infinite;
+}
+
+.gaster-fake-btn::before {
+    content: '🕈︎'; /* Gaster W in wingdings font? no, unicode. */
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.5em;
+    opacity: 0.5;
+}
+
+@keyframes gaster-vibrate {
+    0% { transform: translate(0, 0); }
+    25% { transform: translate(2px, -2px); }
+    50% { transform: translate(-2px, 2px); }
+    75% { transform: translate(2px, 2px); }
+    100% { transform: translate(-2px, -2px); }
+}
+
+.gaster-scatter {
+    pointer-events: none;
+    animation: gaster-scatter-anim 0.5s forwards ease-in;
+}
+
+@keyframes gaster-scatter-anim {
+    0% {
+        transform: scale(1);
+        filter: blur(0) brightness(1);
+        opacity: 1;
+    }
+    30% {
+        transform: scale(1.1) rotate(1deg);
+        filter: blur(2px) brightness(2);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1.5) rotate(5deg) translateY(-50px);
+        filter: blur(20px) brightness(10) contrast(5);
+        opacity: 0;
+    }
+}
+
+/* cyber world theme. neon, glow, and deep blues. i hate colors. */
 body.theme-cyber {
     --bg-color: #050010;
     --card-bg: #0a0020;
     --text-color: #fff;
-    --accent-color: #2be390; /* teal-green from ref */
+    --accent-color: #2be390; /* teal-green or something. i'm colorblind today. */
     --accent-hover: #1cad6b;
-    --grid-line: #00ff4133; /* neon green lines */
+    --grid-line: #00ff4133; /* neon green lines. eyes hurt. */
     --grid-color: transparent;
     background-image: 
         linear-gradient(var(--grid-line) 1px, transparent 1px),

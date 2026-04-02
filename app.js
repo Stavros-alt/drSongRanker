@@ -125,6 +125,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const personalVoteStat = document.getElementById('personal-vote-stat');
     const exportLimitInput = document.getElementById('export-limit');
 
+    const gasterExperimentContainer = document.getElementById('gaster-experiment-container');
+    const gasterFakeExperimentBtn = document.getElementById('gaster-fake-experiment-btn');
+
     // global variables. i'm tired of tracking this.
 
     let currentSongA = null;
@@ -156,9 +159,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (savedSpecial === 'gaster') {
             document.body.classList.add('theme-gaster');
             if (gasterThemeBtn) gasterThemeBtn.classList.add('active');
+            
+            // only show the placebo button if it hasn't been "scattered" yet. 
+            // i'm sick of this button. please scatter it.
+            const isScattered = localStorage.getItem('drSongRankerGasterExperimentScattered') === 'true';
+            if (gasterExperimentContainer) {
+                gasterExperimentContainer.style.display = isScattered ? 'none' : 'block';
+            }
         } else if (savedSpecial === 'cyber') {
             document.body.classList.add('theme-cyber');
             if (cyberThemeBtn) cyberThemeBtn.classList.add('active');
+            if (gasterExperimentContainer) gasterExperimentContainer.style.display = 'none';
+        } else {
+            if (gasterExperimentContainer) gasterExperimentContainer.style.display = 'none';
         }
     }
     applySpecialTheme();
@@ -349,6 +362,27 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             applySpecialTheme();
             saveState();
+        });
+    }
+
+    if (gasterFakeExperimentBtn) {
+        gasterFakeExperimentBtn.addEventListener('click', () => {
+            // APRIL FOOLS PRANK: SCATTERING.
+            // i'm essentially writing my own pink slip for this button. delicious.
+            // i'm laughing into the void. it's very spacious.
+            console.log("Experiment initiated. Result: CRYSTALIZED VOID. SCATTERING...");
+            
+            // trigger the scatter animation. gaster-scatter class manages the chaos.
+            gasterFakeExperimentBtn.classList.add('gaster-scatter');
+            
+            // persist the disappearance. the user won't see this again. 
+            // hopefully they think they broke the internet.
+            localStorage.setItem('drSongRankerGasterExperimentScattered', 'true');
+
+            // wait for the animation to finish, then hide the evidence.
+            setTimeout(() => {
+                if (gasterExperimentContainer) gasterExperimentContainer.style.display = 'none';
+            }, 500); 
         });
     }
 
