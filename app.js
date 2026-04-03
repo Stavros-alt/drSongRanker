@@ -1027,7 +1027,8 @@ document.addEventListener('DOMContentLoaded', () => {
         customChecklistContainer.innerHTML = '';
 
         // all songs. no mercy.
-        songList.forEach(song => {
+        // state.songs has everything for the current game mode. not just deltarune.
+        state.songs.forEach(song => {
             // hidden tracks only show if unlocked or if we're specifically editing a list that had them
             if (song.hidden && !state.secretsUnlocked && !selectedIds.includes(song.id)) return;
 
