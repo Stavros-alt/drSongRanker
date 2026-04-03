@@ -995,9 +995,18 @@ button:active {
 .controls .choice-btn,
 .controls button,
 .controls a {
-    flex-shrink: 1;
+    flex: 1;
     font-size: 0.9em;
     padding: 8px 12px;
+}
+
+/* stupid <a> wrappers won't stretch on their own */
+.controls a {
+    display: flex;
+}
+
+.controls a button {
+    flex: 1;
 }
 
 #kofi-btn {
@@ -1054,6 +1063,12 @@ footer {
         flex-direction: column;
     }
 
+    /* let the game toggles wrap on mobile. nowrap was a mistake here. */
+    .game-toggle {
+        white-space: normal;
+        flex-wrap: wrap;
+    }
+
     .ranking-container {
         display: none;
         /* Hidden by default on mobile, toggled via JS */
@@ -1080,6 +1095,32 @@ footer {
 
     .choices {
         flex-direction: column;
+        width: 100%;
+    }
+
+    /* unlock the fixed widths on mobile. column layout needs full width. */
+    #chooseA-btn,
+    #chooseB-btn,
+    #undo-btn,
+    #tie-btn {
+        width: 100%;
+        min-width: unset;
+        max-width: 100%;
+    }
+
+    .controls {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .controls .choice-btn,
+    .controls button,
+    .controls a {
+        width: 100%;
+        font-size: 0.9em;
+    }
+
+    .controls a button {
         width: 100%;
     }
 
