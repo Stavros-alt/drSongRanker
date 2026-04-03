@@ -674,12 +674,32 @@ button:active {
 }
 
 .choice-btn {
-    min-width: 120px;
     border: var(--border-width) solid var(--accent-color);
     color: var(--accent-color);
-    flex-shrink: 1;
     padding: 8px 12px;
     font-size: 0.9em;
+    /* no more layout dancing */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* the song pick buttons get locked widths */
+#chooseA-btn,
+#chooseB-btn {
+    width: 220px;
+    min-width: 220px;
+    max-width: 220px;
+    flex-shrink: 0;
+}
+
+/* middle buttons stay small and predictable */
+#undo-btn,
+#tie-btn {
+    width: 100px;
+    min-width: 100px;
+    max-width: 100px;
+    flex-shrink: 0;
 }
 
 .choice-btn:hover {
