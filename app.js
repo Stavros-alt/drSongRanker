@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const songBRank = document.getElementById('songB-rank');
     const chooseABtn = document.getElementById('chooseA-btn');
     const chooseBBtn = document.getElementById('chooseB-btn');
-    const tieBtn = document.getElementById('tie-btn');
+    const skipBtn = document.getElementById('skip-btn');
     const undoBtn = document.getElementById('undo-btn');
     const resetBtn = document.getElementById('reset-btn');
     const progressBar = document.getElementById('progress-bar');
@@ -1223,17 +1223,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
             chooseABtn.disabled = true;
             chooseBBtn.disabled = true;
-            tieBtn.disabled = true;
+            skipBtn.disabled = true;
             return;
         }
 
         chooseABtn.disabled = false;
         chooseBBtn.disabled = false;
-        tieBtn.disabled = false;
+        skipBtn.disabled = false;
 
         let song1, song2;
         let attempts = 0;
-        const maxAttempts = 15; // if we can't find a new pair in 15 tries, just give up. i'm done.
+        const maxAttempts = 50; // if we can't find a new pair in 50 tries, just give up. i'm done.
 
         do {
             // picking two songs. don't ask about the distribution.
@@ -1281,7 +1281,18 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!state.preventDuplicates || availableSongs.length < 5) break;
 
             const pairKey = [song1.id, song2.id].sort((a, b) => a - b).join('-');
-            if (!state.recentMatches.includes(pairKey)) break;
+            
+            // strictly check against all history. i'm so tired of repeats.
+            const history = getMatchHistory(song1);
+            let alreadyFoughtInfo = false;
+            for (let i = 0; i < history.length; i++) {
+                if (history[i].opponentId === song2.id) {
+                    alreadyFoughtInfo = true;
+                    break;
+                }
+            }
+
+            if (!state.recentMatches.includes(pairKey) && !alreadyFoughtInfo) break;
             attempts++;
         } while (attempts < maxAttempts);
 
@@ -1335,7 +1346,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // disable buttons. i don't want them clicking like crazy.
         chooseABtn.disabled = true;
         chooseBBtn.disabled = true;
-        tieBtn.disabled = true;
+        skipBtn.disabled = true;
 
         const songAStats = await fetchMatchupStats(currentSongA, currentSongB);
         
@@ -1419,7 +1430,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // re-enable buttons for next round
             chooseABtn.disabled = false;
             chooseBBtn.disabled = false;
-            tieBtn.disabled = false;
+            skipBtn.disabled = false;
 
             updateApp();
             saveState();
@@ -1434,7 +1445,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // disable everything. i don't want you spamming the database.
         chooseABtn.disabled = true;
         chooseBBtn.disabled = true;
-        tieBtn.disabled = true;
+        skipBtn.disabled = true;
 
         // save history before we mess it up.
         state.history = {
@@ -1513,7 +1524,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // re-enable buttons if not showing agreement
             chooseABtn.disabled = false;
             chooseBBtn.disabled = false;
-            tieBtn.disabled = false;
+            skipBtn.disabled = false;
             updateApp();
         }
         saveState();
@@ -2678,7 +2689,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     chooseABtn.addEventListener('click', () => handleChoice('A'));
     chooseBBtn.addEventListener('click', () => handleChoice('B'));
-    tieBtn.addEventListener('click', () => handleChoice(null));
+    skipBtn.addEventListener('click', () => {
+        // they chose nothing. fine. next snippet.
+        if (state.preventDuplicates && currentSongA && currentSongB) {
+            const pairKey = [currentSongA.id, currentSongB.id].sort((a, b) => a - b).join('-');
+            state.recentMatches.push(pairKey);
+            if (state.recentMatches.length > 20) state.recentMatches.shift();
+        }
+        presentNewPair();
+        saveState();
+    });
     undoBtn.addEventListener('click', undoVote);
     resetBtn.addEventListener('click', resetState);
     previewBtns.forEach(btn => {
