@@ -366,7 +366,8 @@ const utSongList = [
         "file": "UNDERTALEsoundtrack/toby fox - UNDERTALE Soundtrack - 46 Spear of Justice.mp3",
         "rating": 1500,
         "comparisons": 0,
-        "duration": 115.49
+        "duration": 115.49,
+        "felfebFile": "audio/felfeb/feb-ut/Spear Of Justice (With Lyrics) - The Undertale Musical [cXadznTVXDE].mp3"
     },
     {
         "id": 1047,
