@@ -534,7 +534,11 @@ document.addEventListener('DOMContentLoaded', () => {
             state.comparisons = parsed.comparisons || 0;
             state.history = parsed.history || null;
             state.activeRankerList = parsed.activeRankerList || 'all';
-            state.customLists = parsed.customLists || {};
+            // don't overwrite if i already loaded this garbage from storage.
+            if (Object.keys(state.customLists).length === 0 && parsed.customLists && Object.keys(parsed.customLists).length > 0) {
+                state.customLists = parsed.customLists;
+                localStorage.setItem('drSongRankerCustomLists', JSON.stringify(state.customLists));
+            }
             state.boostedSongId = parsed.boostedSongId || null;
             state.felfebMode = parsed.felfebMode !== undefined ? parsed.felfebMode : state.felfebMode;
             state.includeBonus = parsed.includeBonus !== undefined ? parsed.includeBonus : state.includeBonus;
@@ -611,7 +615,7 @@ document.addEventListener('DOMContentLoaded', () => {
             state.comparisons = 0;
             state.history = null;
             state.activeRankerList = 'all';
-            state.customLists = {};
+            // i'm not clearing customLists here because loadCustomLists already did its job.
             state.boostedSongId = null;
         }
 
