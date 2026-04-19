@@ -36,6 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const communityRankingBtn = document.getElementById('community-ranking-btn');
     const toggleRankingsBtn = document.getElementById('toggle-rankings-btn');
     const hideLeaderboardToggle = document.getElementById('hide-leaderboard-toggle');
+    const hideMatchupRankingsToggle = document.getElementById('hide-matchup-rankings-toggle');
     const audioA = document.getElementById('audioA');
     const audioB = document.getElementById('audioB');
     const previewBtns = document.querySelectorAll('.preview-btn');
@@ -416,7 +417,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return (yiq >= 128) ? 'black' : 'white';
     }
 
-    let globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{"currentGame": "deltarune", "showRatings": false, "hideLeaderboard": false, "showAgreement": false, "preventDuplicates": true, "combinedDiscovered": false, "felfebMode": true, "includeBonus": false, "includeGenocide": false, "useSystemCursor": false, "selectedFranchises": ["deltarune", "undertale", "uty", "tsus"], "specialTheme": null}');
+    let globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{"currentGame": "deltarune", "showRatings": false, "hideLeaderboard": false, "hideMatchupRankings": false, "showAgreement": false, "preventDuplicates": true, "combinedDiscovered": false, "felfebMode": true, "includeBonus": false, "includeGenocide": false, "useSystemCursor": false, "selectedFranchises": ["deltarune", "undertale", "uty", "tsus"], "specialTheme": null}');
 
     let state = {
         currentGame: globalState.currentGame,
@@ -440,6 +441,7 @@ document.addEventListener('DOMContentLoaded', () => {
         selectedFranchises: globalState.selectedFranchises || ["deltarune", "undertale", "uty", "tsus"],
         hasSeenFinishScreen: false, // don't spam them with this every second
         hideLeaderboard: globalState.hideLeaderboard || false,
+        hideMatchupRankings: globalState.hideMatchupRankings || false,
         specialTheme: globalState.specialTheme || localStorage.getItem('drSongRankerSpecialTheme') || null
     };
 
@@ -467,6 +469,7 @@ document.addEventListener('DOMContentLoaded', () => {
             showAgreement: state.showAgreement,
             selectedFranchises: state.selectedFranchises,
             hideLeaderboard: state.hideLeaderboard,
+            hideMatchupRankings: state.hideMatchupRankings,
             specialTheme: state.specialTheme
         }));
     }
@@ -976,6 +979,31 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // another toggle because people complain about numbers.
+    if (hideMatchupRankingsToggle) {
+        hideMatchupRankingsToggle.checked = state.hideMatchupRankings;
+        hideMatchupRankingsToggle.addEventListener('change', (e) => {
+            state.hideMatchupRankings = e.target.checked;
+            saveState();
+            
+            // force update the dom. whatever.
+            if (songARank) {
+                if (state.hideMatchupRankings) {
+                    songARank.style.display = 'none';
+                } else {
+                    songARank.style.display = 'block';
+                }
+            }
+            if (songBRank) {
+                if (state.hideMatchupRankings) {
+                    songBRank.style.display = 'none';
+                } else {
+                    songBRank.style.display = 'block';
+                }
+            }
+        });
+    }
+
     saveCustomBtn.addEventListener('click', () => {
         const name = state.currentCustomListName;
         if (!name) return;
@@ -1322,6 +1350,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             songARank.textContent = `#${rankA}`;
             songBRank.textContent = `#${rankB}`;
+            
+            if (state.hideMatchupRankings) {
+                songARank.style.display = 'none';
+                songBRank.style.display = 'none';
+            } else {
+                songARank.style.display = 'block';
+                songBRank.style.display = 'block';
+            }
         }
 
         if (chooseABtn && currentSongA) chooseABtn.textContent = `I prefer ${currentSongA.name}`;
