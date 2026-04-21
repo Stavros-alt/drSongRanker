@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleRankingsBtn = document.getElementById('toggle-rankings-btn');
     const hideLeaderboardToggle = document.getElementById('hide-leaderboard-toggle');
     const hideMatchupRankingsToggle = document.getElementById('hide-matchup-rankings-toggle');
+    const hideAccuracyToggle = document.getElementById('hide-accuracy-toggle');
     const audioA = document.getElementById('audioA');
     const audioB = document.getElementById('audioB');
     const previewBtns = document.querySelectorAll('.preview-btn');
@@ -417,7 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return (yiq >= 128) ? 'black' : 'white';
     }
 
-    let globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{"currentGame": "deltarune", "showRatings": false, "hideLeaderboard": false, "hideMatchupRankings": false, "showAgreement": false, "preventDuplicates": true, "combinedDiscovered": false, "felfebMode": true, "includeBonus": false, "includeGenocide": false, "useSystemCursor": false, "selectedFranchises": ["deltarune", "undertale", "uty", "tsus"], "specialTheme": null}');
+    let globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{"currentGame": "deltarune", "showRatings": false, "hideLeaderboard": false, "hideMatchupRankings": false, "hideAccuracy": false, "showAgreement": false, "preventDuplicates": true, "combinedDiscovered": false, "felfebMode": true, "includeBonus": false, "includeGenocide": false, "useSystemCursor": false, "selectedFranchises": ["deltarune", "undertale", "uty", "tsus"], "specialTheme": null}');
 
     let state = {
         currentGame: globalState.currentGame,
@@ -442,6 +443,7 @@ document.addEventListener('DOMContentLoaded', () => {
         hasSeenFinishScreen: false, // don't spam them with this every second
         hideLeaderboard: globalState.hideLeaderboard || false,
         hideMatchupRankings: globalState.hideMatchupRankings || false,
+        hideAccuracy: globalState.hideAccuracy || false,
         specialTheme: globalState.specialTheme || localStorage.getItem('drSongRankerSpecialTheme') || null
     };
 
@@ -470,6 +472,7 @@ document.addEventListener('DOMContentLoaded', () => {
             selectedFranchises: state.selectedFranchises,
             hideLeaderboard: state.hideLeaderboard,
             hideMatchupRankings: state.hideMatchupRankings,
+            hideAccuracy: state.hideAccuracy,
             specialTheme: state.specialTheme
         }));
     }
@@ -1001,6 +1004,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     songBRank.style.display = 'block';
                 }
             }
+        });
+    }
+
+    // hide the accuracy bar. anon from discord asked for this.
+    if (hideAccuracyToggle) {
+        hideAccuracyToggle.checked = state.hideAccuracy;
+        hideAccuracyToggle.addEventListener('change', (e) => {
+            state.hideAccuracy = e.target.checked;
+            saveState();
+            updateProgress();
         });
     }
 
@@ -2092,8 +2105,15 @@ document.addEventListener('DOMContentLoaded', () => {
         // math. i'm done.
         const accuracy = 100 * (1 - Math.exp(-state.comparisons / 100));
 
-        if (progressBar) progressBar.style.width = `${accuracy}%`;
-        if (progressText) progressText.textContent = `Ranking Accuracy: ${accuracy.toFixed(1)}%`;
+        // they wanted to hide this. fine.
+        const progressContainer = document.getElementById('progress-container');
+        if (state.hideAccuracy) {
+            if (progressContainer) progressContainer.style.display = 'none';
+        } else {
+            if (progressContainer) progressContainer.style.display = '';
+            if (progressBar) progressBar.style.width = `${accuracy}%`;
+            if (progressText) progressText.textContent = `Ranking Accuracy: ${accuracy.toFixed(1)}%`;
+        }
 
         // vote hoarding counter. i guess people cheat. whatever.
         if (personalVoteStat) {
