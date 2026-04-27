@@ -2102,8 +2102,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateProgress() {
-        // math. i'm done.
-        const accuracy = 100 * (1 - Math.exp(-state.comparisons / 100));
+        // this used to be hardcoded to 100. ancient relic from when DR was the only ost
+        const activeSongs = filterSongsByChapter(state.songs, currentChapterFilter);
+        let poolSize = activeSongs.length || 1;
+        const accuracy = 100 * (1 - Math.exp(-state.comparisons / poolSize));
 
         // they wanted to hide this. fine.
         const progressContainer = document.getElementById('progress-container');
@@ -2484,6 +2486,7 @@ document.addEventListener('DOMContentLoaded', () => {
             loadState();
             saveState(); // save new currentGame to globalState
             updateMainFilterOptions();
+            updateProgress();
             presentNewPair();
             fetchAndDisplayAllTimeStats();
             if (myRankingBtn.classList.contains('active')) displayRankings();
@@ -2499,6 +2502,7 @@ document.addEventListener('DOMContentLoaded', () => {
             loadState();
             saveState(); // save new currentGame to globalState
             updateMainFilterOptions();
+            updateProgress();
             presentNewPair();
             fetchAndDisplayAllTimeStats();
             if (myRankingBtn.classList.contains('active')) displayRankings();
@@ -2530,6 +2534,7 @@ document.addEventListener('DOMContentLoaded', () => {
             loadState();
             saveState();
             updateMainFilterOptions();
+            updateProgress();
             presentNewPair();
             fetchAndDisplayAllTimeStats();
             if (myRankingBtn.classList.contains('active')) displayRankings();
@@ -2545,6 +2550,7 @@ document.addEventListener('DOMContentLoaded', () => {
             loadState();
             saveState();
             updateMainFilterOptions();
+            updateProgress();
             presentNewPair();
             fetchAndDisplayAllTimeStats();
             if (myRankingBtn.classList.contains('active')) displayRankings();
@@ -2560,6 +2566,7 @@ document.addEventListener('DOMContentLoaded', () => {
             loadState();
             saveState();
             updateMainFilterOptions();
+            updateProgress();
             presentNewPair();
             fetchAndDisplayAllTimeStats();
             if (myRankingBtn.classList.contains('active')) displayRankings();
@@ -3413,7 +3420,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // debug function for testing the finish screen.
     window.debugTriggerFinish = () => {
-        state.comparisons = 761; // close enough to 100%
+        let activeSongs = filterSongsByChapter(state.songs, currentChapterFilter);
+        let poolSize = activeSongs.length || 1;
+        state.comparisons = Math.ceil(poolSize * 7);
         state.hasSeenFinishScreen = false;
         updateProgress();
     };
