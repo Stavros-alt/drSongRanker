@@ -1,8 +1,14 @@
 # environment garbage
 .directory
+.trashinfo
 *~
 *.log
 .tmp/
+.DS_Store
 
 # web garbage
 .env
+
+# python junk
+__pycache__/
+*.py[cod]

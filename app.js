@@ -408,6 +408,69 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // undertale modding trend nonsense. i don't know why i do this.
+    const makeRedderBtn = document.getElementById('make-redder-btn');
+    const makeGreenerBtn = document.getElementById('make-greener-btn');
+    const makeBluerBtn = document.getElementById('make-bluer-btn');
+
+    let moddingRed = 0;
+    let moddingGreen = 0;
+    let moddingBlue = 0;
+
+    function applyModdingOverlay() {
+        let trendLayer = document.getElementById('modding-trend-overlay');
+        if (!trendLayer) {
+            // why am i making dom elements in js again? right. no energy to add to html.
+            trendLayer = document.createElement('div');
+            trendLayer.id = 'modding-trend-overlay';
+            trendLayer.style.position = 'fixed';
+            trendLayer.style.top = '0';
+            trendLayer.style.left = '0';
+            trendLayer.style.width = '100vw';
+            trendLayer.style.height = '100vh';
+            trendLayer.style.pointerEvents = 'none';
+            trendLayer.style.zIndex = '999999';
+            document.body.appendChild(trendLayer);
+        }
+
+        if (moddingRed === 0 && moddingGreen === 0 && moddingBlue === 0) {
+            trendLayer.style.display = 'none';
+            return;
+        }
+
+        trendLayer.style.display = 'block';
+        // stacked gradients because background-color doesn't layer multiple rgba values. css is stupid.
+        trendLayer.style.backgroundImage = `
+            linear-gradient(rgba(255,0,0,${Math.min(1, moddingRed)}), rgba(255,0,0,${Math.min(1, moddingRed)})),
+            linear-gradient(rgba(0,255,0,${Math.min(1, moddingGreen)}), rgba(0,255,0,${Math.min(1, moddingGreen)})),
+            linear-gradient(rgba(0,0,255,${Math.min(1, moddingBlue)}), rgba(0,0,255,${Math.min(1, moddingBlue)}))
+        `;
+    }
+
+    if (makeRedderBtn) {
+        makeRedderBtn.addEventListener('click', () => {
+            moddingRed += 0.25;
+            applyModdingOverlay();
+        });
+    }
+
+    if (makeGreenerBtn) {
+        makeGreenerBtn.addEventListener('click', () => {
+            moddingGreen += 0.25;
+            applyModdingOverlay();
+        });
+    }
+
+    if (makeBluerBtn) {
+        makeBluerBtn.addEventListener('click', () => {
+            moddingBlue += 0.25;
+            applyModdingOverlay();
+        });
+    }
+
+    // start it up. hopefully no one uses this.
+    applyModdingOverlay();
+
     // math. i'm done with this.
     function getContrastColor(hexColor) {
         if (!hexColor) return 'white'; // whatever
