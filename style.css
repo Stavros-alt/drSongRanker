@@ -1866,22 +1866,67 @@ footer {
     letter-spacing: 2px;
 }
 
-/* donor spotlight - above the leaderboard */
-.donor-spotlight {
-    border-bottom: var(--border-width) solid #fff;
-    padding: 15px;
+/* community dropdown. saving screen space. */
+.community-dropdown {
+    margin-bottom: 15px;
     background: #050505;
+    border: var(--border-width) solid #333;
+    transition: all 0.2s;
+}
+
+.community-dropdown[open] {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);
+}
+
+.community-dropdown-summary {
+    padding: 10px 15px;
+    cursor: pointer;
+    color: var(--accent-color);
+    font-size: 0.9em;
+    font-family: 'Roboto Mono', monospace;
+    text-transform: uppercase;
+    list-style: none;
+    text-align: center;
+    font-weight: bold;
+    user-select: none;
+}
+
+.community-dropdown-summary::-webkit-details-marker {
+    display: none;
+}
+
+.community-dropdown-summary:hover {
+    background: #111;
+}
+
+.community-dropdown-summary::before {
+    content: '▶ ';
+    display: inline-block;
+    transition: transform 0.2s;
+}
+
+.community-dropdown[open] .community-dropdown-summary::before {
+    transform: rotate(90deg);
+}
+
+.community-dropdown-content {
+    padding-bottom: 10px;
+}
+
+/* donor spotlight - inside the dropdown now */
+.donor-spotlight {
+    border-top: var(--border-width) solid #333;
+    padding: 15px;
     text-align: center;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 0 20px 5px var(--accent-color); /* switching to accent color as requested. much better. */
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .donor-spotlight:hover {
     transform: scale(1.005);
-    box-shadow: 0 0 25px 8px var(--accent-color);
 }
 
 .donor-spotlight-title {
@@ -1928,6 +1973,59 @@ footer {
     -webkit-line-clamp: 2;
     line-clamp: 2;
     -webkit-box-orient: vertical;
+}
+
+/* community goal spotlight. because we need more bars. */
+.community-goal-spotlight {
+    border-bottom: var(--border-width) solid #fff;
+    padding: 15px;
+    background: #050505;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 20px 5px var(--accent-color);
+    margin-top: 10px;
+}
+
+.community-goal-title {
+    font-size: 0.8em;
+    color: var(--accent-color);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.community-goal-desc {
+    font-size: 0.8em;
+    color: #aaa;
+    margin-bottom: 15px;
+}
+
+.goal-progress-container {
+    width: 100%;
+    height: 20px;
+    background: #222;
+    border: 1px solid #444;
+    position: relative;
+    margin-bottom: 5px;
+}
+
+.goal-progress-bar {
+    height: 100%;
+    background: var(--accent-color);
+    width: 0%; /* updated by js */
+    transition: width 0.5s;
+}
+
+.goal-progress-text {
+    font-size: 0.8em;
+    color: #fff;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
 }
 
 /* Yearbook page styles */

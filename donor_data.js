@@ -11,14 +11,14 @@
 var DONOR_DATA = {
     // This is the person who gets the big slot above the leaderboard.
     currentTopDonor: {
-        name: "STAVROS",
-        month: "MARCH 2026",
-        pfp: "Art/peeringSoul.png", // make sure to add the actual file later
-        quote: "I made this site and all I got was this lousy donor slot.",
+        name: "NO ONE",
+        month: "MAY 2026",
+        pfp: "Art/peeringSoul.png",
+        quote: "This slot is empty. Claim it and you get to pick the next AU soundtrack.",
         styling: {
-            borderColor: "var(--accent-color)",
-            glowColor: "var(--accent-color)",
-            textColor: "var(--accent-color)"
+            borderColor: "#333",
+            glowColor: "transparent",
+            textColor: "#888"
         }
     },
 
@@ -41,9 +41,22 @@ var DONOR_DATA = {
         {
             month: "APRIL 2026",
             donors: []
+        },
+        {
+            month: "MAY 2026",
+            donors: []
         }
         // Add more months here as they come. Or don't. I'm just the messenger.
-    ]
+    ],
+
+    // community goal for the month. because apparently this is a thing now.
+    communityGoal: {
+        active: true,
+        target: 50,
+        current: 0, // whatever
+        reward: "New AU Soundtrack (Top Donor's Choice)",
+        currency: "$"
+    }
 };
 
 // if this is used in the browser, it needs to be accessible.

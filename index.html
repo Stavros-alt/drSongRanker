@@ -96,9 +96,17 @@
 
 
         <div class="ranking-container">
-            <div id="top-donor-slot" class="donor-spotlight" style="display: none;">
-                <!-- JS will inject actual data here. or maybe I won't. don't count on it. -->
-            </div>
+            <details class="community-dropdown" id="community-dropdown" style="display: none;">
+                <summary class="community-dropdown-summary">Community Support</summary>
+                <div class="community-dropdown-content">
+                    <div id="top-donor-slot" class="donor-spotlight" style="display: none;">
+                        <!-- JS will inject actual data here. or maybe I won't. don't count on it. -->
+                    </div>
+                    <div id="community-goal-slot" class="community-goal-spotlight" style="display: none;">
+                        <!-- more js injection. great. -->
+                    </div>
+                </div>
+            </details>
             <div class="ranking-header">
                 <button id="my-ranking-btn" class="ranking-toggle-btn active">My Rank</button>
                 <button id="community-ranking-btn" class="ranking-toggle-btn">Global</button>
@@ -354,8 +362,6 @@
                 style="color: var(--accent-color); text-decoration: none; margin-right: 10px;">Dark Candy</a>
             <a href="https://github.com/stavros-alt/drSongRanker" target="_blank"
                 style="color: #666; text-decoration: none; margin-right: 10px;">GitHub</a>
-            <a href="https://github.com/Stavros-alt/songRankerSkeleton" target="_blank"
-                style="color: #444; text-decoration: none; margin-right: 10px;">Skeleton</a>
             <span style="color: #444; font-size: 0.8em;">(Need a custom ranker? I'm for hire. DM on Discord.)</span>
         </p>
     </footer>

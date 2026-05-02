@@ -3498,6 +3498,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const donor = window.DONOR_DATA.currentTopDonor;
         slot.style.display = 'block';
         
+        const dropdown = document.getElementById('community-dropdown');
+        if (dropdown) dropdown.style.display = 'block';
+        
         // custom styling per request. don't ask.
         if (donor.styling) {
             if (donor.styling.borderColor) slot.style.borderColor = donor.styling.borderColor;
@@ -3521,5 +3524,31 @@ document.addEventListener('DOMContentLoaded', () => {
     // inject on load. hopefully it doesn't break everything.
     setTimeout(injectTopDonor, 100);
 
+    // --- COMMUNITY GOAL ---
+    function injectCommunityGoal() {
+        const slot = document.getElementById('community-goal-slot');
+        if (!slot || !window.DONOR_DATA || !window.DONOR_DATA.communityGoal || !window.DONOR_DATA.communityGoal.active) return;
+
+        let goalObj = window.DONOR_DATA.communityGoal;
+        slot.style.display = 'block';
+
+        const dropdown = document.getElementById('community-dropdown');
+        if (dropdown) dropdown.style.display = 'block';
+
+        // math is hard. definately capping it at 100.
+        let calcPercent = Math.min(100, Math.max(0, (goalObj.current / goalObj.target) * 100));
+
+        slot.innerHTML = `
+            <div class="community-goal-title">Monthly Community Goal</div>
+            <div class="community-goal-desc">Reward: ${goalObj.reward}</div>
+            <div class="goal-progress-container">
+               <div class="goal-progress-bar" style="width: ${calcPercent}%;"></div>
+                <div class="goal-progress-text">${goalObj.currency}${goalObj.current} / ${goalObj.currency}${goalObj.target}</div>
+            </div>
+            <a href="https://ko-fi.com/stavros916" target="_blank" rel="noopener noreferrer" style="font-size: 0.7em; color: var(--accent-color); text-decoration: underline;">Contribute on Ko-fi</a>
+        `;
+    }
+
+    setTimeout(injectCommunityGoal, 100);
 
 });
