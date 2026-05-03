@@ -594,8 +594,130 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // ──────────────────────────────────────────────
-    // secrets unlock. keep this.
+    // personal completed rankings. user wanted this so i guess we parse localstorage. again.
     // ──────────────────────────────────────────────
+    try {
+        const chapterLabels = ['Ch 1', 'Ch 2', 'Ch 3', 'Ch 4']
+        const myChapterStats = {}
+        for (const l of chapterLabels) {
+            myChapterStats[l] = { sum: 0, count: 0 }
+        }
+
+        const drStr = localStorage.getItem('drSongRankerState');
+        if (drStr) {
+            const drState = JSON.parse(drStr);
+            if (drState && drState.songs && drState.comparisons > 0) {
+                for (let i = 0; i < drState.songs.length; i++) {
+                    const song = drState.songs[i];
+                    // reusing that hacky getSection function.
+                    const sec = getSection(song);
+                    if (myChapterStats[sec]) {
+                        myChapterStats[sec].sum += song.rating;
+                        myChapterStats[sec].count++;
+                    }
+                }
+            }
+        }
+
+        // fine, i'll add the other games too just in case.
+        const utStr = localStorage.getItem('utSongRankerState');
+        if (utStr) {
+            const utState = JSON.parse(utStr);
+            if (utState && utState.songs && utState.comparisons > 0) {
+                myChapterStats['UT'] = { sum: 0, count: 0 };
+                for (let j = 0; j < utState.songs.length; j++) {
+                    myChapterStats['UT'].sum += utState.songs[j].rating;
+                    myChapterStats['UT'].count++;
+                }
+                chapterLabels.push('UT');
+            }
+        }
+
+        const utyStr = localStorage.getItem('utySongRankerState');
+        if (utyStr) {
+            const utyState = JSON.parse(utyStr);
+            if (utyState && utyState.songs && utyState.comparisons > 0) {
+                myChapterStats['UTY'] = { sum: 0, count: 0 };
+                for (const s of utyState.songs) {
+                    myChapterStats['UTY'].sum += s.rating;
+                    myChapterStats['UTY'].count++;
+                }
+                chapterLabels.push('UTY');
+            }
+        }
+
+        const tsusStr = localStorage.getItem('tsusSongRankerState');
+        if (tsusStr) {
+            const tsusState = JSON.parse(tsusStr);
+            if (tsusState && tsusState.songs && tsusState.comparisons > 0) {
+                myChapterStats['TSUS'] = { sum: 0, count: 0 };
+                for (const s of tsusState.songs) {
+                    myChapterStats['TSUS'].sum += s.rating;
+                    myChapterStats['TSUS'].count++;
+                }
+                chapterLabels.push('TSUS');
+            }
+        }
+
+        // do we even have data?
+        let hasData = false;
+        for (const l of chapterLabels) {
+            if (myChapterStats[l] && myChapterStats[l].count > 0) {
+                hasData = true;
+                break;
+            }
+        }
+
+        const canvasElement = document.getElementById('personalRadarChart');
+        if (hasData && canvasElement) {
+            const pData = []
+            for (let idx = 0; idx < chapterLabels.length; idx++) {
+                const l = chapterLabels[idx]
+                if (myChapterStats[l] && myChapterStats[l].count) {
+                    pData.push(myChapterStats[l].sum / myChapterStats[l].count)
+                } else {
+                    pData.push(0)
+                }
+            }
+
+            // i hope this color doesn't look terrible.
+            new Chart(canvasElement, {
+                type: 'radar',
+                data: {
+                    labels: chapterLabels,
+                    datasets: [{
+                        label: 'Your Avg Rating',
+                        data: pData,
+                        backgroundColor: 'rgba(255, 0, 255, 0.2)',
+                        borderColor: '#ff00ff',
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#ff00ff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: '#333' },
+                            grid: { color: '#333' },
+                            pointLabels: { color: '#fff', font: { size: 14 } },
+                            suggestedMin: 1200
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        } else if (canvasElement && canvasElement.parentElement) {
+            // guess they haven't played yet.
+            canvasElement.parentElement.innerHTML = '<p style="text-align: center; color: #666; margin-top: 40px;">no local rankings found. go rank some songs first.</p>';
+        }
+    } catch (err) {
+        // localstorage parsing failed. probably corrupt state.
+        console.error("couldn't parse local stats:", err);
+    }
     const secretsUnlocked = localStorage.getItem('drSongRankerSecretsUnlocked');
     if (secretsUnlocked !== 'true') {
         localStorage.setItem('drSongRankerSecretsUnlocked', 'true');
