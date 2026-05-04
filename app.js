@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const tsusToggle = document.getElementById('tsus-toggle');
     const showRatingsToggle = document.getElementById('show-ratings-toggle');
     const preventDuplicatesToggle = document.getElementById('prevent-duplicates-toggle');
+    const showGlobalDiffToggle = document.getElementById('show-global-diff-toggle');
     const felfebModeToggle = document.getElementById('felfeb-mode-toggle');
     const includeBonusToggle = document.getElementById('include-bonus-toggle');
     const systemCursorToggle = document.getElementById('system-cursor-toggle');
@@ -507,6 +508,7 @@ document.addEventListener('DOMContentLoaded', () => {
         hideLeaderboard: globalState.hideLeaderboard || false,
         hideMatchupRankings: globalState.hideMatchupRankings || false,
         hideAccuracy: globalState.hideAccuracy || false,
+        showGlobalDiff: globalState.showGlobalDiff || false,
         specialTheme: globalState.specialTheme || localStorage.getItem('drSongRankerSpecialTheme') || null
     };
 
@@ -536,6 +538,7 @@ document.addEventListener('DOMContentLoaded', () => {
             hideLeaderboard: state.hideLeaderboard,
             hideMatchupRankings: state.hideMatchupRankings,
             hideAccuracy: state.hideAccuracy,
+            showGlobalDiff: state.showGlobalDiff,
             specialTheme: state.specialTheme
         }));
     }
@@ -980,6 +983,16 @@ document.addEventListener('DOMContentLoaded', () => {
             // fine, clear the memory. i don't care.
             if (!state.preventDuplicates) state.recentMatches = [];
             saveState();
+        });
+    }
+
+    // global diff toggle. who even uses this
+    if (showGlobalDiffToggle) {
+        showGlobalDiffToggle.checked = state.showGlobalDiff;
+        showGlobalDiffToggle.addEventListener('change', (e) => {
+            state.showGlobalDiff = e.target.checked;
+            saveState();
+            if (myRankingBtn.classList.contains('active')) displayRankings();
         });
     }
 
@@ -1933,61 +1946,91 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     let cachedCommunitySongs = [];
+    let cachedCommunityGame = null;
+    let communityDataPromise = null;
+
+    // don't refetch if we already have it. supabase doesn't need the extra load
+    function ensureCommunityData() {
+        if (cachedCommunityGame === state.currentGame && cachedCommunitySongs.length > 0) {
+            return Promise.resolve(true)
+        }
+        if (communityDataPromise) return communityDataPromise;
+
+        communityDataPromise = (async () => {
+            try {
+                let combinedData = [];
+                if (currentChapterFilter === 'felfeb' || isFelfebRanker()) {
+                    const { data, error } = await supabaseClient
+                        .from('felfeb_songs')
+                        .select('name, id, rating')
+                        .order('rating', { ascending: false });
+                    if (error) throw error;
+                    combinedData = data;
+                } else if (state.currentGame === 'combined') {
+                    const [drRes, utRes, utyRes, tsusRes] = await Promise.all([
+                        supabaseClient.from('songs').select('name, id, rating').order('rating', { ascending: false }),
+                        supabaseClient.from('ut_songs').select('name, id, rating').order('rating', { ascending: false }),
+                        supabaseClient.from('uty_songs').select('name, id, rating').order('rating', { ascending: false }),
+                        supabaseClient.from('tsus_songs').select('name, id, rating, hidden').order('rating', { ascending: false })
+                    ]);
+
+                    if (drRes.error) throw drRes.error;
+                    if (utRes.error) throw utRes.error;
+                    if (utyRes.error) throw utyRes.error;
+                    if (tsusRes.error) throw tsusRes.error;
+
+                    combinedData = [...drRes.data, ...utRes.data, ...utyRes.data, ...tsusRes.data].sort((a, b) => b.rating - a.rating);
+                } else {
+                    let tableName = 'songs';
+                    let selectCols = 'name, id, rating';
+                    if (state.currentGame === 'undertale') tableName = 'ut_songs';
+                    else if (state.currentGame === 'undertale_yellow' || state.currentGame === 'uty') tableName = 'uty_songs';
+                    else if (state.currentGame === 'tsus') { tableName = 'tsus_songs'; selectCols = 'name, id, rating, hidden'; }
+                    const { data, error } = await supabaseClient
+                        .from(tableName)
+                        .select(selectCols)
+                        .order('rating', { ascending: false });
+                    if (error) throw error;
+                    combinedData = data;
+                }
+
+                // fixing paths. whatever. i don't even care anymore.
+                cachedCommunitySongs = combinedData.map(cSong => {
+                    const localSong = state.songs.find(s => s.id === cSong.id);
+                    return {
+                        ...cSong,
+                        file: localSong ? localSong.file : '',
+                        hidden: localSong ? localSong.hidden : false,
+                        duration: localSong ? localSong.duration : 0, // include duration. don't forget it again.
+                        felfebFile: localSong ? localSong.felfebFile : undefined, // global felfeb. finally.
+                        isBonus: localSong ? localSong.isBonus : false,
+                        region: localSong ? localSong.region : undefined // regions for tsus/uty filtering. i can't believe i forgot this.
+                    };
+                });
+                
+                cachedCommunityGame = state.currentGame;
+                communityDataPromise = null;
+                return true;
+            } catch (err) {
+                console.error("error fetching community data:", err);
+                communityDataPromise = null;
+                return false;
+            }
+        })();
+        return communityDataPromise;
+    }
 
     // displaying community rankings. i'm finally getting around to this.
     async function displayCommunityRankings() {
         rankingList.innerHTML = '<li>Loading community data...</li>';
 
+        const success = await ensureCommunityData();
+        if (!success) {
+            rankingList.innerHTML = `<li>Error loading rankings</li>`;
+            return;
+        }
+
         try {
-            let combinedData = [];
-            if (currentChapterFilter === 'felfeb' || isFelfebRanker()) {
-                const { data, error } = await supabaseClient
-                    .from('felfeb_songs')
-                    .select('name, id, rating')
-                    .order('rating', { ascending: false });
-                if (error) throw error;
-                combinedData = data;
-            } else if (state.currentGame === 'combined') {
-                const [drRes, utRes, utyRes, tsusRes] = await Promise.all([
-                    supabaseClient.from('songs').select('name, id, rating').order('rating', { ascending: false }),
-                    supabaseClient.from('ut_songs').select('name, id, rating').order('rating', { ascending: false }),
-                    supabaseClient.from('uty_songs').select('name, id, rating').order('rating', { ascending: false }),
-                    supabaseClient.from('tsus_songs').select('name, id, rating, hidden').order('rating', { ascending: false })
-                ]);
-
-                if (drRes.error) throw drRes.error;
-                if (utRes.error) throw utRes.error;
-                if (utyRes.error) throw utyRes.error;
-                if (tsusRes.error) throw tsusRes.error;
-
-                combinedData = [...drRes.data, ...utRes.data, ...utyRes.data, ...tsusRes.data].sort((a, b) => b.rating - a.rating);
-            } else {
-                let tableName = 'songs';
-                let selectCols = 'name, id, rating';
-                if (state.currentGame === 'undertale') tableName = 'ut_songs';
-                else if (state.currentGame === 'undertale_yellow' || state.currentGame === 'uty') tableName = 'uty_songs';
-                else if (state.currentGame === 'tsus') { tableName = 'tsus_songs'; selectCols = 'name, id, rating, hidden'; }
-                const { data, error } = await supabaseClient
-                    .from(tableName)
-                    .select(selectCols)
-                    .order('rating', { ascending: false });
-                if (error) throw error;
-                combinedData = data;
-            }
-
-            // fixing paths. whatever. i don't even care anymore.
-            cachedCommunitySongs = combinedData.map(cSong => {
-                const localSong = state.songs.find(s => s.id === cSong.id);
-                return {
-                    ...cSong,
-                    file: localSong ? localSong.file : '',
-                    hidden: localSong ? localSong.hidden : false,
-                    duration: localSong ? localSong.duration : 0, // include duration. don't forget it again.
-                    felfebFile: localSong ? localSong.felfebFile : undefined, // global felfeb. finally.
-                    isBonus: localSong ? localSong.isBonus : false,
-                    region: localSong ? localSong.region : undefined // regions for tsus/uty filtering. i can't believe i forgot this.
-                };
-            });
 
             const filteredSongs = filterSongsByChapter(cachedCommunitySongs, currentChapterFilter);
 
@@ -2123,6 +2166,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const filteredSongs = filterSongsByChapter(state.songs, currentChapterFilter);
         const sortedSongs = [...filteredSongs].sort((a, b) => getRating(b) - getRating(a));
 
+        // build a lookup for global positions. only if they toggled it on
+        let globalRanks = null;
+        if (state.showGlobalDiff && cachedCommunityGame === state.currentGame && cachedCommunitySongs.length > 0) {
+            const filteredGlobal = filterSongsByChapter(cachedCommunitySongs, currentChapterFilter);
+            const sortedGlobal = [...filteredGlobal].sort((a, b) => b.rating - a.rating);
+            globalRanks = {};
+            for (let i = 0; i < sortedGlobal.length; i++) {
+                globalRanks[sortedGlobal[i].id] = i;
+            }
+        }
+
         sortedSongs.forEach((song, index) => {
             const li = document.createElement('li');
             li.style.cursor = 'pointer'; // i shouldn't have to do this here but whatever
@@ -2132,6 +2186,20 @@ document.addEventListener('DOMContentLoaded', () => {
             nameSpan.classList.add('song-name');
             nameSpan.textContent = song.name;
             li.appendChild(nameSpan);
+
+            // rank diff goes after the name. not inside it or overflow eats it
+            if (globalRanks !== null && globalRanks[song.id] !== undefined) {
+                let globalPos = globalRanks[song.id];
+                let rankDiff = globalPos - index; 
+                if (rankDiff !== 0) {
+                    const diffSpan = document.createElement('span');
+                    diffSpan.classList.add('global-diff');
+                    diffSpan.textContent = (rankDiff > 0 ? '+' : '') + rankDiff;
+                    diffSpan.title = `global rank: #${globalPos + 1}`;
+                    diffSpan.style.color = rankDiff > 0 ? '#00ff9d' : '#ff4444';
+                    li.appendChild(diffSpan);
+                }
+            }
 
             const details = document.createElement('small');
             details.textContent = Math.round(getRating(song));
@@ -2162,6 +2230,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
             rankingList.appendChild(li);
         });
+
+        // lazy fetch. only hits supabase when the toggle is on and cache is stale
+        if (state.showGlobalDiff && (cachedCommunityGame !== state.currentGame || cachedCommunitySongs.length === 0)) {
+            ensureCommunityData().then(success => {
+                if (success && myRankingBtn.classList.contains('active')) {
+                    displayRankings();
+                }
+            });
+        }
     }
 
     function updateProgress() {
@@ -3466,6 +3543,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadState();
     if (showRatingsToggle) showRatingsToggle.checked = state.showRatings;
     if (preventDuplicatesToggle) preventDuplicatesToggle.checked = state.preventDuplicates;
+    if (showGlobalDiffToggle) showGlobalDiffToggle.checked = state.showGlobalDiff;
     checkSecretsGlobal();
     // populateCustomDropdown is already called inside loadState. 
     // Just ensure the select value is synced one last time.

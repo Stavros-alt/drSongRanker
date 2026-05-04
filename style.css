@@ -926,7 +926,18 @@ button:active {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    margin-right: 15px;
+    margin-right: 10px;
+    min-width: 0;
+}
+
+/* rank diff indicator. color is set in JS because it depends on the value */
+.global-diff {
+    flex-shrink: 0;
+    font-size: 0.8em;
+    font-weight: bold;
+    margin-right: 10px;
+    min-width: 28px;
+    text-align: right;
 }
 
 #ranking-list small {
