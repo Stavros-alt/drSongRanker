@@ -5,10 +5,19 @@
 *.log
 .tmp/
 .DS_Store
+.idea/
+.vscode/
 
 # web garbage
 .env
+node_modules/
 
 # python junk
 __pycache__/
 *.py[cod]
+*.pyo
+*.pyd
+.venv
+env/
+venv/
+ENV/

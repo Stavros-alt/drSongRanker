@@ -39,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const hideLeaderboardToggle = document.getElementById('hide-leaderboard-toggle');
     const hideMatchupRankingsToggle = document.getElementById('hide-matchup-rankings-toggle');
     const hideAccuracyToggle = document.getElementById('hide-accuracy-toggle');
+    const hideAccuracyPercentToggle = document.getElementById('hide-accuracy-percent-toggle'); // discord anon asked for this. whatever.
     const audioA = document.getElementById('audioA');
     const audioB = document.getElementById('audioB');
     const previewBtns = document.querySelectorAll('.preview-btn');
@@ -482,7 +483,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return (yiq >= 128) ? 'black' : 'white';
     }
 
-    let globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{"currentGame": "deltarune", "showRatings": false, "hideLeaderboard": false, "hideMatchupRankings": false, "hideAccuracy": false, "showAgreement": false, "preventDuplicates": true, "combinedDiscovered": false, "felfebMode": true, "includeBonus": false, "includeGenocide": false, "useSystemCursor": false, "selectedFranchises": ["deltarune", "undertale", "uty", "tsus"], "specialTheme": null}');
+    let globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{"currentGame": "deltarune", "showRatings": false, "hideLeaderboard": false, "hideMatchupRankings": false, "hideAccuracy": false, "hideAccuracyPercent": false, "showAgreement": false, "preventDuplicates": true, "combinedDiscovered": false, "felfebMode": true, "includeBonus": false, "includeGenocide": false, "useSystemCursor": false, "selectedFranchises": ["deltarune", "undertale", "uty", "tsus"], "specialTheme": null}');
 
     let state = {
         currentGame: globalState.currentGame,
@@ -508,6 +509,7 @@ document.addEventListener('DOMContentLoaded', () => {
         hideLeaderboard: globalState.hideLeaderboard || false,
         hideMatchupRankings: globalState.hideMatchupRankings || false,
         hideAccuracy: globalState.hideAccuracy || false,
+        hideAccuracyPercent: globalState.hideAccuracyPercent || false, // hiding the percentage. apparently numbers are stressful.
         showGlobalDiff: globalState.showGlobalDiff || false,
         specialTheme: globalState.specialTheme || localStorage.getItem('drSongRankerSpecialTheme') || null
     };
@@ -538,6 +540,7 @@ document.addEventListener('DOMContentLoaded', () => {
             hideLeaderboard: state.hideLeaderboard,
             hideMatchupRankings: state.hideMatchupRankings,
             hideAccuracy: state.hideAccuracy,
+            hideAccuracyPercent: state.hideAccuracyPercent,
             showGlobalDiff: state.showGlobalDiff,
             specialTheme: state.specialTheme
         }));
@@ -1090,6 +1093,15 @@ document.addEventListener('DOMContentLoaded', () => {
             state.hideAccuracy = e.target.checked;
             saveState();
             updateProgress();
+        });
+    }
+
+    if (hideAccuracyPercentToggle) {
+        hideAccuracyPercentToggle.checked = state.hideAccuracyPercent;
+        hideAccuracyPercentToggle.addEventListener('change', (e) => {
+            state.hideAccuracyPercent = e.target.checked;
+            saveState();
+            updateProgress(); // refresh the bar i guess.
         });
     }
 
@@ -2254,7 +2266,15 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             if (progressContainer) progressContainer.style.display = '';
             if (progressBar) progressBar.style.width = `${accuracy}%`;
-            if (progressText) progressText.textContent = `Ranking Accuracy: ${accuracy.toFixed(1)}%`;
+            
+            if (progressText) {
+                if (state.hideAccuracyPercent) {
+                    progressText.style.display = 'none'; // poof. it's gone.
+                } else {
+                    progressText.style.display = '';
+                    progressText.textContent = `Ranking Accuracy: ${accuracy.toFixed(1)}%`;
+                }
+            }
         }
 
         // vote hoarding counter. i guess people cheat. whatever.

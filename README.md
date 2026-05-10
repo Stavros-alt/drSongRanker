@@ -1,22 +1,27 @@
 # drSongRanker
-
-Elo-based song ranker for various game soundtracks. It works. Don't touch the code.
+Elo-based song ranker for Deltarune, Undertale, and various mods. It works. Don't touch the code unless you want to spend three hours debugging my variable naming choices.
 
 ## Setup
+It's just static HTML. Run a local server if you want to avoid CORS issues with the soundtrack files.
+`python3 -m http.server`
+Windows users? Good luck. Maybe use WSL or something.
 
-Use a local server: `python3 -m http.server`
+## Usage
+1. Pick a game (Deltarune, Undertale, UTY, TS!Underswap, or Combined).
+2. Click the song you like better.
+3. Your ranking updates in real-time.
+4. Export as MP3s, M3U, or text if you actually have friends to share it with.
 
-## Exporting Playlists
+## Configuration
+Everything is in local storage. `drSongRankerGlobalState` handles your UI preferences. `drSongRankerState` and friends handle the actual Elo math.
 
-1. Click **Export Playlist** -> **Copy Text**.
-2. Use TuneMyMusic.
+## Known Issues
+- Mobile layout is... a choice. Use a real computer.
+- Previews might hang if your internet is garbage.
+- Supabase sync is mostly for global stats. Personal ranks are local. Don't clear your cache if you care about your list.
 
 ## Credits
-
 - Toby Fox (Audio/IP)
 - Team Switched (TS!Underswap)
-- Me (Everything else)
-
-## Skeleton
-
-If you want to build your own ranker, use the [songRankerSkeleton](https://github.com/Stavros-alt/songRankerSkeleton). Or, if you're lazy/rich, pay me to do it for you. I'll even maintain it if the price is right. DM on Discord.
+- Master Sword (UTY)
+- Me (Suffering through this code)
