@@ -254,23 +254,62 @@ body {
     /* Hidden by default for mobile safety */
     width: 25px;
     height: 21px;
-    background-image: url('Art/cursor.webp');
-    background-size: contain;
-    background-repeat: no-repeat;
+    background-color: #ff0000;
+    -webkit-mask-image: url('Art/cursor.webp');
+    mask-image: url('Art/cursor.webp');
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
     position: fixed;
     pointer-events: none;
     z-index: 9999;
     transform: translate(-3px, -2px);
     /* hotspot adjustment */
-    transition: transform 0.1s ease, filter 0.1s ease;
+    transition: transform 0.1s ease, background-color 0.1s ease;
 }
 
-/* making things shiny */
+/* soul colors. mask-image is a lifesaver. hue-rotate was a mistake. */
+.custom-cursor.soul-cyan { background-color: #00ffff; }
+.custom-cursor.soul-orange { background-color: #ff8c00; }
+.custom-cursor.soul-blue { background-color: #0000ff; }
+.custom-cursor.soul-purple { background-color: #bf00ff; }
+.custom-cursor.soul-green { background-color: #00ff00; }
+.custom-cursor.soul-yellow { background-color: #ffff00; }
+.custom-cursor.soul-monster { 
+    background-color: #ffffff; 
+    transform: translate(-22px, -21px) rotate(180deg);
+}
+
+/* the glow. because aesthetics or whatever. */
 .custom-cursor.active {
-    filter: drop-shadow(0 0 8px #ff0000);
+    filter: drop-shadow(0 0 8px var(--cursor-glow, #ff0000));
     transform: translate(-3px, -2px) scale(1.2);
     animation: pulse 1s infinite;
 }
+
+.custom-cursor.soul-monster.active {
+    transform: translate(-22px, -21px) rotate(180deg) scale(1.2);
+}
+
+@keyframes pulse-monster {
+    0% { transform: translate(-22px, -21px) rotate(180deg) scale(1.2); }
+    50% { transform: translate(-22px, -21px) rotate(180deg) scale(1.3); }
+    100% { transform: translate(-22px, -21px) rotate(180deg) scale(1.2); }
+}
+
+.custom-cursor.soul-monster.active {
+    animation: pulse-monster 1s infinite;
+}
+
+/* glows for the soul modes. i'm done with these colors. */
+.custom-cursor.soul-cyan { --cursor-glow: #00ffff; }
+.custom-cursor.soul-orange { --cursor-glow: #ff8c00; }
+.custom-cursor.soul-blue { --cursor-glow: #0000ff; }
+.custom-cursor.soul-purple { --cursor-glow: #bf00ff; }
+.custom-cursor.soul-green { --cursor-glow: #00ff00; }
+.custom-cursor.soul-yellow { --cursor-glow: #ffff00; }
+.custom-cursor.soul-monster { --cursor-glow: #ffffff; }
 
 @keyframes pulse {
     0% {

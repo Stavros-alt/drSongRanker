@@ -1,33 +1,49 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // some people just want to use their regular cursor. fine.
+    // some people hate fun and want a regular cursor. whatever.
     try {
         const globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{}');
         if (globalState.useSystemCursor) {
             document.body.classList.add('system-cursor');
         }
     } catch (e) {
-        // storage is hard apparently
+        // storage is broken. again.
     }
 
-    // vanity heart. because why not.
+    // the heart. because i had nothing better to do.
     const cursor = document.createElement('div');
     cursor.classList.add('custom-cursor');
     document.body.appendChild(cursor);
 
     document.addEventListener('mousemove', (e) => {
-        cursor.style.left = `${e.clientX}px`;
-        cursor.style.top = `${e.clientY}px`;
+        updateCursorPosition(e.clientX, e.clientY);
     });
 
-    // mouse privilege.
+    // pointers. why are there so many ways to move a mouse.
     document.addEventListener('pointermove', (e) => {
         if (e.pointerType === 'mouse' || e.pointerType === 'pen') {
-            cursor.style.left = `${e.clientX}px`;
-            cursor.style.top = `${e.clientY}px`;
+            updateCursorPosition(e.clientX, e.clientY);
         }
     });
 
-    // glowy bits.
+    function updateCursorPosition(x, y) {
+        cursor.style.left = `${x}px`;
+        cursor.style.top = `${y}px`;
+    }
+
+    // persistence is suffering.
+    try {
+        const globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{}');
+        if (globalState.soulColor) {
+            cursor.setAttribute('data-soul-mode', globalState.soulColor);
+            if (globalState.soulColor !== 'red') {
+                cursor.classList.add(`soul-${globalState.soulColor}`);
+            }
+        }
+    } catch (e) {
+        // i give up on localstorage.
+    }
+
+    // glowy bits for buttons. i'm done with this.
     const interactiveSelectors = 'button, .song-card, .ranking-toggle-btn, .filter-btn, a, input, .chart-card';
 
     document.body.addEventListener('mouseover', (e) => {

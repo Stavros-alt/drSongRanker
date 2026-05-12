@@ -483,7 +483,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return (yiq >= 128) ? 'black' : 'white';
     }
 
-    let globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{"currentGame": "deltarune", "showRatings": false, "hideLeaderboard": false, "hideMatchupRankings": false, "hideAccuracy": false, "hideAccuracyPercent": false, "showAgreement": false, "preventDuplicates": true, "combinedDiscovered": false, "felfebMode": true, "includeBonus": false, "includeGenocide": false, "useSystemCursor": false, "selectedFranchises": ["deltarune", "undertale", "uty", "tsus"], "specialTheme": null}');
+    let globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{"currentGame": "deltarune", "showRatings": false, "hideLeaderboard": false, "hideMatchupRankings": false, "hideAccuracy": false, "hideAccuracyPercent": false, "showAgreement": false, "preventDuplicates": true, "combinedDiscovered": false, "felfebMode": true, "includeBonus": false, "includeGenocide": false, "useSystemCursor": false, "selectedFranchises": ["deltarune", "undertale", "uty", "tsus"], "specialTheme": null, "soulColor": "red"}');
 
     let state = {
         currentGame: globalState.currentGame,
@@ -511,7 +511,8 @@ document.addEventListener('DOMContentLoaded', () => {
         hideAccuracy: globalState.hideAccuracy || false,
         hideAccuracyPercent: globalState.hideAccuracyPercent || false, // hiding the percentage. apparently numbers are stressful.
         showGlobalDiff: globalState.showGlobalDiff || false,
-        specialTheme: globalState.specialTheme || localStorage.getItem('drSongRankerSpecialTheme') || null
+        specialTheme: globalState.specialTheme || localStorage.getItem('drSongRankerSpecialTheme') || null,
+        soulColor: globalState.soulColor || 'red'
     };
 
     function saveState() {
@@ -542,7 +543,8 @@ document.addEventListener('DOMContentLoaded', () => {
             hideAccuracy: state.hideAccuracy,
             hideAccuracyPercent: state.hideAccuracyPercent,
             showGlobalDiff: state.showGlobalDiff,
-            specialTheme: state.specialTheme
+            specialTheme: state.specialTheme,
+            soulColor: state.soulColor
         }));
     }
 
@@ -732,7 +734,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
         updateGameUI();
         updateLeaderboardVisibility();
+        updateSoulColorUI();
     }
+
+    function updateSoulColorUI() {
+        // sync the cursor and the setting buttons. i'm sick of looking at this.
+        const soulBtns = document.querySelectorAll('.soul-option');
+        const cursor = document.querySelector('.custom-cursor');
+        
+        soulBtns.forEach(btn => {
+            if (btn.dataset.soul === state.soulColor) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+
+        if (cursor) {
+            // clear old classes but keep active if it's there
+            const isActive = cursor.classList.contains('active');
+            cursor.className = 'custom-cursor';
+            if (isActive) cursor.classList.add('active');
+            
+            cursor.setAttribute('data-soul-mode', state.soulColor);
+            if (state.soulColor !== 'red') {
+                cursor.classList.add(`soul-${state.soulColor}`);
+            }
+        }
+    }
+
+    // soul setting listeners. i hope no one clicks these.
+    document.querySelectorAll('.soul-option').forEach(btn => {
+        btn.addEventListener('click', () => {
+            state.soulColor = btn.dataset.soul;
+            updateSoulColorUI();
+            saveState();
+        });
+    });
 
     function updateGameUI() {
         if (state.currentGame === 'deltarune') {

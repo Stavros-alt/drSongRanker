@@ -19,9 +19,15 @@ Everything is in local storage. `drSongRankerGlobalState` handles your UI prefer
 - Mobile layout is... a choice. Use a real computer.
 - Previews might hang if your internet is garbage.
 - Supabase sync is mostly for global stats. Personal ranks are local. Don't clear your cache if you care about your list.
+- Custom soul cursors use `mask-image`. If your browser is from 2012, it'll probably look like garbage.
+
+## Features I Added Because People Kept Asking
+- **Custom Soul Cursor:** Change your cursor color. Includes a Monster Soul mode (upside down).
+- **Theme Overlays:** Red/Green/Blue site-wide overlays.
+- **Combined Mode:** Rank everything at once. Good luck.
 
 ## Credits
 - Toby Fox (Audio/IP)
 - Team Switched (TS!Underswap)
 - Master Sword (UTY)
-- Me (Suffering through this code)
+- Me (Still suffering)
