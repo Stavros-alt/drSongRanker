@@ -15,9 +15,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const preventDuplicatesToggle = document.getElementById('prevent-duplicates-toggle');
     const showGlobalDiffToggle = document.getElementById('show-global-diff-toggle');
     const felfebModeToggle = document.getElementById('felfeb-mode-toggle');
-    const includeBonusToggle = document.getElementById('include-bonus-toggle');
+
     const systemCursorToggle = document.getElementById('system-cursor-toggle');
-    const includeGenocideToggle = document.getElementById('include-genocide-toggle');
+
     const arena = document.querySelector('.arena');
     const songACard = document.getElementById('songA-card');
     const songBCard = document.getElementById('songB-card');
@@ -483,7 +483,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return (yiq >= 128) ? 'black' : 'white';
     }
 
-    let globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{"currentGame": "deltarune", "showRatings": false, "hideLeaderboard": false, "hideMatchupRankings": false, "hideAccuracy": false, "hideAccuracyPercent": false, "showAgreement": false, "preventDuplicates": true, "combinedDiscovered": false, "felfebMode": true, "includeBonus": false, "includeGenocide": false, "useSystemCursor": false, "selectedFranchises": ["deltarune", "undertale", "uty", "tsus"], "specialTheme": null, "soulColor": "red"}');
+    let globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{"currentGame": "deltarune", "showRatings": false, "hideLeaderboard": false, "hideMatchupRankings": false, "hideAccuracy": false, "hideAccuracyPercent": false, "showAgreement": false, "preventDuplicates": true, "combinedDiscovered": false, "felfebMode": true, "useSystemCursor": false, "selectedFranchises": ["deltarune", "undertale", "uty", "tsus"], "specialTheme": null, "soulColor": "red"}');
 
     let state = {
         currentGame: globalState.currentGame,
@@ -501,8 +501,7 @@ document.addEventListener('DOMContentLoaded', () => {
         recentMatches: [], // keeping track of what we just saw.
         volume: parseFloat(localStorage.getItem('drSongRankerVolume') || '0.5'),
         felfebMode: globalState.felfebMode !== undefined ? globalState.felfebMode : true,
-        includeBonus: globalState.includeBonus || false,
-        includeGenocide: globalState.includeGenocide || false,
+
         useSystemCursor: globalState.useSystemCursor || false,
         selectedFranchises: globalState.selectedFranchises || ["deltarune", "undertale", "uty", "tsus"],
         hasSeenFinishScreen: false, // don't spam them with this every second
@@ -533,8 +532,7 @@ document.addEventListener('DOMContentLoaded', () => {
             preventDuplicates: state.preventDuplicates,
             combinedDiscovered: globalState.combinedDiscovered,
             felfebMode: state.felfebMode,
-            includeBonus: state.includeBonus,
-            includeGenocide: state.includeGenocide,
+
             useSystemCursor: state.useSystemCursor,
             showAgreement: state.showAgreement,
             selectedFranchises: state.selectedFranchises,
@@ -618,8 +616,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             state.boostedSongId = parsed.boostedSongId || null;
             state.felfebMode = parsed.felfebMode !== undefined ? parsed.felfebMode : state.felfebMode;
-            state.includeBonus = parsed.includeBonus !== undefined ? parsed.includeBonus : state.includeBonus;
-            state.includeGenocide = parsed.includeGenocide !== undefined ? parsed.includeGenocide : state.includeGenocide;
+
             state.useSystemCursor = parsed.useSystemCursor !== undefined ? parsed.useSystemCursor : state.useSystemCursor;
             state.hasSeenFinishScreen = parsed.hasSeenFinishScreen || false;
 
@@ -1042,16 +1039,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (includeBonusToggle) {
-        includeBonusToggle.checked = state.includeBonus;
-        includeBonusToggle.addEventListener('change', (e) => {
-            state.includeBonus = e.target.checked;
-            saveState();
-            presentNewPair(); // refresh the current pair
-            if (myRankingBtn.classList.contains('active')) displayRankings();
-            else displayCommunityRankings();
-        });
-    }
+
 
     if (systemCursorToggle) {
         systemCursorToggle.checked = state.useSystemCursor;
@@ -1074,17 +1062,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (includeGenocideToggle) {
-        includeGenocideToggle.checked = state.includeGenocide;
-        // more tracks to filter through. just what i needed.
-        includeGenocideToggle.addEventListener('change', (e) => {
-            state.includeGenocide = e.target.checked;
-            saveState();
-            presentNewPair();
-            if (myRankingBtn.classList.contains('active')) displayRankings();
-            else displayCommunityRankings();
-        });
-    }
+
 
     if (hideLeaderboardToggle) {
         hideLeaderboardToggle.checked = state.hideLeaderboard;
@@ -1283,15 +1261,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let pool = state.songs;
 
-        // exclude bonus songs if disabled
-        if (!state.includeBonus) {
-            pool = pool.filter(s => !s.isBonus);
-        }
 
-        // exclude genocide songs if disabled
-        if (!state.includeGenocide) {
-            pool = pool.filter(s => !s.name.includes('(Genocide)') && !s.name.includes('(Post-Genocide)') && !s.name.includes('(Anticipation Slow Ver.)'));
-        }
 
         if (filter === 'all' || filter === 'combined_all') {
             // normal OST only. no secrets.
@@ -2353,9 +2323,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // sync the filters. automation for the lazy.    // i'm not doing full reactive state, deal with it.
     function filterSongsByChapter(songs, filter) {
         let pool = songs;
-        if (!state.includeBonus) {
-            pool = pool.filter(s => !s.isBonus);
-        }
 
         if (filter === 'all' || filter === 'combined_all') {
             return pool.filter(s => !s.hidden);
