@@ -1797,8 +1797,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 previewFile = songData.felfebFile;
             }
         }
-        audioEl.src = encodeURI(previewFile);
-        audioEl.load();
 
         playerSongName.textContent = `${songData.name} (Preview)`;
 
@@ -1809,7 +1807,7 @@ document.addEventListener('DOMContentLoaded', () => {
         musicPlayerBar.classList.remove('hidden');
 
         // if it's short, play the last 10 seconds.
-        // if it's 30-60s, play from the start. 
+        // if it's 30-60s, play from the start.
         // otherwise skip the first 30s because i only care about the middle bit.
         let startTime = PREVIEW_START_TIME;
         if (songData.duration) {
@@ -1819,21 +1817,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 startTime = 0;
             }
         }
-        audioEl.currentTime = startTime;
 
-        const playPromise = audioEl.play();
+        // can't set currentTime until metadata is loaded. browsers are picky about this
+        // and it silently breaks after the first song if you don't wait.
+        const onMetaReady = () => {
+            audioEl.removeEventListener('loadedmetadata', onMetaReady);
+            audioEl.currentTime = startTime;
+            const playPromise = audioEl.play();
+            if (playPromise !== undefined) {
+                playPromise.then(_ => {
+                    playerPlayBtn.textContent = "⏸";
+                    activePreviewTimeout = setTimeout(() => {
+                        audioEl.pause();
+                        playerPlayBtn.textContent = "⏯";
+                    }, PREVIEW_DURATION);
+                }).catch(err => {
+                    console.error("Audio preview playback failed:", err.message);
+                });
+            }
+        };
 
-        if (playPromise !== undefined) {
-            playPromise.then(_ => {
-                playerPlayBtn.textContent = "⏸";
-                activePreviewTimeout = setTimeout(() => {
-                    audioEl.pause();
-                    playerPlayBtn.textContent = "⏯";
-                }, PREVIEW_DURATION);
-            }).catch(error => {
-                console.error("Audio playback error:", error);
-            });
-        }
+        audioEl.addEventListener('loadedmetadata', onMetaReady);
+        audioEl.onerror = () => console.error("preview audio load error for:", previewFile);
+        audioEl.src = encodeURI(previewFile);
+        audioEl.load();
     }
 
     function playFullSong(songKey) {
@@ -1854,8 +1861,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 fullFile = songData.felfebFile;
             }
         }
-        audioEl.src = encodeURI(fullFile);
-        audioEl.load();
 
         playerSongName.textContent = songData.name;
 
@@ -1865,11 +1870,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         musicPlayerBar.classList.remove('hidden');
 
-        audioEl.currentTime = 0; // back to the start.
+        // load() resets to t=0 anyway so no need to seek. don't fight the browser.
+        audioEl.onerror = () => console.error("full song audio load error for:", fullFile);
+        audioEl.src = encodeURI(fullFile);
+        audioEl.load();
         audioEl.play().then(() => {
             playerPlayBtn.textContent = "⏸";
-        }).catch(error => {
-            console.error("Full playback error:", error); // great. even this is broken.
+        }).catch(err => {
+            console.error("Full playback failed:", err.message); // great. even this is broken.
         });
     }
 
