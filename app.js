@@ -103,6 +103,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const gasterThemeBtn = document.getElementById('gaster-theme-btn');
     const cyberThemeBtn = document.getElementById('cyber-theme-btn');
 
+    // soul cursor color picker
+    const customSoulPicker = document.getElementById('custom-soul-picker');
+    const customSoulLabel = document.querySelector('.custom-soul-label');
+
     const customRankerModal = document.getElementById('custom-ranker-modal');
     const closeCustomBtn = document.getElementById('close-custom-btn');
     const saveCustomBtn = document.getElementById('save-custom-btn');
@@ -744,6 +748,21 @@ document.addEventListener('DOMContentLoaded', () => {
             else btn.classList.remove('active');
         });
 
+        if (customSoulLabel) {
+            if (state.soulColor && state.soulColor.startsWith('#')) {
+                customSoulLabel.classList.add('active');
+                customSoulLabel.style.backgroundColor = state.soulColor;
+                customSoulLabel.style.color = getContrastColor(state.soulColor);
+                if (customSoulPicker) {
+                    customSoulPicker.value = state.soulColor;
+                }
+            } else {
+                customSoulLabel.classList.remove('active');
+                customSoulLabel.style.backgroundColor = '';
+                customSoulLabel.style.color = '';
+            }
+        }
+
         if (cursor) {
             // clear old classes but keep active if it's there
             const isActive = cursor.classList.contains('active');
@@ -751,8 +770,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isActive) cursor.classList.add('active');
             
             cursor.setAttribute('data-soul-mode', state.soulColor);
-            if (state.soulColor !== 'red') {
-                cursor.classList.add(`soul-${state.soulColor}`);
+            if (state.soulColor && state.soulColor.startsWith('#')) {
+                cursor.style.backgroundColor = state.soulColor;
+                cursor.style.setProperty('--cursor-glow', state.soulColor);
+            } else {
+                cursor.style.backgroundColor = '';
+                cursor.style.setProperty('--cursor-glow', '');
+                if (state.soulColor !== 'red') {
+                    cursor.classList.add(`soul-${state.soulColor}`);
+                }
             }
         }
     }
@@ -765,6 +791,15 @@ document.addEventListener('DOMContentLoaded', () => {
             saveState();
         });
     });
+
+    if (customSoulPicker) {
+        customSoulPicker.addEventListener('input', (e) => {
+            const color = e.target.value;
+            state.soulColor = color;
+            updateSoulColorUI();
+            saveState();
+        });
+    }
 
     function updateGameUI() {
         if (state.currentGame === 'deltarune') {
@@ -1972,77 +2007,81 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let cachedCommunitySongs = [];
     let cachedCommunityGame = null;
-    let communityDataPromise = null;
+    let cachedIsFelfeb = null;
 
-    // don't refetch if we already have it. supabase doesn't need the extra load
+    // load community data offline from hardcoded ratings
     function ensureCommunityData() {
-        if (cachedCommunityGame === state.currentGame && cachedCommunitySongs.length > 0) {
-            return Promise.resolve(true)
+        const isFelfeb = (currentChapterFilter === 'felfeb' || isFelfebRanker());
+        if (cachedCommunityGame === state.currentGame && cachedIsFelfeb === isFelfeb && cachedCommunitySongs.length > 0) {
+            return Promise.resolve(true);
         }
-        if (communityDataPromise) return communityDataPromise;
 
-        communityDataPromise = (async () => {
-            try {
-                let combinedData = [];
-                if (currentChapterFilter === 'felfeb' || isFelfebRanker()) {
-                    const { data, error } = await supabaseClient
-                        .from('felfeb_songs')
-                        .select('name, id, rating')
-                        .order('rating', { ascending: false });
-                    if (error) throw error;
-                    combinedData = data;
-                } else if (state.currentGame === 'combined') {
-                    const [drRes, utRes, utyRes, tsusRes] = await Promise.all([
-                        supabaseClient.from('songs').select('name, id, rating').order('rating', { ascending: false }),
-                        supabaseClient.from('ut_songs').select('name, id, rating').order('rating', { ascending: false }),
-                        supabaseClient.from('uty_songs').select('name, id, rating').order('rating', { ascending: false }),
-                        supabaseClient.from('tsus_songs').select('name, id, rating, hidden').order('rating', { ascending: false })
-                    ]);
-
-                    if (drRes.error) throw drRes.error;
-                    if (utRes.error) throw utRes.error;
-                    if (utyRes.error) throw utyRes.error;
-                    if (tsusRes.error) throw tsusRes.error;
-
-                    combinedData = [...drRes.data, ...utRes.data, ...utyRes.data, ...tsusRes.data].sort((a, b) => b.rating - a.rating);
-                } else {
-                    let tableName = 'songs';
-                    let selectCols = 'name, id, rating';
-                    if (state.currentGame === 'undertale') tableName = 'ut_songs';
-                    else if (state.currentGame === 'undertale_yellow' || state.currentGame === 'uty') tableName = 'uty_songs';
-                    else if (state.currentGame === 'tsus') { tableName = 'tsus_songs'; selectCols = 'name, id, rating, hidden'; }
-                    const { data, error } = await supabaseClient
-                        .from(tableName)
-                        .select(selectCols)
-                        .order('rating', { ascending: false });
-                    if (error) throw error;
-                    combinedData = data;
-                }
-
-                // fixing paths. whatever. i don't even care anymore.
-                cachedCommunitySongs = combinedData.map(cSong => {
-                    const localSong = state.songs.find(s => s.id === cSong.id);
-                    return {
-                        ...cSong,
-                        file: localSong ? localSong.file : '',
-                        hidden: localSong ? localSong.hidden : false,
-                        duration: localSong ? localSong.duration : 0, // include duration. don't forget it again.
-                        felfebFile: localSong ? localSong.felfebFile : undefined, // global felfeb. finally.
-                        isBonus: localSong ? localSong.isBonus : false,
-                        region: localSong ? localSong.region : undefined // regions for tsus/uty filtering. i can't believe i forgot this.
-                    };
-                });
-                
-                cachedCommunityGame = state.currentGame;
-                communityDataPromise = null;
-                return true;
-            } catch (err) {
-                console.error("error fetching community data:", err);
-                communityDataPromise = null;
-                return false;
+        try {
+            let combinedData = [];
+            let sourceList = [];
+            if (state.currentGame === 'combined') {
+                const drList = (typeof songList !== 'undefined') ? songList : (window.songList || []);
+                const utList = (typeof utSongList !== 'undefined') ? utSongList : (window.utSongList || []);
+                const utyList = (typeof utySongList !== 'undefined') ? utySongList : (window.utySongList || []);
+                const tsusList = (typeof tsusSongList !== 'undefined') ? tsusSongList : (window.tsusSongList || []);
+                sourceList = [...drList, ...utList, ...utyList, ...tsusList];
+            } else if (state.currentGame === 'deltarune') {
+                sourceList = (typeof songList !== 'undefined') ? songList : (window.songList || []);
+            } else if (state.currentGame === 'undertale') {
+                sourceList = (typeof utSongList !== 'undefined') ? utSongList : (window.utSongList || []);
+            } else if (state.currentGame === 'uty') {
+                sourceList = (typeof utySongList !== 'undefined') ? utySongList : (window.utySongList || []);
+            } else if (state.currentGame === 'tsus') {
+                sourceList = (typeof tsusSongList !== 'undefined') ? tsusSongList : (window.tsusSongList || []);
             }
-        })();
-        return communityDataPromise;
+
+            if (isFelfeb) {
+                // only include songs that actually have a felfeb rating. not all of them do.
+                sourceList.forEach(localSong => {
+                    const rating = window.GLOBAL_FELFEB_RATINGS && window.GLOBAL_FELFEB_RATINGS[localSong.id];
+                    if (rating !== undefined) {
+                        combinedData.push({
+                            id: localSong.id,
+                            name: localSong.name,
+                            rating: rating,
+                            file: localSong.file,
+                            hidden: localSong.hidden,
+                            duration: localSong.duration || 0,
+                            felfebFile: localSong.felfebFile,
+                            isBonus: localSong.isBonus || false,
+                            region: localSong.region
+                        });
+                    }
+                });
+            } else {
+                sourceList.forEach(localSong => {
+                    const rating = (window.GLOBAL_SONG_RATINGS && window.GLOBAL_SONG_RATINGS[localSong.id] !== undefined)
+                        ? window.GLOBAL_SONG_RATINGS[localSong.id]
+                        : 1500;
+                    combinedData.push({
+                        id: localSong.id,
+                        name: localSong.name,
+                        rating: rating,
+                        file: localSong.file,
+                        hidden: localSong.hidden,
+                        duration: localSong.duration || 0,
+                        felfebFile: localSong.felfebFile,
+                        isBonus: localSong.isBonus || false,
+                        region: localSong.region
+                    });
+                });
+            }
+
+            combinedData.sort((a, b) => b.rating - a.rating);
+
+            cachedCommunitySongs = combinedData;
+            cachedCommunityGame = state.currentGame;
+            cachedIsFelfeb = isFelfeb;
+            return Promise.resolve(true);
+        } catch (err) {
+            console.error("error processing community data:", err);
+            return Promise.resolve(false);
+        }
     }
 
     // displaying community rankings. i'm finally getting around to this.
@@ -2189,7 +2228,18 @@ document.addEventListener('DOMContentLoaded', () => {
         // console.log("Rendering rankings at " + timestamp); 
 
         const filteredSongs = filterSongsByChapter(state.songs, currentChapterFilter);
-        const sortedSongs = [...filteredSongs].sort((a, b) => getRating(b) - getRating(a));
+        // tiebreak tied songs by community rating. uty/tsus don't have a felfeb global set so they always use the main map.
+        const hasFelfebGlobal = state.felfebMode && (state.currentGame === 'deltarune' || state.currentGame === 'undertale');
+        const globalRatingsMap = hasFelfebGlobal
+            ? (window.GLOBAL_FELFEB_RATINGS || {})
+            : (window.GLOBAL_SONG_RATINGS || {});
+        const sortedSongs = [...filteredSongs].sort((a, b) => {
+            const diff = getRating(b) - getRating(a);
+            if (diff !== 0) return diff;
+            const ga = globalRatingsMap[a.id] || 1500;
+            const gb = globalRatingsMap[b.id] || 1500;
+            return gb - ga;
+        });
 
         // build a lookup for global positions. only if they toggled it on
         let globalRanks = null;

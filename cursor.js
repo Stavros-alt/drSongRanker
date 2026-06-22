@@ -30,12 +30,14 @@ document.addEventListener('DOMContentLoaded', () => {
         cursor.style.top = `${y}px`;
     }
 
-    // persistence is suffering.
     try {
         const globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{}');
         if (globalState.soulColor) {
             cursor.setAttribute('data-soul-mode', globalState.soulColor);
-            if (globalState.soulColor !== 'red') {
+            if (globalState.soulColor.startsWith('#')) {
+                cursor.style.backgroundColor = globalState.soulColor;
+                cursor.style.setProperty('--cursor-glow', globalState.soulColor);
+            } else if (globalState.soulColor !== 'red') {
                 cursor.classList.add(`soul-${globalState.soulColor}`);
             }
         }
