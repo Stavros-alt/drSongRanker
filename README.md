@@ -22,7 +22,7 @@ Everything is in local storage. `drSongRankerGlobalState` handles your UI prefer
 - Custom soul cursors use `mask-image`. If your browser is from 2012, it'll probably look like garbage.
 
 ## Features I Added Because People Kept Asking
-- **Custom Soul Cursor:** Change your cursor color. Includes a Monster Soul mode (upside down).
+- **Custom Soul Cursor:** Change your cursor color. Includes a Monster Soul mode (upside down) and an invert toggle for custom colors.
 - **Theme Overlays:** Red/Green/Blue site-wide overlays.
 - **Combined Mode:** Rank everything at once. Good luck.
 

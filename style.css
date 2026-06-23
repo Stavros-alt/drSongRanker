@@ -302,6 +302,16 @@ body {
     animation: pulse-monster 1s infinite;
 }
 
+/* custom soul flipped upside down. same trick as monster, but keeps your color. */
+.custom-cursor.inverted {
+    transform: translate(-22px, -21px) rotate(180deg);
+}
+
+.custom-cursor.inverted.active {
+    transform: translate(-22px, -21px) rotate(180deg) scale(1.2);
+    animation: pulse-monster 1s infinite;
+}
+
 /* glows for the soul modes. i'm done with these colors. */
 .custom-cursor.soul-cyan { --cursor-glow: #00ffff; }
 .custom-cursor.soul-orange { --cursor-glow: #ff8c00; }

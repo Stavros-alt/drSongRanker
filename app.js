@@ -487,7 +487,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return (yiq >= 128) ? 'black' : 'white';
     }
 
-    let globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{"currentGame": "deltarune", "showRatings": false, "hideLeaderboard": false, "hideMatchupRankings": false, "hideAccuracy": false, "hideAccuracyPercent": false, "showAgreement": false, "preventDuplicates": true, "combinedDiscovered": false, "felfebMode": true, "useSystemCursor": false, "selectedFranchises": ["deltarune", "undertale", "uty", "tsus"], "specialTheme": null, "soulColor": "red"}');
+    let globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{"currentGame": "deltarune", "showRatings": false, "hideLeaderboard": false, "hideMatchupRankings": false, "hideAccuracy": false, "hideAccuracyPercent": false, "showAgreement": false, "preventDuplicates": true, "combinedDiscovered": false, "felfebMode": true, "useSystemCursor": false, "selectedFranchises": ["deltarune", "undertale", "uty", "tsus"], "specialTheme": null, "soulColor": "red", "soulInverted": false}');
 
     let state = {
         currentGame: globalState.currentGame,
@@ -515,7 +515,8 @@ document.addEventListener('DOMContentLoaded', () => {
         hideAccuracyPercent: globalState.hideAccuracyPercent || false, // hiding the percentage. apparently numbers are stressful.
         showGlobalDiff: globalState.showGlobalDiff || false,
         specialTheme: globalState.specialTheme || localStorage.getItem('drSongRankerSpecialTheme') || null,
-        soulColor: globalState.soulColor || 'red'
+        soulColor: globalState.soulColor || 'red',
+        soulInverted: globalState.soulInverted || false
     };
 
     function saveState() {
@@ -546,7 +547,8 @@ document.addEventListener('DOMContentLoaded', () => {
             hideAccuracyPercent: state.hideAccuracyPercent,
             showGlobalDiff: state.showGlobalDiff,
             specialTheme: state.specialTheme,
-            soulColor: state.soulColor
+            soulColor: state.soulColor,
+            soulInverted: state.soulInverted
         }));
     }
 
@@ -768,11 +770,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const isActive = cursor.classList.contains('active');
             cursor.className = 'custom-cursor';
             if (isActive) cursor.classList.add('active');
+
+            const invertBtn = document.getElementById('custom-soul-invert');
+            if (invertBtn) {
+                const isCustom = state.soulColor && state.soulColor.startsWith('#');
+                if (isCustom && state.soulInverted) invertBtn.classList.add('active');
+                else invertBtn.classList.remove('active');
+            }
             
             cursor.setAttribute('data-soul-mode', state.soulColor);
             if (state.soulColor && state.soulColor.startsWith('#')) {
                 cursor.style.backgroundColor = state.soulColor;
                 cursor.style.setProperty('--cursor-glow', state.soulColor);
+                if (state.soulInverted) cursor.classList.add('inverted');
             } else {
                 cursor.style.backgroundColor = '';
                 cursor.style.setProperty('--cursor-glow', '');
@@ -798,6 +808,18 @@ document.addEventListener('DOMContentLoaded', () => {
             state.soulColor = color;
             updateSoulColorUI();
             saveState();
+        });
+    }
+
+    const customSoulInvertBtn = document.getElementById('custom-soul-invert');
+    if (customSoulInvertBtn) {
+        customSoulInvertBtn.addEventListener('click', () => {
+            // only meaningful for custom colors. presets have their own story.
+            if (state.soulColor && state.soulColor.startsWith('#')) {
+                state.soulInverted = !state.soulInverted;
+                updateSoulColorUI();
+                saveState();
+            }
         });
     }
 

@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (globalState.soulColor.startsWith('#')) {
                 cursor.style.backgroundColor = globalState.soulColor;
                 cursor.style.setProperty('--cursor-glow', globalState.soulColor);
+                if (globalState.soulInverted) cursor.classList.add('inverted');
             } else if (globalState.soulColor !== 'red') {
                 cursor.classList.add(`soul-${globalState.soulColor}`);
             }
