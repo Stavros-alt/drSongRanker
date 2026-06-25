@@ -251,7 +251,7 @@ body {
 /* vanity cursor */
 .custom-cursor {
     display: none;
-    /* Hidden by default for mobile safety */
+    /* hidden by default for mobile safety */
     width: 25px;
     height: 21px;
     background-color: #ff0000;
@@ -435,7 +435,7 @@ body.system-cursor [style*="cursor: pointer"] {
     border: var(--border-width) solid #fff;
     padding: 15px;
     width: 280px;
-    /* Increased width to prevent clipping */
+    /* increased width to prevent clipping */
     box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.5);
     text-align: center;
 }
@@ -462,7 +462,7 @@ body.system-cursor [style*="cursor: pointer"] {
     cursor: auto !important;
 }
 
-/* Close button inside popup */
+/* close button inside popup */
 #close-settings-btn {
     margin-top: 15px;
     width: 100%;
@@ -474,13 +474,13 @@ body.system-cursor [style*="cursor: pointer"] {
     gap: 10px;
     justify-content: center;
     flex-wrap: wrap;
-    /* Allow wrapping */
+    /* allow wrapping */
     margin-top: 10px;
 }
 
 .color-btn {
     width: 40px;
-    /* Slightly larger */
+    /* slightly larger */
     height: 40px;
     border: 2px solid #fff;
     cursor: none;
@@ -491,7 +491,7 @@ body.system-cursor [style*="cursor: pointer"] {
     font-weight: bold;
     font-family: 'Roboto Mono', monospace;
     flex-shrink: 0;
-    /* Prevent squishing */
+    /* prevent squishing */
 }
 
 .color-btn:hover {
@@ -875,9 +875,9 @@ button:active {
     /* darker border for whatever reason */
     color: #666;
     padding: 6px 12px;
-    /* Smaller padding */
+    /* smaller padding */
     font-size: 0.8em;
-    /* Smaller font */
+    /* smaller font */
     background: #000;
     font-weight: 700;
     text-transform: uppercase;
@@ -1133,12 +1133,12 @@ footer {
 
     .ranking-container {
         display: none;
-        /* Hidden by default on mobile, toggled via JS */
+        /* hidden by default on mobile, toggled via JS */
         width: 100%;
         height: auto;
-        /* Allow it to grow */
+        /* allow it to grow */
         overflow-y: visible;
-        /* Scroll with the page */
+        /* scroll with the page */
         margin-top: 20px;
     }
 
@@ -1541,7 +1541,7 @@ footer {
     margin: 15px 0;
     resize: none;
     font-size: 16px;
-    /* Prevent iOS zoom */
+    /* prevent iOS zoom */
 }
 
 #suggestion-modal textarea:focus {
@@ -1659,7 +1659,7 @@ footer {
     font-family: 'Roboto Mono', monospace;
     transition: all 0.05s;
     padding: 0;
-    /* CRITICAL FIX: Reset global button padding */
+    /* CRITICAL FIX: reset global button padding */
 }
 
 .nes-btn:active {
@@ -1924,4 +1924,78 @@ footer {
     margin-top: 10px;
     color: var(--accent-color);
     letter-spacing: 2px;
+}
+
+/* one-time donation popup. high contrast so people actually see it. */
+#donation-popup .donation-content {
+    max-width: 480px;
+    width: 95%;
+    padding: 30px;
+    text-align: left;
+    box-sizing: border-box;
+}
+
+.donation-body {
+    max-height: 55vh;
+    overflow-y: auto;
+    margin-bottom: 20px;
+}
+
+.donation-body p {
+    margin: 0 0 14px 0;
+    font-size: 0.95em;
+    line-height: 1.6;
+    color: #ddd;
+}
+
+.donation-body p:last-child {
+    margin-bottom: 0;
+}
+
+.donation-actions {
+    gap: 12px;
+}
+
+#donation-kofi-btn {
+    background: var(--accent-color);
+    color: #000;
+    border: 2px solid var(--accent-color);
+    padding: 12px 24px;
+    font-family: var(--ui-font);
+    font-weight: 700;
+    font-size: 1em;
+    cursor: none;
+    text-transform: uppercase;
+    flex: 1;
+}
+
+#donation-kofi-btn:hover {
+    background: #000;
+    color: var(--accent-color);
+}
+
+#donation-close-btn {
+    background: #000;
+    color: #888;
+    border: 2px solid #666;
+    padding: 12px 24px;
+    font-family: var(--ui-font);
+    font-size: 0.9em;
+    cursor: none;
+    text-transform: uppercase;
+}
+
+#donation-close-btn:hover {
+    background: #222;
+    color: #ddd;
+}
+
+@media (max-width: 600px) {
+    .donation-actions {
+        flex-direction: column;
+    }
+
+    .donation-actions button {
+        width: 100%;
+    }
 }

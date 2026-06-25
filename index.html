@@ -149,7 +149,7 @@
             </div>
 
             <ul id="ranking-list">
-                <!-- Rankings will be populated here -->
+                <!-- rankings will be populated here -->
             </ul>
         </div>
     </div>
@@ -188,7 +188,7 @@
                 style="background: #000; padding: 0; border: 2px solid #333; margin-bottom: 25px; overflow: hidden; display: flex; align-items: center; justify-content: center; width: 450px; height: 600px; margin-left: auto; margin-right: auto;">
                 <div id="share-preview"
                     style="background: #000; width: 600px; height: 800px; padding: 40px; box-sizing: border-box; text-align: left; font-family: 'Roboto Mono', monospace; position: relative; flex-shrink: 0; transform: scale(0.75); transform-origin: center center;">
-                    <!-- Content injected by JS -->
+                    <!-- content injected by JS -->
                 </div>
             </div>
             <div
@@ -336,6 +336,27 @@
         </div>
     </div>
 
+    <!-- one-time donation beg. ch5 ost ain't free. -->
+    <div id="donation-popup" class="modal">
+        <div class="modal-content donation-content">
+            <div class="donation-body">
+                <p>hey, if you're a new user, nice to meet ya! if you're returning, good to have ya back.</p>
+                <p>anyways, i don't usually do this sort of thing. i pride myself on keeping this site ad-free and free for any user, but i'm not exactly "rolling in dough" so to speak.</p>
+                <p>to put it simply: i need money to add the chapter five ost to the ranker, and i can't do it on my own.</p>
+                <p>if you enjoy the ranker or were hoping to rank the chapter five songs, please consider donating.</p>
+                <p>btw, this is a one-time popup. you will never see this again.</p>
+                <p>the link is right below if you decide to help me out.</p>
+                <p>thanks for reading :)</p>
+            </div>
+            <div class="modal-actions donation-actions">
+                <a href="https://ko-fi.com/stavros916" target="_blank" rel="noopener noreferrer" id="donation-kofi-link">
+                    <button id="donation-kofi-btn">Support on Ko-fi</button>
+                </a>
+                <button id="donation-close-btn">Close</button>
+            </div>
+        </div>
+    </div>
+
     <audio id="audioA"></audio>
     <audio id="audioB"></audio>
 
@@ -370,7 +391,7 @@
                     <button class="color-btn theme-option" data-color="random"
                         style="background: linear-gradient(45deg, #fff, #888); color: #000;">?</button>
 
-                    <!-- Custom Color Picker -->
+                    <!-- custom color picker -->
                     <label for="custom-theme-picker" class="color-btn custom-color-label" style="background: #333; color: #fff; cursor: pointer;">
                         +
                         <input type="color" id="custom-theme-picker" style="display: none;">
@@ -543,7 +564,7 @@
     <script src="tsus_song_data.js"></script>
     <script src="global_ratings.js"></script>
     <script src="cursor.js"></script>
-    <script src="app.js?v=fixed_agreement"></script>
+    <script src="app.js?v=donation_popup"></script>
     <script>
         // konami code. everyone knows this. why am i commenting it.
         const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];

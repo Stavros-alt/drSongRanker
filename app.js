@@ -979,10 +979,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (oldList) {
                 state.customLists = { "Default": JSON.parse(oldList) };
                 localStorage.setItem('drSongRankerCustomLists', JSON.stringify(state.customLists));
-                // Remove the old key so we don't migrate again if the user deletes "Default"
+                // remove the old key so we don't migrate again if the user deletes "Default"
                 localStorage.removeItem('drSongRankerCustomSelection');
             } else {
-                state.customLists = {}; // Initialize empty if nothing exists
+                state.customLists = {}; // init empty if nothing exists
             }
         }
         populateCustomDropdown();
@@ -1004,7 +1004,7 @@ document.addEventListener('DOMContentLoaded', () => {
             state.currentCustomListName = name;
             saveListsToStorage();
 
-            populateCustomDropdown(); // Ensure dropdown has it
+            populateCustomDropdown(); // make sure dropdown has it
 
             // auto select.
             if (mainFilterSelect) {
@@ -1212,13 +1212,13 @@ document.addEventListener('DOMContentLoaded', () => {
         saveListsToStorage();
         state.currentCustomListName = null;
 
-        // Hide modal
+        // hide modal
         customRankerModal.style.display = 'none';
 
-        // Refresh dropdown
+        // refresh dropdown
         populateCustomDropdown();
 
-        // Reset selection to 'all'
+        // reset selection to 'all'
         if (mainFilterSelect) {
             mainFilterSelect.value = 'all';
             mainFilterSelect.dispatchEvent(new Event('change'));
@@ -1238,7 +1238,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const div = document.createElement('div');
             div.className = 'checklist-item';
 
-            // Allow clicking the row to toggle
+            // allow clicking the row to toggle
             div.addEventListener('click', (e) => {
                 if (e.target !== checkbox) {
                     checkbox.checked = !checkbox.checked;
@@ -1693,7 +1693,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 loserSong.rating = newLoserRating;
                 winnerSong.comparisons++;
                 loserSong.comparisons++;
-                if (state.currentGame === 'combined') { // Only sync if in combined mode
+                if (state.currentGame === 'combined') { // only sync if in combined mode
                     syncCombinedVote(winnerSong, loserSong);
                 }
                 await recordCommunityVote(winnerSong.id, loserSong.id);
@@ -3060,7 +3060,7 @@ document.addEventListener('DOMContentLoaded', () => {
             mainFilterSelect.value = mixKey;
             chapterMixModal.style.display = 'none';
 
-            // Trigger the change manually since setting value doesn't fire it
+            // trigger the change manually since setting value doesn't fire it
             mainFilterSelect.dispatchEvent(new Event('change'));
         });
     }
@@ -3078,13 +3078,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Removed duplicate createListBtn listener
+    // removed duplicate createListBtn listener
 
     function populateCustomDropdown() {
         const select = mainFilterSelect;
         if (!select) return;
 
-        // Use state as source of truth, fallback to current select value if valid
+        // use state as source of truth, fallback to current select value if valid
         const targetVal = state.activeRankerList || select.value || 'all';
         select.innerHTML = '';
 
@@ -3123,7 +3123,7 @@ document.addEventListener('DOMContentLoaded', () => {
             );
         }
 
-        // Add secret options if unlocked (mostly for DR, but whatever)
+        // add secret options if unlocked (mostly for DR, but whatever)
         if (state.secretsUnlocked) {
             standardOptions.splice(1, 0, { val: 'all_plus', text: 'All Songs + Hidden' });
             standardOptions.push({ val: 'hidden', text: 'Hidden Tracks' });
@@ -3190,10 +3190,10 @@ document.addEventListener('DOMContentLoaded', () => {
             select.appendChild(optgroup);
         }
 
-        // Restore selection
+        // restore selection
         select.value = targetVal;
 
-        // If the target value is invalid (not in options), fallback to all
+        // if the target value is invalid (not in options), fallback to all
         if (select.value !== targetVal) {
             select.value = 'all';
             // optional: update state?
@@ -3301,7 +3301,7 @@ document.addEventListener('DOMContentLoaded', () => {
             backgroundColor: "#000000",
             width: 600,
             height: 800,
-            scale: 2 // High res. i'm a pro.
+            scale: 2 // high res. i'm a pro.
         }).then(canvas => {
             sharePreview.style.cssText = originalStyle; // restore
             const link = document.createElement('a');
@@ -3453,13 +3453,13 @@ document.addEventListener('DOMContentLoaded', () => {
         let pool = isGlobal ? cachedCommunitySongs : state.songs;
 
         if (isGlobal && pool.length === 0) {
-            return null; // Not loaded yet
+            return null; // not loaded yet
         }
 
-        // Apply chapter/custom filter
+        // apply chapter/custom filter
         let filtered = filterSongsByChapter(pool, currentChapterFilter);
 
-        // Sort by rating (global or personal)
+        // sort by rating (global or personal)
         return [...filtered].sort((a, b) => getRating(b) - getRating(a));
     }
 
@@ -3647,11 +3647,40 @@ document.addEventListener('DOMContentLoaded', () => {
     if (preventDuplicatesToggle) preventDuplicatesToggle.checked = state.preventDuplicates;
     if (showGlobalDiffToggle) showGlobalDiffToggle.checked = state.showGlobalDiff;
     checkSecretsGlobal();
-    // populateCustomDropdown is already called inside loadState. 
-    // Just ensure the select value is synced one last time.
+    // populateCustomDropdown is already called inside loadState.
+    // just make sure the select value is synced one last time.
     updateMainFilterOptions();
     if (mainFilterSelect) mainFilterSelect.value = state.activeRankerList;
     updateApp();
+
+    // one-time donation popup. dismiss writes a key so it never comes back.
+    const DONATION_KEY = 'drSongRankerDonationPopupDismissed';
+    const donationPopup = document.getElementById('donation-popup');
+    const donationCloseBtn = document.getElementById('donation-close-btn');
+    const donationKofiLink = document.getElementById('donation-kofi-link');
+
+    function dismissDonationPopup() {
+        try {
+            localStorage.setItem(DONATION_KEY, 'true');
+        } catch (e) {
+            // private mode or storage full. nothing to do, popup just won't persist.
+        }
+        if (donationPopup) donationPopup.style.display = 'none';
+    }
+
+    if (donationPopup && !localStorage.getItem(DONATION_KEY)) {
+        donationPopup.style.display = 'flex';
+    }
+
+    if (donationCloseBtn) {
+        donationCloseBtn.addEventListener('click', dismissDonationPopup);
+    }
+
+    // kofi link opens in new tab AND dismisses the popup so it's gone for good.
+    if (donationKofiLink) {
+        donationKofiLink.addEventListener('click', dismissDonationPopup);
+    }
+
     // refresh on back button because browsers are annoying.
     window.addEventListener('pageshow', (e) => {
         if (e.persisted) {
