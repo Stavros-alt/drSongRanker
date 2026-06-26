@@ -64,6 +64,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (song.id <= 87 || song.id === 38 || song.id === 40) return 'Ch 2';
             if (song.id <= 125) return 'Ch 3';
             if (song.id >= 300) return 'Scrapped';
+            if (song.id >= 252 && song.id <= 291) return 'Ch 5';
             return 'Ch 4';
         }
         if (song.id < 2000) {
@@ -256,7 +257,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ──────────────────────────────────────────────
     // deltarune by chapter
     // ──────────────────────────────────────────────
-    const drSections = ['Ch 1', 'Ch 2', 'Ch 3', 'Ch 4'];
+    const drSections = ['Ch 1', 'Ch 2', 'Ch 3', 'Ch 4', 'Ch 5'];
     const drAvgs = computeSectionAverages(drSongs, drSections);
 
     new Chart(document.getElementById('drChapterChart'), {
@@ -537,7 +538,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ──────────────────────────────────────────────
     // radar chart. keeping it because it looks cool.
     // ──────────────────────────────────────────────
-    const radarLabels = ['Ch 1', 'Ch 2', 'Ch 3', 'Ch 4', 'UT', 'UTY', 'TSUS'];
+    const radarLabels = ['Ch 1', 'Ch 2', 'Ch 3', 'Ch 4', 'Ch 5', 'UT', 'UTY', 'TSUS'];
     const radarStats = {};
     radarLabels.forEach(l => { radarStats[l] = { sum: 0, count: 0 }; });
 
@@ -597,7 +598,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // personal completed rankings. user wanted this so i guess we parse localstorage. again.
     // ──────────────────────────────────────────────
     try {
-        const chapterLabels = ['Ch 1', 'Ch 2', 'Ch 3', 'Ch 4']
+        const chapterLabels = ['Ch 1', 'Ch 2', 'Ch 3', 'Ch 4', 'Ch 5']
         const myChapterStats = {}
         for (const l of chapterLabels) {
             myChapterStats[l] = { sum: 0, count: 0 }

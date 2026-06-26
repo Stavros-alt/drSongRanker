@@ -3,6 +3,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const SUPABASE_KEY = 'sb_publishable_ZYm_PTc6nIPS6t7MKsWKrQ_pwSiLCq2';
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+    // encodeURI doesn't touch ? so it breaks filenames with question marks.
+    function encodeFilePath(path) {
+        return encodeURI(path).replace(/\?/g, '%3F');
+    }
+
     // DOM cache. i'm done with these IDs.
     const mainTitle = document.getElementById('main-title');
     const mainFilterSelect = document.getElementById('main-filter-select');
@@ -1388,6 +1393,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (song.id >= 88 && song.id <= 125) ch.push(3);
             if (song.id >= 126 && song.id <= 200) ch.push(4);
+            if (song.id >= 252 && song.id <= 291) ch.push(5);
             return ch;
         } else {
             // Undertale areas. Ruins (1-14), Snowdin (15-24), Waterfall (25-46), Hotland/CORE (47-70), New Home (71+)
@@ -1526,8 +1532,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (chooseABtn && currentSongA) chooseABtn.textContent = `I prefer ${currentSongA.name}`;
         if (chooseBBtn && currentSongB) chooseBBtn.textContent = `I prefer ${currentSongB.name}`;
 
-        audioA.src = encodeURI(currentSongA.file);
-        audioB.src = encodeURI(currentSongB.file);
+        audioA.src = encodeFilePath(currentSongA.file);
+        audioB.src = encodeFilePath(currentSongB.file);
 
         audioA.load();
         audioB.load();
@@ -1896,7 +1902,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         audioEl.addEventListener('loadedmetadata', onMetaReady);
         audioEl.onerror = () => console.error("preview audio load error for:", previewFile);
-        audioEl.src = encodeURI(previewFile);
+        audioEl.src = encodeFilePath(previewFile);
         audioEl.load();
     }
 
@@ -1929,7 +1935,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // load() resets to t=0 anyway so no need to seek. don't fight the browser.
         audioEl.onerror = () => console.error("full song audio load error for:", fullFile);
-        audioEl.src = encodeURI(fullFile);
+        audioEl.src = encodeFilePath(fullFile);
         audioEl.load();
         audioEl.play().then(() => {
             playerPlayBtn.textContent = "⏸";
@@ -2029,81 +2035,77 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let cachedCommunitySongs = [];
     let cachedCommunityGame = null;
-    let cachedIsFelfeb = null;
+    let communityDataPromise = null;
 
-    // load community data offline from hardcoded ratings
+    // don't refetch if we already have it. supabase doesn't need the extra load
     function ensureCommunityData() {
-        const isFelfeb = (currentChapterFilter === 'felfeb' || isFelfebRanker());
-        if (cachedCommunityGame === state.currentGame && cachedIsFelfeb === isFelfeb && cachedCommunitySongs.length > 0) {
-            return Promise.resolve(true);
+        if (cachedCommunityGame === state.currentGame && cachedCommunitySongs.length > 0) {
+            return Promise.resolve(true)
         }
+        if (communityDataPromise) return communityDataPromise;
 
-        try {
-            let combinedData = [];
-            let sourceList = [];
-            if (state.currentGame === 'combined') {
-                const drList = (typeof songList !== 'undefined') ? songList : (window.songList || []);
-                const utList = (typeof utSongList !== 'undefined') ? utSongList : (window.utSongList || []);
-                const utyList = (typeof utySongList !== 'undefined') ? utySongList : (window.utySongList || []);
-                const tsusList = (typeof tsusSongList !== 'undefined') ? tsusSongList : (window.tsusSongList || []);
-                sourceList = [...drList, ...utList, ...utyList, ...tsusList];
-            } else if (state.currentGame === 'deltarune') {
-                sourceList = (typeof songList !== 'undefined') ? songList : (window.songList || []);
-            } else if (state.currentGame === 'undertale') {
-                sourceList = (typeof utSongList !== 'undefined') ? utSongList : (window.utSongList || []);
-            } else if (state.currentGame === 'uty') {
-                sourceList = (typeof utySongList !== 'undefined') ? utySongList : (window.utySongList || []);
-            } else if (state.currentGame === 'tsus') {
-                sourceList = (typeof tsusSongList !== 'undefined') ? tsusSongList : (window.tsusSongList || []);
-            }
+        communityDataPromise = (async () => {
+            try {
+                let combinedData = [];
+                if (currentChapterFilter === 'felfeb' || isFelfebRanker()) {
+                    const { data, error } = await supabaseClient
+                        .from('felfeb_songs')
+                        .select('name, id, rating')
+                        .order('rating', { ascending: false });
+                    if (error) throw error;
+                    combinedData = data;
+                } else if (state.currentGame === 'combined') {
+                    const [drRes, utRes, utyRes, tsusRes] = await Promise.all([
+                        supabaseClient.from('songs').select('name, id, rating').order('rating', { ascending: false }),
+                        supabaseClient.from('ut_songs').select('name, id, rating').order('rating', { ascending: false }),
+                        supabaseClient.from('uty_songs').select('name, id, rating').order('rating', { ascending: false }),
+                        supabaseClient.from('tsus_songs').select('name, id, rating, hidden').order('rating', { ascending: false })
+                    ]);
 
-            if (isFelfeb) {
-                // only include songs that actually have a felfeb rating. not all of them do.
-                sourceList.forEach(localSong => {
-                    const rating = window.GLOBAL_FELFEB_RATINGS && window.GLOBAL_FELFEB_RATINGS[localSong.id];
-                    if (rating !== undefined) {
-                        combinedData.push({
-                            id: localSong.id,
-                            name: localSong.name,
-                            rating: rating,
-                            file: localSong.file,
-                            hidden: localSong.hidden,
-                            duration: localSong.duration || 0,
-                            felfebFile: localSong.felfebFile,
-                            isBonus: localSong.isBonus || false,
-                            region: localSong.region
-                        });
-                    }
+                    if (drRes.error) throw drRes.error;
+                    if (utRes.error) throw utRes.error;
+                    if (utyRes.error) throw utyRes.error;
+                    if (tsusRes.error) throw tsusRes.error;
+
+                    combinedData = [...drRes.data, ...utRes.data, ...utyRes.data, ...tsusRes.data].sort((a, b) => b.rating - a.rating);
+                } else {
+                    let tableName = 'songs';
+                    let selectCols = 'name, id, rating';
+                    if (state.currentGame === 'undertale') tableName = 'ut_songs';
+                    else if (state.currentGame === 'undertale_yellow' || state.currentGame === 'uty') tableName = 'uty_songs';
+                    else if (state.currentGame === 'tsus') { tableName = 'tsus_songs'; selectCols = 'name, id, rating, hidden'; }
+                    const { data, error } = await supabaseClient
+                        .from(tableName)
+                        .select(selectCols)
+                        .order('rating', { ascending: false });
+                    if (error) throw error;
+                    combinedData = data;
+                }
+
+                // fixing paths. whatever. i don't even care anymore.
+                cachedCommunitySongs = combinedData.map(cSong => {
+                    const localSong = state.songs.find(s => s.id === cSong.id);
+                    return {
+                        ...cSong,
+                        file: localSong ? localSong.file : '',
+                        hidden: localSong ? localSong.hidden : false,
+                        duration: localSong ? localSong.duration : 0, // include duration. don't forget it again.
+                        felfebFile: localSong ? localSong.felfebFile : undefined, // global felfeb. finally.
+                        isBonus: localSong ? localSong.isBonus : false,
+                        region: localSong ? localSong.region : undefined // regions for tsus/uty filtering. i can't believe i forgot this.
+                    };
                 });
-            } else {
-                sourceList.forEach(localSong => {
-                    const rating = (window.GLOBAL_SONG_RATINGS && window.GLOBAL_SONG_RATINGS[localSong.id] !== undefined)
-                        ? window.GLOBAL_SONG_RATINGS[localSong.id]
-                        : 1500;
-                    combinedData.push({
-                        id: localSong.id,
-                        name: localSong.name,
-                        rating: rating,
-                        file: localSong.file,
-                        hidden: localSong.hidden,
-                        duration: localSong.duration || 0,
-                        felfebFile: localSong.felfebFile,
-                        isBonus: localSong.isBonus || false,
-                        region: localSong.region
-                    });
-                });
+
+                cachedCommunityGame = state.currentGame;
+                communityDataPromise = null;
+                return true;
+            } catch (err) {
+                console.error("error fetching community data:", err);
+                communityDataPromise = null;
+                return false;
             }
-
-            combinedData.sort((a, b) => b.rating - a.rating);
-
-            cachedCommunitySongs = combinedData;
-            cachedCommunityGame = state.currentGame;
-            cachedIsFelfeb = isFelfeb;
-            return Promise.resolve(true);
-        } catch (err) {
-            console.error("error processing community data:", err);
-            return Promise.resolve(false);
-        }
+        })();
+        return communityDataPromise;
     }
 
     // displaying community rankings. i'm finally getting around to this.
@@ -2694,8 +2696,8 @@ document.addEventListener('DOMContentLoaded', () => {
         songBName.textContent = currentSongB.name;
         chooseABtn.textContent = `I prefer ${currentSongA.name}`;
         chooseBBtn.textContent = `I prefer ${currentSongB.name}`;
-        audioA.src = encodeURI(currentSongA.file);
-        audioB.src = encodeURI(currentSongB.file);
+        audioA.src = encodeFilePath(currentSongA.file);
+        audioB.src = encodeFilePath(currentSongB.file);
         audioA.load();
         audioB.load();
 
@@ -2841,6 +2843,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <option value="2">Chapter 2</option>
                 <option value="3">Chapter 3</option>
                 <option value="4">Chapter 4</option>
+                <option value="5">Chapter 5</option>
                 <option value="mix_chapters" style="color: var(--accent-color); font-weight: bold;">Mix Chapters...</option>
             `;
         } else if (state.currentGame === 'undertale') {
@@ -3400,7 +3403,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 playFile = song.felfebFile;
             }
         }
-        playlistAudio.src = encodeURI(playFile);
+        playlistAudio.src = encodeFilePath(playFile);
         playlistAudio.play().then(() => {
             isPlaylistPlaying = true;
             playerPlayBtn.textContent = "⏸";
@@ -3524,7 +3527,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 try {
                     // try to normalize path if it has weird ./ 
                     const cleanPath = song.file.replace(/\/\.\//g, '/');
-                    const response = await fetch(encodeURI(cleanPath));
+                    const response = await fetch(encodeFilePath(cleanPath));
                     if (!response.ok) throw new Error(`http error! status: ${response.status}`);
                     const blob = await response.blob();
                     // just the filename. i'm not recreating the entire soundtrack folder structure.
