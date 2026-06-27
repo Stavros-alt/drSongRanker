@@ -3656,34 +3656,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (mainFilterSelect) mainFilterSelect.value = state.activeRankerList;
     updateApp();
 
-    // one-time donation popup. dismiss writes a key so it never comes back.
-    const DONATION_KEY = 'drSongRankerDonationPopupDismissed';
-    const donationPopup = document.getElementById('donation-popup');
-    const donationCloseBtn = document.getElementById('donation-close-btn');
-    const donationKofiLink = document.getElementById('donation-kofi-link');
-
-    function dismissDonationPopup() {
-        try {
-            localStorage.setItem(DONATION_KEY, 'true');
-        } catch (e) {
-            // private mode or storage full. nothing to do, popup just won't persist.
-        }
-        if (donationPopup) donationPopup.style.display = 'none';
-    }
-
-    if (donationPopup && !localStorage.getItem(DONATION_KEY)) {
-        donationPopup.style.display = 'flex';
-    }
-
-    if (donationCloseBtn) {
-        donationCloseBtn.addEventListener('click', dismissDonationPopup);
-    }
-
-    // kofi link opens in new tab AND dismisses the popup so it's gone for good.
-    if (donationKofiLink) {
-        donationKofiLink.addEventListener('click', dismissDonationPopup);
-    }
-
     // refresh on back button because browsers are annoying.
     window.addEventListener('pageshow', (e) => {
         if (e.persisted) {
