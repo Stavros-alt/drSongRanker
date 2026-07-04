@@ -557,6 +557,74 @@ document.addEventListener('DOMContentLoaded', () => {
         }));
     }
 
+    // export all ranking data as json. because people keep losing their progress.
+    function exportData() {
+        const allKeys = [
+            'drSongRankerState', 'utSongRankerState', 'utySongRankerState',
+            'tsusSongRankerState', 'combinedSongRankerState', 'drSongRankerGlobalState',
+            'drSongRankerVolume', 'drSongRankerCustomLists',
+            'drSongRankerTheme', 'drSongRankerBackground', 'drSongRankerSpecialTheme',
+            'drSongRankerSecretsUnlocked', 'drSongRankerPreventDuplicatesForcedOn_v2',
+            'drSongRankerGasterExperimentScattered'
+        ];
+        const data = { version: 1, exportDate: new Date().toISOString() };
+        for (const key of allKeys) {
+            const val = localStorage.getItem(key);
+            if (val !== null) {
+                data[key] = val;
+            }
+        }
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `drSongRanker_backup_${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    // import ranking data from json. fingers crossed.
+    function importData(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                if (!data.version) {
+                    alert('Invalid save file. missing version marker.');
+                    return;
+                }
+                // confirm before overwriting everything
+                if (!confirm('This will OVERWRITE all current ranking data. make sure you exported first. continue?')) {
+                    return;
+                }
+                // save what's being imported
+                for (const [key, val] of Object.entries(data)) {
+                    if (key === 'version' || key === 'exportDate') continue;
+                    localStorage.setItem(key, val);
+                }
+                alert('Import successful! reloading...');
+                location.reload();
+            } catch (err) {
+                alert('Failed to import: ' + err.message);
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    // bind export/import buttons
+    const exportDataBtn = document.getElementById('export-data-btn');
+    const importDataBtn = document.getElementById('import-data-btn');
+    const importDataInput = document.getElementById('import-data-input');
+
+    if (exportDataBtn) exportDataBtn.addEventListener('click', exportData);
+    if (importDataBtn) importDataBtn.addEventListener('click', () => importDataInput.click());
+    if (importDataInput) importDataInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            importData(e.target.files[0]);
+            e.target.value = '';
+        }
+    });
+
     // why am i even hiding this. just look at the screen.
     function updateLeaderboardVisibility() {
         if (!rankingContainer) return;

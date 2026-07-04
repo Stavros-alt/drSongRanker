@@ -1324,6 +1324,22 @@ footer {
     border-color: var(--accent-color);
 }
 
+.data-btn {
+    background: #000;
+    border: 2px solid var(--accent-color, #00ff9d);
+    color: var(--accent-color, #00ff9d);
+    padding: 8px 16px;
+    cursor: pointer;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 0.9em;
+}
+
+.data-btn:hover {
+    background: var(--accent-color);
+    color: #000;
+    border-color: var(--accent-color);
+}
+
 #music-player-bar.hidden {
     transform: translateY(100%);
 }

@@ -500,6 +500,20 @@
             </div>
 
             <div class="setting-group" style="margin-top: 20px; border-top: 1px solid #333; padding-top: 20px;">
+                <p>Save Data</p>
+                <p style="font-size: 0.8em; color: #888; margin-bottom: 10px;">Export/import your ranking progress as a JSON file. Use this to backup or transfer your data.</p>
+                <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                    <button id="export-data-btn" class="data-btn">
+                        EXPORT
+                    </button>
+                    <button id="import-data-btn" class="data-btn">
+                        IMPORT
+                    </button>
+                    <input type="file" id="import-data-input" accept=".json" style="display: none;">
+                </div>
+            </div>
+
+            <div class="setting-group" style="margin-top: 20px; border-top: 1px solid #333; padding-top: 20px;">
                 <p style="color: #ff4444; font-size: 0.9em;">Danger Zone</p>
                 <button id="reset-btn"
                     style="background: #300; border: 2px solid #ff4444; color: #ff4444; padding: 10px; cursor: pointer; font-family: 'Roboto Mono', monospace;">RESET
