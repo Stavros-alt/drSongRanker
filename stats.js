@@ -109,17 +109,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     const totalComparisons = publicSongs.reduce((sum, s) => sum + (s.comparisons || 0), 0);
 
     const statsData = [
-        { value: publicSongs.length, label: 'Total Songs' },
-        { value: drSongs.length, label: 'Deltarune' },
-        { value: utSongs.length, label: 'Undertale' },
-        { value: utySongs.length, label: 'UT Yellow' },
-        { value: tsusSongs.length, label: 'TS!Underswap' },
-        { value: await fetchFelfebStats(), label: 'Felfeb Votes' }
+        { value: publicSongs.length, label: 'Total Songs', color: null },
+        { value: drSongs.length, label: 'Deltarune', color: '#00ff9d' },
+        { value: utSongs.length, label: 'Undertale', color: '#ff4444' },
+        { value: utySongs.length, label: 'UT Yellow', color: '#666' },
+        { value: tsusSongs.length, label: 'TS!Underswap', color: '#666' },
+        { value: await fetchFelfebStats(), label: 'Felfeb Votes', color: null }
     ];
 
     statsData.forEach(stat => {
         const box = document.createElement('div');
         box.className = 'stat-box';
+        if (stat.color) {
+            box.style.borderLeft = '4px solid ' + stat.color;
+        }
         box.innerHTML = `
             <div class="stat-value">${stat.value}</div>
             <div class="stat-label">${stat.label}</div>
@@ -241,7 +244,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             datasets: [{
                 label: 'Average Rating',
                 data: gameAvgs,
-                backgroundColor: ['#00ff9d', '#ff00ff', '#ffff00'],
+                backgroundColor: ['#00ff9d', '#ff4444', '#666', '#666'],
                 borderColor: '#fff',
                 borderWidth: 1
             }]
@@ -267,7 +270,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             datasets: [{
                 label: 'Average Rating',
                 data: drAvgs,
-                backgroundColor: ['#00ff9d', '#00f2ff', '#ff00ff', '#ffff00'],
+                backgroundColor: ['#bf44ff', '#44ccff', '#ff4444', '#4466ff', '#ffdd00'],
                 borderColor: '#fff',
                 borderWidth: 1
             }]
@@ -293,7 +296,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             datasets: [{
                 label: 'Average Rating',
                 data: utAvgs,
-                backgroundColor: ['#ff0000', '#00f2ff', '#0066ff', '#ff8800', '#ff00ff'],
+                backgroundColor: ['#bf44ff', '#44ccff', '#4466ff', '#ff8800', '#ffdd00'],
                 borderColor: '#fff',
                 borderWidth: 1
             }]
@@ -319,7 +322,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             datasets: [{
                 label: 'Average Rating',
                 data: utyAvgs,
-                backgroundColor: ['#ff0000', '#00f2ff', '#ffff00', '#ff8800', '#888888', '#ff00ff'],
+                backgroundColor: ['#bf44ff', '#44ccff', '#ff8800', '#ff4444', '#4466ff', '#ffdd00'],
                 borderColor: '#fff',
                 borderWidth: 1
             }]
