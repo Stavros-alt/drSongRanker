@@ -492,7 +492,47 @@ document.addEventListener('DOMContentLoaded', () => {
         return (yiq >= 128) ? 'black' : 'white';
     }
 
-    let globalState = JSON.parse(localStorage.getItem('drSongRankerGlobalState') || '{"currentGame": "deltarune", "showRatings": false, "hideLeaderboard": false, "hideMatchupRankings": false, "hideAccuracy": false, "hideAccuracyPercent": false, "showAgreement": false, "preventDuplicates": true, "combinedDiscovered": false, "felfebMode": true, "useSystemCursor": false, "selectedFranchises": ["deltarune", "undertale", "uty", "tsus"], "specialTheme": null, "soulColor": "red", "soulInverted": false}');
+    const STATE_VERSION = 2;
+
+    const DEFAULT_GLOBAL_STATE = {
+        currentGame: "deltarune",
+        showRatings: false,
+        hideLeaderboard: false,
+        hideMatchupRankings: false,
+        hideAccuracy: false,
+        hideAccuracyPercent: false,
+        showAgreement: false,
+        preventDuplicates: true,
+        combinedDiscovered: false,
+        felfebMode: true,
+        useSystemCursor: false,
+        selectedFranchises: ["deltarune", "undertale", "uty", "tsus"],
+        specialTheme: null,
+        soulColor: "red",
+        soulInverted: false,
+        version: STATE_VERSION
+    };
+
+    // merge. saved fills gaps in defaults so new keys don't break old saves.
+    let globalState = (() => {
+        let raw;
+        try {
+            raw = JSON.parse(localStorage.getItem('drSongRankerGlobalState'));
+        } catch (e) {
+            raw = null;
+        }
+        if (!raw || typeof raw !== 'object') raw = {};
+
+        const merged = Object.assign({}, DEFAULT_GLOBAL_STATE, raw);
+
+        // version old or missing? patch it and save so the schema doesn't drift.
+        if (!merged.version || merged.version < STATE_VERSION) {
+            merged.version = STATE_VERSION;
+            localStorage.setItem('drSongRankerGlobalState', JSON.stringify(merged));
+        }
+
+        return merged;
+    })();
 
     let state = {
         currentGame: globalState.currentGame,
@@ -553,7 +593,8 @@ document.addEventListener('DOMContentLoaded', () => {
             showGlobalDiff: state.showGlobalDiff,
             specialTheme: state.specialTheme,
             soulColor: state.soulColor,
-            soulInverted: state.soulInverted
+            soulInverted: state.soulInverted,
+            version: STATE_VERSION
         }));
     }
 
