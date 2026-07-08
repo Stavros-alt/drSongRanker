@@ -91,7 +91,7 @@ const songList = [
     { id: 91, name: "MIKE, the BOARD, please!", file: "DELTARUNESoundtrack/./091 MIKE, the BOARD, please!.mp3", rating: 1500, comparisons: 0, duration: 32.89 },
     { id: 92, name: "Sandy Board", file: "DELTARUNESoundtrack/./092 Sandy Board.mp3", rating: 1500, comparisons: 0, duration: 78.39 },
     { id: 93, name: "Adventure Board", file: "DELTARUNESoundtrack/./093 Adventure Board.mp3", rating: 1500, comparisons: 0, duration: 59.32 },
-    { id: 94, name: "Query-", file: "DELTARUNESoundtrack/./094 Query-.mp3", rating: 1500, comparisons: 0, duration: 24.82 },
+    { id: 94, name: "Query?", file: "DELTARUNESoundtrack/./094 Query-.mp3", rating: 1500, comparisons: 0, duration: 24.82 },
     { id: 95, name: "Quiz!", file: "DELTARUNESoundtrack/./095 Quiz!.mp3", rating: 1500, comparisons: 0, duration: 76.83 },
     { id: 96, name: "Dig! Dig! To The Center of the Earth!", file: "DELTARUNESoundtrack/./096 Dig! Dig! To The Center of the Earth!.mp3", rating: 1500, comparisons: 0, duration: 7.99 },
     { id: 97, name: "Pushing Buddies", file: "DELTARUNESoundtrack/./097 Pushing Buddies.mp3", rating: 1500, comparisons: 0, duration: 19.83 },
