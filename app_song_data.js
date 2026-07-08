@@ -45,7 +45,7 @@ const songList = [
     { id: 43, name: "My Castle Town", file: "DELTARUNESoundtrack/./043 My Castle Town.mp3", rating: 1500, comparisons: 0, duration: 127.58 },
     { id: 44, name: "Ohhhhohohoho!", file: "DELTARUNESoundtrack/./044 Ohhhhohohoho!.mp3", rating: 1500, comparisons: 0, duration: 9.51 },
     { id: 45, name: "Queen", file: "DELTARUNESoundtrack/./045 Queen.mp3", rating: 1500, comparisons: 0, duration: 56.79 },
-    { id: 46, name: "A CYBER'S WORLD-", file: "DELTARUNESoundtrack/./046 A CYBER'S WORLD-.mp3", rating: 1500, comparisons: 0, duration: 166.19 },
+    { id: 46, name: "A CYBER'S WORLD?", file: "DELTARUNESoundtrack/./046 A CYBER'S WORLD-.mp3", rating: 1500, comparisons: 0, duration: 166.19 },
     { id: 47, name: "A Simple Diversion", file: "DELTARUNESoundtrack/./047 A Simple Diversion.mp3", rating: 1500, comparisons: 0, duration: 31.37 },
     { id: 48, name: "Almost To The Guys!", file: "DELTARUNESoundtrack/./048 Almost To The Guys!.mp3", rating: 1500, comparisons: 0, duration: 17.89 },
     { id: 49, name: "Cool Beat", file: "DELTARUNESoundtrack/./049 Cool Beat.mp3", rating: 1500, comparisons: 0, duration: 17.50 },
