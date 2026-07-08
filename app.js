@@ -3704,25 +3704,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 return `${songName} - Toby Fox DELTARUNE Chapter 2 OST`;
             }
 
-            let chapterSuffix = "";
-            if (state.currentGame === 'deltarune') {
-                if (s.id <= 40) chapterSuffix = " (Chapter 1)";
-                else if (s.id <= 87 || s.id === 38 || s.id === 40) chapterSuffix = " (Chapter 2)";
-                else if (s.id <= 125) chapterSuffix = " (Chapter 3)";
-                else if (s.id <= 165) chapterSuffix = " (Chapter 4)";
-            } else {
-                const track = s.id - 1000;
-                if (track <= 14) chapterSuffix = " (Ruins)";
-                else if (track <= 24) chapterSuffix = " (Snowdin)";
-                else if (track <= 46) chapterSuffix = " (Waterfall)";
-                else if (track <= 70) chapterSuffix = " (Hotland/CORE)";
-                else chapterSuffix = " (New Home/End)";
-            }
-
             let ostName = 'Deltarune OST';
             if (state.currentGame === 'undertale') ostName = 'Undertale OST';
             else if (state.currentGame === 'undertale_yellow') ostName = 'Undertale Yellow OST';
-            return `${songName} - Toby Fox ${ostName}${chapterSuffix}`;
+            return `${songName} - Toby Fox ${ostName}`;
         }).join('\n');
         navigator.clipboard.writeText(textList).then(() => {
             alert("Copied to clipboard. Paste it into Spotify/YouTube tools and leave me alone.");
