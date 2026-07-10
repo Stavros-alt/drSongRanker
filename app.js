@@ -703,7 +703,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			}
 		});
 
-	// ─── group merge: compile friends' saves into average rankings ───
+	// group merge: compile friends' saves into average rankings
 
 	let mergedFiles = []; // array of { name, data } where data is parsed JSON
 	let mergedResults = {}; // game -> { songId: { name, ratings: [], voters: [] } }
@@ -766,7 +766,7 @@ document.addEventListener("DOMContentLoaded", () => {
 					if (gameDedup[game].has(dedupKey)) continue;
 					gameDedup[game].add(dedupKey);
 
-					const rating = s.felfebRating || s.rating || 1500;
+					const rating = s.rating || 1500;
 
 					if (!perGame[game][s.id]) {
 						perGame[game][s.id] = {
@@ -815,11 +815,55 @@ document.addEventListener("DOMContentLoaded", () => {
 						};
 					}
 					if (!perGame[nativeGame][s.id].voterNames.includes(file.name)) {
-						perGame[nativeGame][s.id].ratings.push(
-							s.felfebRating || s.rating || 1500,
-						);
+						perGame[nativeGame][s.id].ratings.push(s.rating || 1500);
 						perGame[nativeGame][s.id].voterNames.push(file.name);
 					}
+				}
+			}
+		}
+
+		// build synthetic combined bucket from individual game states
+		// for files that don't have their own combined state
+		for (let fi = 0; fi < mergedFiles.length; fi++) {
+			const file = mergedFiles[fi];
+			if (file.data[MERGE_STATE_KEYS.combined]) continue; // already has combined data
+
+			for (const [game, key] of Object.entries(MERGE_STATE_KEYS)) {
+				if (game === "combined") continue;
+
+				const raw = file.data[key];
+				if (!raw) continue;
+
+				let parsed;
+				try {
+					parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
+				} catch (e) {
+					continue;
+				}
+
+				const songs = parsed.songs || [];
+				if (!perGame["combined"]) perGame["combined"] = {};
+				if (!gameDedup["combined"]) gameDedup["combined"] = new Set();
+
+				for (const s of songs) {
+					const comparisons = s.felfebComparisons || s.comparisons || 0;
+					if (comparisons === 0) continue;
+
+					const dedupKey = `${fi}-${s.id}`;
+					if (gameDedup["combined"].has(dedupKey)) continue;
+					gameDedup["combined"].add(dedupKey);
+
+					const rating = s.rating || 1500;
+
+					if (!perGame["combined"][s.id]) {
+						perGame["combined"][s.id] = {
+							name: s.name || `Song #${s.id}`,
+							ratings: [],
+							voterNames: [],
+						};
+					}
+					perGame["combined"][s.id].ratings.push(rating);
+					perGame["combined"][s.id].voterNames.push(file.name);
 				}
 			}
 		}
