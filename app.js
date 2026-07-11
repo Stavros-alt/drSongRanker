@@ -1918,7 +1918,6 @@ document.addEventListener("DOMContentLoaded", () => {
 		winnerComparisons,
 		loserComparisons,
 	) {
-		// why is elo so convoluted.
 		const getK = (comparisons) => (comparisons < 10 ? 100 : 32);
 
 		const kWinner = getK(winnerComparisons);
@@ -1935,7 +1934,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		};
 	}
 
-	// felfeb accessors. i refuse to copy-paste field names everywhere.
+	// felfeb accessors
 	function isFelfebRanker() {
 		return state.activeRankerList === "felfeb";
 	}

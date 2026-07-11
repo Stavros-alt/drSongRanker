@@ -55,7 +55,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 	const dbSongs = await fetchData();
 	if (!dbSongs.length) return;
 
-	// merging with local metadata. this feels like a disaster waiting to happen.
 	const localSongs = [
 		...(window.songList || []),
 		...(window.utSongList || []),
@@ -71,7 +70,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 		};
 	});
 
-	// game classification. i managed to make this straightforward for once.
 	function getGame(song) {
 		if (song.id < 1000) return "DR";
 		if (song.id < 2000) return "UT";
@@ -107,25 +105,22 @@ document.addEventListener("DOMContentLoaded", async () => {
 		if (track <= 72) return "Wild East";
 		if (track <= 94) return "Steamworks";
 		if (track <= 125) return "New Home";
-		if (track === 126) return "New Home"; // asgore. i'm finally over this.
-		if (track === 127) return "Ruins"; // enemy retreating. this starts in ruins but covers everything. still messy as hell.
-		if (track === 128) return "Snowdin"; // apprehension. Genocide martlet is exhausting.
-		if (track === 129 || track === 130) return "Wild East"; // starlo and ceroba are too much for me right now.
+		if (track === 126) return "New Home";
+		if (track === 127) return "Ruins"; // starts in ruins but covers everything
+		if (track === 128) return "Snowdin";
+		if (track === 129 || track === 130) return "Wild East";
 		if (track >= 131) return "Steamworks";
 		return "New Home";
 	}
 
 	const publicSongs = songs;
 
-	// split by game. i really should have done this from the start.
 	const drSongs = publicSongs.filter((s) => getGame(s) === "DR");
 	const utSongs = publicSongs.filter((s) => getGame(s) === "UT");
 	const utySongs = publicSongs.filter((s) => getGame(s) === "UTY");
 	const tsusSongs = publicSongs.filter((s) => getGame(s) === "TSUS");
 
-	// ──────────────────────────────────────────────
 	// quick stats row
-	// ──────────────────────────────────────────────
 	const quickStatsRow = document.getElementById("quick-stats-row");
 	const avgRating =
 		publicSongs.reduce((sum, s) => sum + s.rating, 0) / publicSongs.length;
@@ -156,9 +151,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		quickStatsRow.appendChild(box);
 	});
 
-	// ──────────────────────────────────────────────
 	// helper: compute section averages
-	// ──────────────────────────────────────────────
 	function computeSectionAverages(songSet, sectionLabels) {
 		const stats = {};
 		sectionLabels.forEach((l) => {
@@ -176,9 +169,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		);
 	}
 
-	// ──────────────────────────────────────────────
 	// top 10 highest rated
-	// ──────────────────────────────────────────────
 	const top10 = songs.slice(0, 10);
 
 	new Chart(document.getElementById("votesChart"), {
@@ -204,9 +195,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		},
 	});
 
-	// ──────────────────────────────────────────────
 	// bottom 10 lowest rated
-	// ──────────────────────────────────────────────
 	const bottom10 = [...songs].sort((a, b) => a.rating - b.rating).slice(0, 10);
 
 	new Chart(document.getElementById("bottom10Chart"), {
@@ -232,9 +221,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		},
 	});
 
-	// ──────────────────────────────────────────────
 	// rating distribution
-	// ──────────────────────────────────────────────
 	const ratings = publicSongs.map((s) => Math.round(s.rating));
 	const bins = {};
 	ratings.forEach((r) => {
@@ -265,9 +252,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		},
 	});
 
-	// ──────────────────────────────────────────────
 	// average rating by game
-	// ──────────────────────────────────────────────
 	const gameLabels = ["Deltarune", "Undertale", "UT Yellow", "TS!Underswap"];
 	const gameAvgs = [drSongs, utSongs, utySongs, tsusSongs].map((set) =>
 		set.length ? set.reduce((sum, s) => sum + s.rating, 0) / set.length : 0,
@@ -295,9 +280,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		},
 	});
 
-	// ──────────────────────────────────────────────
 	// deltarune by chapter
-	// ──────────────────────────────────────────────
 	const drSections = ["Ch 1", "Ch 2", "Ch 3", "Ch 4", "Ch 5"];
 	const drAvgs = computeSectionAverages(drSongs, drSections);
 
@@ -329,9 +312,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		},
 	});
 
-	// ──────────────────────────────────────────────
 	// undertale by area
-	// ──────────────────────────────────────────────
 	const utSections = [
 		"Ruins",
 		"Snowdin",
@@ -369,9 +350,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		},
 	});
 
-	// ──────────────────────────────────────────────
 	// uty by region
-	// ──────────────────────────────────────────────
 	const utySections = [
 		"Ruins",
 		"Snowdin",
@@ -416,9 +395,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		},
 	});
 
-	// ──────────────────────────────────────────────
 	// most volatile (biggest outliers from game mean)
-	// ──────────────────────────────────────────────
 	const gameMeans = {
 		DR: gameAvgs[0],
 		UT: gameAvgs[1],
@@ -474,9 +451,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		},
 	});
 
-	// ──────────────────────────────────────────────
 	// the curve (all songs sorted)
-	// ──────────────────────────────────────────────
 	const allSorted = [...songs].sort((a, b) => b.rating - a.rating);
 
 	new Chart(document.getElementById("curveChart"), {
@@ -517,9 +492,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		},
 	});
 
-	// ──────────────────────────────────────────────
 	// chronological quality: 3 separate charts
-	// ──────────────────────────────────────────────
 	function makeChronoChart(canvasId, songSet, color, gameLabel) {
 		// normalize x-axis: just use order within this game
 		const sorted = [...songSet].sort((a, b) => a.id - b.id);
@@ -562,9 +535,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	makeChronoChart("chronoUtChart", utSongs, "#00ff9d", "Undertale");
 	makeChronoChart("chronoUtyChart", utySongs, "#ffff00", "UT Yellow");
 
-	// ──────────────────────────────────────────────
 	// duration vs rating (fixed: no zero-duration songs)
-	// ──────────────────────────────────────────────
 	const songsWithDuration = publicSongs.filter(
 		(s) => s.duration && s.duration > 0,
 	);
@@ -611,9 +582,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		},
 	});
 
-	// ──────────────────────────────────────────────
 	// most battled
-	// ──────────────────────────────────────────────
 	const mostBattled = [...publicSongs]
 		.sort((a, b) => b.comparisons - a.comparisons)
 		.slice(0, 10);
@@ -641,9 +610,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		},
 	});
 
-	// ──────────────────────────────────────────────
 	// radar chart. keeping it because it looks cool.
-	// ──────────────────────────────────────────────
 	const radarLabels = [
 		"Ch 1",
 		"Ch 2",
@@ -715,7 +682,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		},
 	});
 
-	// ─── personal completed rankings ───
+	// personal completed rankings
 	try {
 		const chapterLabels = ["Ch 1", "Ch 2", "Ch 3", "Ch 4", "Ch 5"];
 		const myChapterStats = {};
