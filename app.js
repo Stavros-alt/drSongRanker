@@ -3985,7 +3985,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			);
 		}
 
-		// add secret options if unlocked (mostly for DR, but whatever)
+		// add secret options if unlocked (mostly for DR)
 		if (state.secretsUnlocked) {
 			standardOptions.splice(1, 0, {
 				val: "all_plus",

@@ -12,6 +12,9 @@
 .env
 node_modules/
 
+# build artifacts
+build/
+
 # python junk
 __pycache__/
 *.py[cod]
