@@ -348,7 +348,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			customBgLabel.classList.remove("active");
 			btn.classList.add("active");
 
-			// if you pick a background, special themes die.
+			// picking a background overrides special themes
 			if (state.specialTheme) {
 				state.specialTheme = null;
 				localStorage.removeItem("drSongRankerSpecialTheme");
@@ -501,7 +501,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		return yiq >= 128 ? "black" : "white";
 	}
 
-	const STATE_VERSION = 2;
+	const STATE_VERSION = 3;
 
 	const DEFAULT_GLOBAL_STATE = {
 		currentGame: "deltarune",
@@ -516,6 +516,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		felfebMode: true,
 		useSystemCursor: false,
 		selectedFranchises: ["deltarune", "undertale", "uty", "tsus"],
+		selectedDRChapters: [1, 2, 3, 4, 5],
 		specialTheme: null,
 		soulColor: "red",
 		soulInverted: false,
@@ -571,6 +572,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			"uty",
 			"tsus",
 		],
+		selectedDRChapters: globalState.selectedDRChapters || [1, 2, 3, 4, 5],
 		hasSeenFinishScreen: false, // don't spam them with this every second
 		hideLeaderboard: globalState.hideLeaderboard || false,
 		hideMatchupRankings: globalState.hideMatchupRankings || false,
@@ -608,6 +610,7 @@ document.addEventListener("DOMContentLoaded", () => {
 				useSystemCursor: state.useSystemCursor,
 				showAgreement: state.showAgreement,
 				selectedFranchises: state.selectedFranchises,
+				selectedDRChapters: state.selectedDRChapters,
 				hideLeaderboard: state.hideLeaderboard,
 				hideMatchupRankings: state.hideMatchupRankings,
 				hideAccuracy: state.hideAccuracy,
@@ -1097,8 +1100,16 @@ document.addEventListener("DOMContentLoaded", () => {
 					? tsusSongList
 					: window.tsusSongList || [];
 
-			if (state.selectedFranchises.includes("deltarune"))
-				sourceList.push(...drList);
+			if (state.selectedFranchises.includes("deltarune")) {
+				const drChapters = state.selectedDRChapters || [1, 2, 3, 4, 5];
+				const filteredDR = drList.filter((s) => {
+					const songChapters = getChaptersForSong(s);
+					// songs with no chapter mapping (bonus/extras) always included
+					if (songChapters.length === 0) return true;
+					return songChapters.some((ch) => drChapters.includes(ch));
+				});
+				sourceList.push(...filteredDR);
+			}
 			if (state.selectedFranchises.includes("undertale"))
 				sourceList.push(...utList);
 			if (state.selectedFranchises.includes("uty")) sourceList.push(...utyList);
@@ -1627,7 +1638,7 @@ document.addEventListener("DOMContentLoaded", () => {
 					"drSongRankerCustomLists",
 					JSON.stringify(state.customLists),
 				);
-				// remove the old key so we don't migrate again if the user deletes "Default"
+				// clear old key so migration doesnt re-run if "Default" gets recreated
 				localStorage.removeItem("drSongRankerCustomSelection");
 			} else {
 				state.customLists = {}; // init empty if nothing exists
@@ -3688,6 +3699,9 @@ document.addEventListener("DOMContentLoaded", () => {
 				franchises.length > 0 ? franchises.join(" + ") : "Empty Mix";
 			html += `<option value="combined_all">All Games (${mixLabel})</option>`;
 			html += `<option value="mix_games" style="color: var(--accent-color); font-weight: bold;">Mix Franchises...</option>`;
+			if (state.selectedFranchises.includes("deltarune")) {
+				html += `<option value="mix_dr_chapters" style="color: var(--accent-color); font-weight: bold;">Mix DR Chapters...</option>`;
+			}
 		} else {
 			html += `<option value="all">All Songs (Original)</option>`;
 		}
@@ -3813,6 +3827,16 @@ document.addEventListener("DOMContentLoaded", () => {
 				return;
 			}
 
+			if (val === "mix_dr_chapters") {
+				chapterMixModal.style.display = "flex";
+				mixCheckboxes.forEach((cb) => {
+					cb.checked = state.selectedDRChapters.includes(parseInt(cb.value));
+				});
+				// reset select so it doesn't stay on "Mix DR Chapters..."
+				mainFilterSelect.value = state.activeRankerList;
+				return;
+			}
+
 			currentChapterFilter = val;
 			state.activeRankerList = currentChapterFilter;
 			saveState();
@@ -3912,6 +3936,21 @@ document.addEventListener("DOMContentLoaded", () => {
 				return;
 			}
 
+			// combined mode: filter which DR chapters are in the pool
+			if (state.currentGame === "combined") {
+				state.selectedDRChapters = selected.map(Number);
+				state.activeRankerList = "combined_all";
+				chapterMixModal.style.display = "none";
+				saveState();
+				loadState();
+				updateMainFilterOptions();
+				presentNewPair();
+				if (myRankingBtn.classList.contains("active")) displayRankings();
+				else displayCommunityRankings();
+				return;
+			}
+
+			// deltarune mode: create a temporary mix filter
 			const mixKey = `mix_${selected.join("_")}`;
 			const label = `Mixed: Ch ${selected.join(" + ")}`;
 
@@ -3951,6 +3990,11 @@ document.addEventListener("DOMContentLoaded", () => {
 				mainFilterSelect.value = "all"; // fallback
 				state.activeRankerList = "all";
 				presentNewPair(); // refresh just in case
+			}
+			if (mainFilterSelect.value === "mix_dr_chapters") {
+				mainFilterSelect.value = "combined_all";
+				state.activeRankerList = "combined_all";
+				presentNewPair();
 			}
 		});
 	}
@@ -4001,6 +4045,12 @@ document.addEventListener("DOMContentLoaded", () => {
 			);
 		} else if (state.currentGame === "combined") {
 			// keep it simple. just all songs.
+			if (state.selectedFranchises.includes("deltarune")) {
+				standardOptions.push({
+					val: "mix_dr_chapters",
+					text: "Mix DR Chapters...",
+				});
+			}
 		} else {
 			standardOptions.push(
 				{ val: "1", text: "Ruins" },
@@ -4032,15 +4082,14 @@ document.addEventListener("DOMContentLoaded", () => {
 			const el = document.createElement("option");
 			el.value = opt.val;
 			el.textContent = opt.text;
-			if (opt.val === "mix_chapters") {
+			if (opt.val === "mix_chapters" || opt.val === "mix_dr_chapters") {
 				el.style.color = "var(--accent-color)";
 				el.style.fontWeight = "bold";
 			}
 			select.appendChild(el);
 		});
 
-		// check if we have an active mix that isn't in standard options.
-		// this is why we can't have nice things.
+		// check if we have an active mix that isnt in standard options.
 		if (targetVal.startsWith("mix_") && targetVal !== "mix_chapters") {
 			const chapters = targetVal.replace("mix_", "").split("_");
 			const label = `Mixed: Ch ${chapters.join(" + ")}`;

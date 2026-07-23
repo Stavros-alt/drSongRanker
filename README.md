@@ -31,6 +31,7 @@ Everything is in local storage. `drSongRankerGlobalState` handles your UI prefer
 - **Custom Soul Cursor:** Change your cursor color. Includes a Monster Soul mode (upside down) and an invert toggle for custom colors.
 - **Theme Overlays:** Red/Green/Blue site-wide overlays.
 - **Combined Mode:** Rank everything at once. Good luck.
+- **DR Chapter Filter:** In combined mode, pick which Deltarune chapters to include or exclude from the mix.
 - **Group Merge:** Upload your friends' exported save files and see the group's average rankings. Settings -> Save Data -> Group Merge.
 
 ## Credits
