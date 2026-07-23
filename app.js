@@ -39,6 +39,8 @@ document.addEventListener("DOMContentLoaded", () => {
 	const songBRank = document.getElementById("songB-rank");
 	const chooseABtn = document.getElementById("chooseA-btn");
 	const chooseBBtn = document.getElementById("chooseB-btn");
+	const chooseAMobileBtn = document.getElementById("chooseA-mobile-btn");
+	const chooseBMobileBtn = document.getElementById("chooseB-mobile-btn");
 	const skipBtn = document.getElementById("skip-btn");
 	const undoBtn = document.getElementById("undo-btn");
 	const resetBtn = document.getElementById("reset-btn");
@@ -2093,12 +2095,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
 			chooseABtn.disabled = true;
 			chooseBBtn.disabled = true;
+			if (chooseAMobileBtn) chooseAMobileBtn.disabled = true;
+			if (chooseBMobileBtn) chooseBMobileBtn.disabled = true;
 			skipBtn.disabled = true;
 			return;
 		}
 
 		chooseABtn.disabled = false;
 		chooseBBtn.disabled = false;
+		if (chooseAMobileBtn) chooseAMobileBtn.disabled = false;
+		if (chooseBMobileBtn) chooseBMobileBtn.disabled = false;
 		skipBtn.disabled = false;
 
 		let song1, song2;
@@ -2211,6 +2217,10 @@ document.addEventListener("DOMContentLoaded", () => {
 			chooseABtn.textContent = `I prefer ${currentSongA.name}`;
 		if (chooseBBtn && currentSongB)
 			chooseBBtn.textContent = `I prefer ${currentSongB.name}`;
+		if (chooseAMobileBtn && currentSongA)
+			chooseAMobileBtn.textContent = `I prefer ${currentSongA.name}`;
+		if (chooseBMobileBtn && currentSongB)
+			chooseBMobileBtn.textContent = `I prefer ${currentSongB.name}`;
 
 		audioA.src = encodeFilePath(currentSongA.file);
 		audioB.src = encodeFilePath(currentSongB.file);
@@ -2229,9 +2239,11 @@ document.addEventListener("DOMContentLoaded", () => {
 	}
 
 	async function displayAgreementStats(winner) {
-		// disable buttons. i don't want them clicking like crazy.
+		// lock buttons while agreement loads
 		chooseABtn.disabled = true;
 		chooseBBtn.disabled = true;
+		if (chooseAMobileBtn) chooseAMobileBtn.disabled = true;
+		if (chooseBMobileBtn) chooseBMobileBtn.disabled = true;
 		skipBtn.disabled = true;
 
 		const songAStats = await fetchMatchupStats(currentSongA, currentSongB);
@@ -2330,6 +2342,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 			chooseABtn.disabled = false;
 			chooseBBtn.disabled = false;
+			if (chooseAMobileBtn) chooseAMobileBtn.disabled = false;
+			if (chooseBMobileBtn) chooseBMobileBtn.disabled = false;
 			skipBtn.disabled = false;
 
 			updateApp();
@@ -2342,9 +2356,11 @@ document.addEventListener("DOMContentLoaded", () => {
 			return;
 		}
 
-		// disable everything. i don't want you spamming the database.
+		// lock buttons until vote processes
 		chooseABtn.disabled = true;
 		chooseBBtn.disabled = true;
+		if (chooseAMobileBtn) chooseAMobileBtn.disabled = true;
+		if (chooseBMobileBtn) chooseBMobileBtn.disabled = true;
 		skipBtn.disabled = true;
 
 		// save history before we mess it up.
@@ -2432,6 +2448,8 @@ document.addEventListener("DOMContentLoaded", () => {
 			// re-enable buttons if not showing agreement
 			chooseABtn.disabled = false;
 			chooseBBtn.disabled = false;
+			if (chooseAMobileBtn) chooseAMobileBtn.disabled = false;
+			if (chooseBMobileBtn) chooseBMobileBtn.disabled = false;
 			skipBtn.disabled = false;
 			updateApp();
 		}
@@ -2597,7 +2615,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		}
 
 		// can't set currentTime until metadata is loaded. browsers are picky about this
-		// and it silently breaks after the first song if you don't wait.
+		// silently breaks after the first song without waiting for metadata
 		const onMetaReady = () => {
 			audioEl.removeEventListener("loadedmetadata", onMetaReady);
 			audioEl.currentTime = startTime;
@@ -3133,7 +3151,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		const poolSize = activeSongs.length || 1;
 		const accuracy = 100 * (1 - Math.exp(-state.comparisons / poolSize));
 
-		// they wanted to hide this. fine.
+		// respect the hide preference
 		const progressContainer = document.getElementById("progress-container");
 		if (state.hideAccuracy) {
 			if (progressContainer) progressContainer.style.display = "none";
@@ -3533,6 +3551,10 @@ document.addEventListener("DOMContentLoaded", () => {
 		songBName.textContent = currentSongB.name;
 		chooseABtn.textContent = `I prefer ${currentSongA.name}`;
 		chooseBBtn.textContent = `I prefer ${currentSongB.name}`;
+		if (chooseAMobileBtn)
+			chooseAMobileBtn.textContent = `I prefer ${currentSongA.name}`;
+		if (chooseBMobileBtn)
+			chooseBMobileBtn.textContent = `I prefer ${currentSongB.name}`;
 		audioA.src = encodeFilePath(currentSongA.file);
 		audioB.src = encodeFilePath(currentSongB.file);
 		audioA.load();
@@ -3844,8 +3866,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	chooseABtn.addEventListener("click", () => handleChoice("A"));
 	chooseBBtn.addEventListener("click", () => handleChoice("B"));
+	if (chooseAMobileBtn)
+		chooseAMobileBtn.addEventListener("click", () => handleChoice("A"));
+	if (chooseBMobileBtn)
+		chooseBMobileBtn.addEventListener("click", () => handleChoice("B"));
 	skipBtn.addEventListener("click", () => {
-		// they chose nothing. fine. next snippet.
+		// skipped matchup, move on
 		if (state.preventDuplicates && currentSongA && currentSongB) {
 			const pairKey = [currentSongA.id, currentSongB.id]
 				.sort((a, b) => a - b)
@@ -3971,7 +3997,7 @@ document.addEventListener("DOMContentLoaded", () => {
 				{ val: "wild_east", text: "Wild East (UTY)" },
 				{ val: "steamworks", text: "Steamworks (UTY)" },
 				{ val: "new_home", text: "New Home (UTY)" },
-				// genocide section removed because the user said it was 'unfair'. fine.
+				// genocide section removed after complaints
 			);
 		} else if (state.currentGame === "combined") {
 			// keep it simple. just all songs.
@@ -4183,7 +4209,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		});
 	});
 
-	// close on click. users find things hard.
+	// close on outside click
 	window.addEventListener("click", (e) => {
 		if (e.target === shareModal) {
 			shareModal.style.display = "none";
@@ -4243,11 +4269,11 @@ document.addEventListener("DOMContentLoaded", () => {
 			);
 		}
 
-		// filter the songs. i'm not dealing with hidden stuff if the user didn't ask for it.
+		// filter the songs. exclude hidden unless the active list requests them
 		sourceSongs = filterSongsByChapter(sourceSongs, currentChapterFilter);
 
 		if (sourceSongs.length === 0 || index < 0 || index >= sourceSongs.length)
-			return; // i hope you didn't click nothing.
+			return; // out of bounds, bail
 
 		playlist = sourceSongs;
 		currentPlaylistIndex = index;
@@ -4314,7 +4340,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		musicPlayerBar.classList.add("hidden");
 	});
 
-	// Export. i'm literally doing your job for you.
+	// export the list
 	exportListBtn.addEventListener("click", () => {
 		exportModal.style.display = "flex";
 	});
@@ -4361,7 +4387,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 		let m3uContent = "#EXTM3U\n";
 		exportPool.forEach((song) => {
-			// we use the local path. if you moved your files, that's a you problem.
+			// local paths. expects soundtrack at the original file location.
 			m3uContent += `#EXTINF:-1,${song.name}\n${song.file}\n`;
 		});
 

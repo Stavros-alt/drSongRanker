@@ -759,6 +759,28 @@ button:active {
 	margin-top: auto;
 }
 
+.vote-btn {
+	border: var(--border-width) solid var(--accent-color);
+	color: var(--accent-color);
+	background: #000;
+	padding: 8px 12px;
+	font-size: 0.85em;
+	font-family: var(--ui-font);
+	cursor: pointer;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.vote-btn:hover {
+	background: var(--accent-color);
+	color: #000;
+}
+
+.mobile-vote-btn {
+	display: none;
+}
+
 .preview-btn:hover {
 	border-color: var(--accent-color);
 	color: var(--accent-color);
@@ -1204,14 +1226,28 @@ footer {
 		width: 100%;
 	}
 
+	.card-controls {
+		flex-wrap: wrap;
+	}
+
 	.choices {
 		flex-direction: column;
 		width: 100%;
 	}
 
-	/* unlock the fixed widths on mobile. column layout needs full width. */
+	.mobile-vote-btn {
+		display: block;
+		width: 100%;
+		margin-top: 8px;
+	}
+
+	/* hide desktop A/B buttons on mobile, they live in the cards now */
 	#chooseA-btn,
-	#chooseB-btn,
+	#chooseB-btn {
+		display: none;
+	}
+
+	/* unlock the fixed widths on mobile. column layout needs full width. */
 	#undo-btn,
 	#tie-btn {
 		width: 100%;
