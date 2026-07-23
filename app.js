@@ -4180,7 +4180,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		// i shortened this because the footer kept eating the songs. hope this is enough.
 		const targetHeight = 580;
 
-		// scaling logic. i honestly don't know why i'm doing this anymore.
+		// scaling logic.
 		let cols = 1;
 		if (songCount > 120) cols = 4;
 		else if (songCount > 60) cols = 3;
@@ -4200,8 +4200,8 @@ document.addEventListener("DOMContentLoaded", () => {
 		const listPaddingLeft = fontSize > 20 ? "60px" : "45px";
 		html += `<ul style="padding-left: ${listPaddingLeft}; margin: 0; color: #fff; height: 100%; list-style-type: none;">`;
 		topSongs.forEach((song, index) => {
-			// hanging numbers because apparently decimal alignment is a thing people care about.
-			// li no longer has overflow:hidden because i was accidentally hiding my own work. typical.
+			// hanging numbers for decimal alignment.
+			// li no longer has overflow:hidden. was hiding my own work.
 			html += `<li style="margin-bottom: ${marginBottom}px; position: relative; width: 100%; display: block;">`;
 			html += `<span style="color: ${accentColor}; font-weight: bold; position: absolute; right: 100%; margin-right: 12px; text-align: right; pointer-events: none; white-space: nowrap;">${index + 1}.</span>`;
 			html += `<span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%;">${song.name}</span></li>`;

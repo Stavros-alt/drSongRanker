@@ -1,4 +1,4 @@
-// list of songs. don't ask me to update it.
+// list of songs.
 const songList = [
 	{
 		id: 1,
@@ -1642,8 +1642,7 @@ const songList = [
 		comparisons: 0,
 		duration: 31.0,
 	},
-	// expanded hidden tracks. don't ask me for more.
-	// corrected hidden tracks from deltarune.wiki. .ogg only.
+	// expanded hidden tracks. corrected from deltarune.wiki. .ogg only.
 	{
 		id: 201,
 		name: "man",
@@ -2013,15 +2012,7 @@ const songList = [
 		hidden: true,
 		duration: 13.42,
 	},
-	{
-		id: 242,
-		name: "thrash_rating",
-		file: "DELTARUNESoundtrack/thrash_rating.ogg",
-		rating: 1500,
-		comparisons: 0,
-		hidden: true,
-		duration: 10.67,
-	},
+
 	{
 		id: 243,
 		name: "field_of_hopes_crisp",
