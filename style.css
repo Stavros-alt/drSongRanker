@@ -1392,6 +1392,12 @@ footer {
 	border-bottom: var(--border-width) solid #222;
 }
 
+.ranking-actions.global-layout {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	justify-content: unset;
+}
+
 .action-btn {
 	background: #000;
 	border: var(--border-width) solid #fff;
@@ -1401,6 +1407,7 @@ footer {
 	font-size: 0.8em;
 	cursor: none;
 	text-transform: uppercase;
+	text-align: center;
 }
 
 .action-btn:hover {

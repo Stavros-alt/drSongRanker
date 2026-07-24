@@ -49,6 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	const rankingContainer = document.querySelector(".ranking-container");
 	const myRankingBtn = document.getElementById("my-ranking-btn");
 	const communityRankingBtn = document.getElementById("community-ranking-btn");
+	const rankingActions = document.querySelector(".ranking-actions");
 	const toggleRankingsBtn = document.getElementById("toggle-rankings-btn");
 	const hideLeaderboardToggle = document.getElementById(
 		"hide-leaderboard-toggle",
@@ -501,7 +502,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		return yiq >= 128 ? "black" : "white";
 	}
 
-	const STATE_VERSION = 3;
+	const STATE_VERSION = 4;
 
 	const DEFAULT_GLOBAL_STATE = {
 		currentGame: "deltarune",
@@ -515,6 +516,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		combinedDiscovered: false,
 		felfebMode: true,
 		useSystemCursor: false,
+		communityRankingMode: "elo",
 		selectedFranchises: ["deltarune", "undertale", "uty", "tsus"],
 		selectedDRChapters: [1, 2, 3, 4, 5],
 		specialTheme: null,
@@ -579,6 +581,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		hideAccuracy: globalState.hideAccuracy || false,
 		hideAccuracyPercent: globalState.hideAccuracyPercent || false,
 		showGlobalDiff: globalState.showGlobalDiff || false,
+		communityRankingMode: globalState.communityRankingMode || "elo",
 		specialTheme:
 			globalState.specialTheme ||
 			localStorage.getItem("drSongRankerSpecialTheme") ||
@@ -616,6 +619,7 @@ document.addEventListener("DOMContentLoaded", () => {
 				hideAccuracy: state.hideAccuracy,
 				hideAccuracyPercent: state.hideAccuracyPercent,
 				showGlobalDiff: state.showGlobalDiff,
+				communityRankingMode: state.communityRankingMode,
 				specialTheme: state.specialTheme,
 				soulColor: state.soulColor,
 				soulInverted: state.soulInverted,
@@ -2804,6 +2808,8 @@ document.addEventListener("DOMContentLoaded", () => {
 		}
 		if (communityDataPromise) return communityDataPromise;
 
+		const isCentralityMode = state.communityRankingMode === "centrality";
+
 		communityDataPromise = (async () => {
 			try {
 				let combinedData = [];
@@ -2815,22 +2821,29 @@ document.addEventListener("DOMContentLoaded", () => {
 					if (error) throw error;
 					combinedData = data;
 				} else if (state.currentGame === "combined") {
+					const selCols = isCentralityMode
+						? "name, id, rating, centrality"
+						: "name, id, rating";
 					const [drRes, utRes, utyRes, tsusRes] = await Promise.all([
 						supabaseClient
 							.from("songs")
-							.select("name, id, rating")
+							.select(selCols)
 							.order("rating", { ascending: false }),
 						supabaseClient
 							.from("ut_songs")
-							.select("name, id, rating")
+							.select(selCols)
 							.order("rating", { ascending: false }),
 						supabaseClient
 							.from("uty_songs")
-							.select("name, id, rating")
+							.select(selCols)
 							.order("rating", { ascending: false }),
 						supabaseClient
 							.from("tsus_songs")
-							.select("name, id, rating, hidden")
+							.select(
+								isCentralityMode
+									? "name, id, rating, centrality, hidden"
+									: "name, id, rating, hidden",
+							)
 							.order("rating", { ascending: false }),
 					]);
 
@@ -2844,10 +2857,19 @@ document.addEventListener("DOMContentLoaded", () => {
 						...utRes.data,
 						...utyRes.data,
 						...tsusRes.data,
-					].sort((a, b) => b.rating - a.rating);
+					].sort((a, b) => {
+						const sortKey = isCentralityMode ? "centrality" : "rating";
+						const va =
+							a[sortKey] != null ? a[sortKey] : isCentralityMode ? 50 : 0;
+						const vb =
+							b[sortKey] != null ? b[sortKey] : isCentralityMode ? 50 : 0;
+						return vb - va;
+					});
 				} else {
 					let tableName = "songs";
-					let selectCols = "name, id, rating";
+					let selectCols = isCentralityMode
+						? "name, id, rating, centrality"
+						: "name, id, rating";
 					if (state.currentGame === "undertale") tableName = "ut_songs";
 					else if (
 						state.currentGame === "undertale_yellow" ||
@@ -2856,7 +2878,9 @@ document.addEventListener("DOMContentLoaded", () => {
 						tableName = "uty_songs";
 					else if (state.currentGame === "tsus") {
 						tableName = "tsus_songs";
-						selectCols = "name, id, rating, hidden";
+						selectCols = isCentralityMode
+							? "name, id, rating, centrality, hidden"
+							: "name, id, rating, hidden";
 					}
 					const { data, error } = await supabaseClient
 						.from(tableName)
@@ -2878,6 +2902,15 @@ document.addEventListener("DOMContentLoaded", () => {
 						region: localSong ? localSong.region : undefined, // for tsus/uty area filtering
 					};
 				});
+
+				// sort by the active ranking mode
+				if (isCentralityMode) {
+					cachedCommunitySongs.sort((a, b) => {
+						const va = a.centrality != null ? a.centrality : 50;
+						const vb = b.centrality != null ? b.centrality : 50;
+						return vb - va;
+					});
+				}
 
 				cachedCommunityGame = state.currentGame;
 				communityDataPromise = null;
@@ -2918,7 +2951,13 @@ document.addEventListener("DOMContentLoaded", () => {
 				li.appendChild(nameSpan);
 
 				const details = document.createElement("small");
-				details.textContent = Math.round(song.rating);
+				const score =
+					state.communityRankingMode === "centrality"
+						? song.centrality != null
+							? song.centrality
+							: 50
+						: song.rating;
+				details.textContent = Math.round(score);
 				details.style.display = state.showRatings ? "inline" : "none";
 				li.appendChild(details);
 
@@ -3079,9 +3118,20 @@ document.addEventListener("DOMContentLoaded", () => {
 				cachedCommunitySongs,
 				currentChapterFilter,
 			);
-			const sortedGlobal = [...filteredGlobal].sort(
-				(a, b) => b.rating - a.rating,
-			);
+			const sortedGlobal = [...filteredGlobal].sort((a, b) => {
+				const isCentrality = state.communityRankingMode === "centrality";
+				const va = isCentrality
+					? a.centrality != null
+						? a.centrality
+						: 50
+					: a.rating;
+				const vb = isCentrality
+					? b.centrality != null
+						? b.centrality
+						: 50
+					: b.rating;
+				return vb - va;
+			});
 			globalRanks = {};
 			for (let i = 0; i < sortedGlobal.length; i++) {
 				globalRanks[sortedGlobal[i].id] = i;
@@ -3620,14 +3670,42 @@ document.addEventListener("DOMContentLoaded", () => {
 	myRankingBtn.addEventListener("click", () => {
 		communityRankingBtn.classList.remove("active");
 		myRankingBtn.classList.add("active");
+		if (communityModeBtn) communityModeBtn.style.display = "none";
+		if (rankingActions) rankingActions.classList.remove("global-layout");
 		displayRankings();
 	});
 
 	communityRankingBtn.addEventListener("click", () => {
 		myRankingBtn.classList.remove("active");
 		communityRankingBtn.classList.add("active");
+		if (communityModeBtn) communityModeBtn.style.display = "";
+		if (rankingActions) rankingActions.classList.add("global-layout");
 		displayCommunityRankings();
 	});
+
+	const communityModeBtn = document.getElementById("community-mode-btn");
+	if (communityModeBtn) {
+		// hidden until global tab
+		if (myRankingBtn.classList.contains("active")) {
+			communityModeBtn.style.display = "none";
+		}
+		communityModeBtn.textContent =
+			state.communityRankingMode === "centrality" ? "Centrality" : "Elo";
+		communityModeBtn.addEventListener("click", () => {
+			const next = state.communityRankingMode === "elo" ? "centrality" : "elo";
+			state.communityRankingMode = next;
+			saveState();
+			communityModeBtn.textContent =
+				next === "centrality" ? "Centrality" : "Elo";
+			// bust cache, mode changed
+			cachedCommunityGame = null;
+			cachedCommunitySongs = [];
+			communityDataPromise = null;
+			if (communityRankingBtn.classList.contains("active")) {
+				displayCommunityRankings();
+			}
+		});
+	}
 
 	if (combinedToggle) {
 		combinedToggle.addEventListener("click", () => {

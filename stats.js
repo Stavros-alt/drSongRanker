@@ -4,6 +4,39 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 	const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+	// elo or centrality mode
+	const RANKING_MODE_KEY = "drSongRankerStatsMode";
+	const rankingMode = localStorage.getItem(RANKING_MODE_KEY) || "elo";
+
+	function getScore(s) {
+		if (rankingMode === "centrality") {
+			return s.centrality != null ? s.centrality : 50;
+		}
+		return s.rating;
+	}
+
+	function getScoreLabel() {
+		return rankingMode === "centrality" ? "Centrality" : "Rating";
+	}
+
+	// toggle button
+	const toggleBtn = document.getElementById("ranking-mode-toggle");
+	const toggleLabel = document.getElementById("ranking-mode-label");
+	if (toggleBtn) {
+		if (rankingMode === "centrality") {
+			toggleLabel.textContent = "Elo";
+			toggleLabel.classList.remove("active-mode");
+			toggleBtn.querySelector("span:last-child").classList.add("active-mode");
+		} else {
+			toggleLabel.classList.add("active-mode");
+		}
+		toggleBtn.addEventListener("click", () => {
+			const next = rankingMode === "elo" ? "centrality" : "elo";
+			localStorage.setItem(RANKING_MODE_KEY, next);
+			location.reload();
+		});
+	}
+
 	// chart defaults
 
 	Chart.defaults.color = "#fff";
@@ -14,19 +47,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 		const [drRes, utRes, utyRes, tsusRes] = await Promise.all([
 			supabase
 				.from("songs")
-				.select("id, name, rating, comparisons")
+				.select("id, name, rating, comparisons, centrality")
 				.order("rating", { ascending: false }),
 			supabase
 				.from("ut_songs")
-				.select("id, name, rating, comparisons")
+				.select("id, name, rating, comparisons, centrality")
 				.order("rating", { ascending: false }),
 			supabase
 				.from("uty_songs")
-				.select("id, name, rating, comparisons")
+				.select("id, name, rating, comparisons, centrality")
 				.order("rating", { ascending: false }),
 			supabase
 				.from("tsus_songs")
-				.select("id, name, rating, comparisons")
+				.select("id, name, rating, comparisons, centrality")
 				.order("rating", { ascending: false }),
 		]);
 
@@ -38,9 +71,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 			alert("Failed to load stats.");
 			return [];
 		}
-		return [...drRes.data, ...utRes.data, ...utyRes.data, ...tsusRes.data].sort(
-			(a, b) => b.rating - a.rating,
-		);
+		const merged = [
+			...drRes.data,
+			...utRes.data,
+			...utyRes.data,
+			...tsusRes.data,
+		];
+		const sortKey = rankingMode === "centrality" ? "centrality" : "rating";
+		return merged.sort((a, b) => {
+			const va =
+				a[sortKey] != null ? a[sortKey] : rankingMode === "centrality" ? 50 : 0;
+			const vb =
+				b[sortKey] != null ? b[sortKey] : rankingMode === "centrality" ? 50 : 0;
+			return vb - va;
+		});
 	}
 
 	async function fetchFelfebStats() {
@@ -160,7 +204,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		songSet.forEach((s) => {
 			const sec = getSection(s);
 			if (stats[sec]) {
-				stats[sec].sum += s.rating;
+				stats[sec].sum += getScore(s);
 				stats[sec].count++;
 			}
 		});
@@ -178,8 +222,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 			labels: top10.map((s) => s.name.substring(0, 15) + "..."),
 			datasets: [
 				{
-					label: "Rating",
-					data: top10.map((s) => s.rating),
+					label: getScoreLabel(),
+					data: top10.map((s) => getScore(s)),
 					backgroundColor: "#00f2ff",
 					borderColor: "#fff",
 					borderWidth: 1,
@@ -191,12 +235,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 			responsive: true,
 			maintainAspectRatio: false,
 			plugins: { legend: { display: false } },
-			scales: { x: { min: 1400 } },
 		},
 	});
 
 	// bottom 10 lowest rated
-	const bottom10 = [...songs].sort((a, b) => a.rating - b.rating).slice(0, 10);
+	const bottom10 = [...songs]
+		.sort((a, b) => getScore(a) - getScore(b))
+		.slice(0, 10);
 
 	new Chart(document.getElementById("bottom10Chart"), {
 		type: "bar",
@@ -204,8 +249,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 			labels: bottom10.map((s) => s.name.substring(0, 15) + "..."),
 			datasets: [
 				{
-					label: "Rating",
-					data: bottom10.map((s) => s.rating),
+					label: getScoreLabel(),
+					data: bottom10.map((s) => getScore(s)),
 					backgroundColor: "#333333",
 					borderColor: "#666",
 					borderWidth: 1,
@@ -217,12 +262,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 			responsive: true,
 			maintainAspectRatio: false,
 			plugins: { legend: { display: false } },
-			scales: { x: { min: 1000 } },
 		},
 	});
 
 	// rating distribution
-	const ratings = publicSongs.map((s) => Math.round(s.rating));
+	const ratings = publicSongs.map((s) => Math.round(getScore(s)));
 	const bins = {};
 	ratings.forEach((r) => {
 		const bin = Math.floor(r / 50) * 50;
@@ -255,7 +299,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	// average rating by game
 	const gameLabels = ["Deltarune", "Undertale", "UT Yellow", "TS!Underswap"];
 	const gameAvgs = [drSongs, utSongs, utySongs, tsusSongs].map((set) =>
-		set.length ? set.reduce((sum, s) => sum + s.rating, 0) / set.length : 0,
+		set.length ? set.reduce((sum, s) => sum + getScore(s), 0) / set.length : 0,
 	);
 
 	new Chart(document.getElementById("avgByGameChart"), {
@@ -264,7 +308,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			labels: gameLabels,
 			datasets: [
 				{
-					label: "Average Rating",
+					label: getScoreLabel() + " Average",
 					data: gameAvgs,
 					backgroundColor: ["#00ff9d", "#ff4444", "#666", "#666"],
 					borderColor: "#fff",
@@ -275,7 +319,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 		options: {
 			responsive: true,
 			maintainAspectRatio: false,
-			scales: { y: { min: 1200 } },
 			plugins: { legend: { display: false } },
 		},
 	});
@@ -290,7 +333,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			labels: drSections,
 			datasets: [
 				{
-					label: "Average Rating",
+					label: getScoreLabel() + " Average",
 					data: drAvgs,
 					backgroundColor: [
 						"#bf44ff",
@@ -307,7 +350,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 		options: {
 			responsive: true,
 			maintainAspectRatio: false,
-			scales: { y: { min: 1200 } },
 			plugins: { legend: { display: false } },
 		},
 	});
@@ -328,7 +370,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			labels: utSections,
 			datasets: [
 				{
-					label: "Average Rating",
+					label: getScoreLabel() + " Average",
 					data: utAvgs,
 					backgroundColor: [
 						"#bf44ff",
@@ -345,7 +387,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 		options: {
 			responsive: true,
 			maintainAspectRatio: false,
-			scales: { y: { min: 1200 } },
 			plugins: { legend: { display: false } },
 		},
 	});
@@ -367,7 +408,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			labels: utySections,
 			datasets: [
 				{
-					label: "Average Rating",
+					label: getScoreLabel() + " Average",
 					data: utyAvgs,
 					backgroundColor: [
 						"#bf44ff",
@@ -386,7 +427,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 			responsive: true,
 			maintainAspectRatio: false,
 			scales: {
-				y: { min: 1200 },
 				x: {
 					ticks: { maxRotation: 45, minRotation: 30, font: { size: 10 } },
 				},
@@ -406,7 +446,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	const withDeviation = publicSongs.map((s) => ({
 		...s,
 		game: getGame(s),
-		deviation: s.rating - gameMeans[getGame(s)],
+		deviation: getScore(s) - gameMeans[getGame(s)],
 	}));
 
 	// top 10 by absolute deviation
@@ -452,7 +492,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	});
 
 	// the curve (all songs sorted)
-	const allSorted = [...songs].sort((a, b) => b.rating - a.rating);
+	const allSorted = [...songs].sort((a, b) => getScore(b) - getScore(a));
 
 	new Chart(document.getElementById("curveChart"), {
 		type: "line",
@@ -460,8 +500,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 			labels: allSorted.map((_, i) => i + 1),
 			datasets: [
 				{
-					label: "Rating",
-					data: allSorted.map((s) => s.rating),
+					label: getScoreLabel(),
+					data: allSorted.map((s) => getScore(s)),
 					borderColor: "#00f2ff",
 					backgroundColor: "rgba(0, 242, 255, 0.1)",
 					fill: true,
@@ -479,7 +519,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 						title: (context) => `Rank #${context[0].label}`,
 						label: (context) => {
 							const song = allSorted[context.dataIndex];
-							return `${song.name}: ${Math.round(song.rating)}`;
+							return `${song.name}: ${Math.round(getScore(song))}`;
 						},
 					},
 				},
@@ -487,7 +527,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			},
 			scales: {
 				x: { title: { display: true, text: "Rank" } },
-				y: { title: { display: true, text: "Rating" } },
+				y: { title: { display: true, text: getScoreLabel() } },
 			},
 		},
 	});
@@ -502,7 +542,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 				datasets: [
 					{
 						label: gameLabel,
-						data: sorted.map((s, i) => ({ x: i + 1, y: s.rating })),
+						data: sorted.map((s, i) => ({ x: i + 1, y: getScore(s) })),
 						backgroundColor: color,
 						pointRadius: 4,
 						pointHoverRadius: 6,
@@ -525,7 +565,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 				},
 				scales: {
 					x: { title: { display: true, text: "Track Order" } },
-					y: { title: { display: true, text: "Rating" } },
+					y: { title: { display: true, text: getScoreLabel() } },
 				},
 			},
 		});
@@ -546,7 +586,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 			datasets: [
 				{
 					label: "Songs",
-					data: songsWithDuration.map((s) => ({ x: s.duration, y: s.rating })),
+					data: songsWithDuration.map((s) => ({
+						x: s.duration,
+						y: getScore(s),
+					})),
 					backgroundColor: "#ffff00",
 					pointRadius: 4,
 					pointHoverRadius: 6,
@@ -563,7 +606,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 							const song = songsWithDuration.find(
 								(s) =>
 									Math.abs(s.duration - context.raw.x) < 0.01 &&
-									s.rating === context.raw.y,
+									getScore(s) === context.raw.y,
 							);
 							return `${song ? song.name : "Unknown"}: ${Math.round(context.raw.y)} (${context.raw.x}s)`;
 						},
@@ -577,7 +620,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 					type: "linear",
 					position: "bottom",
 				},
-				y: { title: { display: true, text: "Rating" } },
+				y: { title: { display: true, text: getScoreLabel() } },
 			},
 		},
 	});
@@ -631,17 +674,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 		if (game === "DR") {
 			const sec = getSection(s);
 			if (radarStats[sec]) {
-				radarStats[sec].sum += s.rating;
+				radarStats[sec].sum += getScore(s);
 				radarStats[sec].count++;
 			}
 		} else if (game === "UT") {
-			radarStats["UT"].sum += s.rating;
+			radarStats["UT"].sum += getScore(s);
 			radarStats["UT"].count++;
 		} else if (game === "UTY") {
-			radarStats["UTY"].sum += s.rating;
+			radarStats["UTY"].sum += getScore(s);
 			radarStats["UTY"].count++;
 		} else {
-			radarStats["TSUS"].sum += s.rating;
+			radarStats["TSUS"].sum += getScore(s);
 			radarStats["TSUS"].count++;
 		}
 	});
@@ -656,7 +699,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			labels: radarLabels,
 			datasets: [
 				{
-					label: "Avg Rating",
+					label: "Avg " + getScoreLabel(),
 					data: radarData,
 					backgroundColor: "rgba(0, 255, 157, 0.2)",
 					borderColor: "#00ff9d",
@@ -675,7 +718,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 					angleLines: { color: "#333" },
 					grid: { color: "#333" },
 					pointLabels: { color: "#fff", font: { size: 14 } },
-					suggestedMin: 1300,
 				},
 			},
 			plugins: { legend: { display: false } },
