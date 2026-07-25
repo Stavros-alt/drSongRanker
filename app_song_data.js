@@ -1628,8 +1628,8 @@ const songList = [
 	},
 	{
 		id: 290,
-		name: "Scarlet Forest (DELTARUNE Piano Collections, Vol. 1)",
-		file: "DELTARUNESoundtrack/290 Scarlet Forest (DELTARUNE Piano Collections, Vol. 1).mp3",
+		name: "Field of Hopes and Dreams (Credits Version)",
+		file: "DELTARUNESoundtrack/290 Field of Hopes and Dreams (Credits Version).mp3",
 		rating: 1500,
 		comparisons: 0,
 		duration: 99.0,
