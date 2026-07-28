@@ -1075,7 +1075,7 @@ button:active {
 	padding: 2px 6px;
 	font-size: 0.7em;
 	cursor: none;
-	/* cursor.js handles this because i don't want to. */
+	/* cursor.js handles this */
 	transition: all 0.1s;
 	min-width: 25px;
 	flex-shrink: 0;

@@ -3234,7 +3234,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			personalVoteStat.textContent = `YOUR VOTES: ${state.comparisons}`;
 		}
 
-		// popup for 100% completion so they stop complaining
+		// popup for 100% completion
 		if (accuracy.toFixed(1) === "100.0" && !state.hasSeenFinishScreen) {
 			state.hasSeenFinishScreen = true;
 			saveState();
@@ -3997,7 +3997,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		});
 	});
 	fullPlayBtns.forEach((btn) => {
-		btn.addEventListener("click", () => playFullSong(btn.dataset.song)); // hope they like the whole song.
+		btn.addEventListener("click", () => playFullSong(btn.dataset.song)); // play full song
 	});
 	toggleRankingsBtn.addEventListener("click", () => {
 		rankingContainer.classList.toggle("visible");
@@ -4686,7 +4686,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	if (mainFilterSelect) mainFilterSelect.value = state.activeRankerList;
 	updateApp();
 
-	// refresh on back button because browsers are annoying.
+	// refresh on bfcache restore
 	window.addEventListener("pageshow", (e) => {
 		if (e.persisted) {
 			checkSecretsGlobal();

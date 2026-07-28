@@ -842,7 +842,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 				},
 			});
 		} else if (canvasElement && canvasElement.parentElement) {
-			// guess they haven't played yet.
+			// no local rankings data
 			canvasElement.parentElement.innerHTML =
 				'<p style="text-align: center; color: #666; margin-top: 40px;">no local rankings found. go rank some songs first.</p>';
 		}
