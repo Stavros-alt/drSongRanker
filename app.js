@@ -262,7 +262,7 @@ document.addEventListener("DOMContentLoaded", () => {
 				// the button does the switching now.
 				if (combinedToggle) combinedToggle.style.display = "inline-block";
 
-				// auto-switch if we just discovered it? nah, let them click.
+				// auto switching after discovery feels pushy. nah, keep it manual.
 				vsClickCount = 0;
 			}
 		});
@@ -461,7 +461,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		}
 
 		trendLayer.style.display = "block";
-		// background-color can't layer multiple rgba values, need gradients
+		// background color can't layer multiple rgba values, need gradients
 		trendLayer.style.backgroundImage = `
             linear-gradient(rgba(255,0,0,${Math.min(1, moddingRed)}), rgba(255,0,0,${Math.min(1, moddingRed)})),
             linear-gradient(rgba(0,255,0,${Math.min(1, moddingGreen)}), rgba(0,255,0,${Math.min(1, moddingGreen)})),
@@ -745,9 +745,9 @@ document.addEventListener("DOMContentLoaded", () => {
 	}
 
 	function rebuildMergedResults() {
-		// collected per game: map of songId -> { name, ratings: [r1, r2, ...], voterNames: [n1, n2, ...] }
+		// collected per game: map of songId to { name, ratings: [r1, r2, ...], voterNames: [n1, n2, ...] }
 		const perGame = {};
-		// per-game dedup so combined key doesn't double-count
+		// dedup per game so the combined key doesn't double count
 		const gameDedup = {}; // game -> Set of `${fileIdx}-${songId}`
 
 		for (let fi = 0; fi < mergedFiles.length; fi++) {
@@ -1020,7 +1020,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			// close settings
 			if (settingsModal) settingsModal.style.display = "none";
 			groupMergeModal.style.display = "flex";
-			// re-render in case data changed
+			// rerender in case data changed
 			const sel = document.getElementById("merge-game-select");
 			if (sel) renderGroupMergedResults(sel.value);
 		});
@@ -1642,7 +1642,7 @@ document.addEventListener("DOMContentLoaded", () => {
 					"drSongRankerCustomLists",
 					JSON.stringify(state.customLists),
 				);
-				// clear old key so migration doesnt re-run if "Default" gets recreated
+				// clear old key so migration doesnt rerun if "Default" gets recreated
 				localStorage.removeItem("drSongRankerCustomSelection");
 			} else {
 				state.customLists = {}; // init empty if nothing exists
@@ -2027,7 +2027,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		} else if (filter === "hidden") {
 			return state.secretsUnlocked ? pool.filter((s) => s.hidden) : [];
 		} else if (filter.startsWith("mix_")) {
-			// "mix_1_2_3" -> [1, 2, 3]
+			// "mix_1_2_3" becomes [1, 2, 3]
 			const chapters = filter.replace("mix_", "").split("_").map(Number);
 			return pool.filter((s) => {
 				if (s.hidden && !state.secretsUnlocked) return false;
@@ -2047,7 +2047,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	function getChaptersForSong(song) {
 		if (song.id >= 4000) {
-			// TS!Underswap regional filters as requested
+			// TS!Underswap regional filters
 			if (song.region) return [song.region.toLowerCase().replace(/ /g, "_")];
 			return ["all"];
 		}
@@ -2083,7 +2083,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			if (song.id >= 252 && song.id <= 291) ch.push(5);
 			return ch;
 		} else {
-			// Undertale areas. Ruins (1-14), Snowdin (15-24), Waterfall (25-46), Hotland/CORE (47-70), New Home (71+)
+			// Undertale areas. Ruins (1 to 14), Snowdin (15 to 24), Waterfall (25 to 46), Hotland/CORE (47 to 70), New Home (71+)
 			const track = song.id - 1000;
 			if (track <= 14) return [1];
 			if (track >= 15 && track <= 24) return [2];
@@ -2460,7 +2460,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		if (state.showAgreement && winner) {
 			await displayAgreementStats(winner);
 		} else {
-			// re-enable buttons if not showing agreement
+			// reenable buttons if not showing agreement
 			chooseABtn.disabled = false;
 			chooseBBtn.disabled = false;
 			if (chooseAMobileBtn) chooseAMobileBtn.disabled = false;
@@ -2618,7 +2618,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		musicPlayerBar.classList.remove("hidden");
 
 		// if it's short, play the last 10 seconds.
-		// if it's 30-60s, play from the start.
+		// if it's 30 to 60s, play from the start.
 		// otherwise skip the first 30s because i only care about the middle bit.
 		let startTime = PREVIEW_START_TIME;
 		if (songData.duration) {
@@ -3628,7 +3628,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		if (myRankingBtn.classList.contains("active")) {
 			displayRankings();
 		} else if (communityRankingBtn.classList.contains("active")) {
-			// don't auto-refresh community rankings on every vote, too expensive
+			// don't auto refresh community rankings on every vote, too expensive
 		}
 		updateProgress();
 		presentNewPair();
@@ -4224,6 +4224,77 @@ document.addEventListener("DOMContentLoaded", () => {
 		}
 	}
 
+	// section colors mirror the stats page section charts. don't drift from them.
+	const SECTION_COLORS = {
+		dr: ["#bf44ff", "#44ccff", "#ff4444", "#4466ff", "#ffdd00"],
+		ut: ["#bf44ff", "#44ccff", "#4466ff", "#ff8800", "#ffdd00"],
+		uty: ["#bf44ff", "#44ccff", "#ff8800", "#ff4444", "#4466ff", "#ffdd00"],
+		tsus: ["#bf44ff", "#44ccff", "#ff8800", "#ff4444", "#4466ff", "#ffdd00"],
+	};
+	const TSUS_REGION_ORDER = [
+		"ruined_home",
+		"stardust_woods",
+		"koffin_keep",
+		"starstruck_village",
+		"crystal_springs",
+		"extras",
+	];
+	const UTY_AREA_ORDER = [
+		"ruins",
+		"snowdin",
+		"dunes",
+		"wild_east",
+		"steamworks",
+		"new_home",
+	];
+	const UT_AREA_NAMES = [
+		"RUINS",
+		"SNOWDIN",
+		"WATERFALL",
+		"HOTLAND/CORE",
+		"NEW HOME",
+	];
+
+	function getSectionInfo(song) {
+		// rank number label + color for the share export. one section per song.
+		const game =
+			song.id < 1000
+				? "dr"
+				: song.id < 2000
+					? "ut"
+					: song.id < 4000
+						? "uty"
+						: "tsus";
+		const chs = getChaptersForSong(song);
+		let label = "";
+		let idx = -1;
+		if (game === "dr") {
+			const ch = chs[0];
+			label = ch ? `CH${ch}` : "EXTRA";
+			idx = ch ? ch - 1 : -1;
+		} else if (game === "ut") {
+			const ch = chs[0];
+			label = ch ? UT_AREA_NAMES[ch - 1] : "EXTRA";
+			idx = ch ? ch - 1 : -1;
+		} else if (game === "uty") {
+			idx = chs[0] ? UTY_AREA_ORDER.indexOf(chs[0]) : -1;
+			label = idx >= 0 ? chs[0].replace(/_/g, " ").toUpperCase() : "EXTRA";
+		} else {
+			const slug = chs[0] === "all" ? "" : chs[0] || "";
+			idx = slug ? TSUS_REGION_ORDER.indexOf(slug) : -1;
+			label = idx >= 0 ? slug.replace(/_/g, " ").toUpperCase() : "EXTRA";
+		}
+		if (state.currentGame === "combined") {
+			// same section name exists in multiple games (ruins everywhere). disambiguate.
+			label = `${game.toUpperCase()} ${label}`;
+		}
+		const color =
+			idx >= 0
+				? SECTION_COLORS[game][idx % SECTION_COLORS[game].length]
+				: "#666";
+		return { label, color, game, idx };
+	}
+
 	function updateSharePreview() {
 		if (!shareBtn) return;
 		const isCommunity = communityRankingBtn.classList.contains("active");
@@ -4235,9 +4306,21 @@ document.addEventListener("DOMContentLoaded", () => {
 		}
 
 		const filteredData = filterSongsByChapter(sourceData, currentChapterFilter);
-		const sortedData = [...filteredData].sort(
-			(a, b) => getRating(b) - getRating(a),
-		);
+		const isCentrality =
+			isCommunity && state.communityRankingMode === "centrality";
+		const sortedData = [...filteredData].sort((a, b) => {
+			const va = isCentrality
+				? a.centrality != null
+					? a.centrality
+					: 50
+				: getRating(a);
+			const vb = isCentrality
+				? b.centrality != null
+					? b.centrality
+					: 50
+				: getRating(b);
+			return vb - va;
+		});
 
 		const songCount = shareCountInput ? parseInt(shareCountInput.value) : 10;
 		const topSongs = sortedData.slice(0, songCount);
@@ -4251,11 +4334,15 @@ document.addEventListener("DOMContentLoaded", () => {
 		titleText +=
 			songCount >= sortedData.length ? " RANKING" : ` TOP ${songCount}`;
 
+		if (isCentrality) {
+			titleText += " (CENTRALITY)";
+		}
+
 		if (currentChapterFilter !== "all") {
 			titleText += ` (${currentChapterFilter.toUpperCase()})`;
 		}
 
-		// i shortened this because the footer kept eating the songs. hope this is enough.
+		// i shortened this because the footer kept eating the songs.
 		const targetHeight = 580;
 
 		// scaling logic.
@@ -4277,14 +4364,40 @@ document.addEventListener("DOMContentLoaded", () => {
 		// making room for the numbers i just shoved outside the list.
 		const listPaddingLeft = fontSize > 20 ? "60px" : "45px";
 		html += `<ul style="padding-left: ${listPaddingLeft}; margin: 0; color: #fff; height: 100%; list-style-type: none;">`;
+		const legendMap = new Map();
 		topSongs.forEach((song, index) => {
+			const sec = getSectionInfo(song);
+			legendMap.set(sec.label, {
+				color: sec.color,
+				game: sec.game,
+				idx: sec.idx,
+			});
 			// hanging numbers for decimal alignment.
 			// li no longer has overflow:hidden. was hiding my own work.
-			html += `<li style="margin-bottom: ${marginBottom}px; position: relative; width: 100%; display: block;">`;
-			html += `<span style="color: ${accentColor}; font-weight: bold; position: absolute; right: 100%; margin-right: 12px; text-align: right; pointer-events: none; white-space: nowrap;">${index + 1}.</span>`;
-			html += `<span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%;">${song.name}</span></li>`;
+			html += `<li style="margin-bottom: ${marginBottom}px; position: relative; width: 100%; display: flex; align-items: center;">`;
+			html += `<span style="color: ${sec.color}; font-weight: bold; position: absolute; right: 100%; margin-right: 12px; text-align: right; pointer-events: none; white-space: nowrap;">${index + 1}.</span>`;
+			html += `<span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; flex: 1; min-width: 0;">${song.name}</span></li>`;
 		});
 		html += "</ul></div>";
+
+		// legend mapping number colors to sections. only when more than one section shows.
+		if (legendMap.size > 1) {
+			const gameOrder = { dr: 0, ut: 1, uty: 2, tsus: 3 };
+			const sortedLegend = [...legendMap.entries()].sort((a, b) => {
+				const ga = gameOrder[a[1].game] ?? 99;
+				const gb = gameOrder[b[1].game] ?? 99;
+				if (ga !== gb) return ga - gb;
+				// unknown sections (EXTRA) go last
+				return (
+					(a[1].idx >= 0 ? a[1].idx : 99) - (b[1].idx >= 0 ? b[1].idx : 99)
+				);
+			});
+			html += `<div style="position: absolute; bottom: 34px; left: 25px; right: 25px; display: flex; flex-wrap: wrap; gap: 10px 16px; font-family: 'Roboto Mono', monospace; font-size: 11px; color: #aaa;">`;
+			sortedLegend.forEach(([label, info]) => {
+				html += `<span style="display: inline-flex; align-items: center;"><span style="display: inline-block; width: 10px; height: 10px; background: ${info.color}; margin-right: 6px; border-radius: 2px;"></span>${label}</span>`;
+			});
+			html += "</div>";
+		}
 
 		// pushing this footer down. go away.
 		html += `<p style="position: absolute; bottom: 12px; right: 30px; margin: 0; font-size: 13px; color: #555; font-family: 'Roboto Mono', monospace;">stavros-alt.github.io/drSongRanker</p>`;
@@ -4314,7 +4427,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	downloadShareBtn.addEventListener("click", () => {
 		// prepare for capture.
-		// html2canvas struggles with transforms. let's temporarily un-transform it.
+		// html2canvas struggles with transforms. temporarily undo them.
 		const originalStyle = sharePreview.style.cssText;
 		sharePreview.style.transform = "none";
 		sharePreview.style.position = "fixed";
@@ -4618,7 +4731,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		const textList = exportPool
 			.map((s) => {
 				let songName = s.name;
-				// band-aids for bad search results.
+				// stopgaps for bad search results.
 				if (songName === "AIRWAVES") songName = "Air Waves";
 				if (songName === "A DARK ZONE") songName = "A Dark Zone";
 

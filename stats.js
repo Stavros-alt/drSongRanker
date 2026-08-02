@@ -534,7 +534,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 	// chronological quality: 3 separate charts
 	function makeChronoChart(canvasId, songSet, color, gameLabel) {
-		// normalize x-axis: just use order within this game
+		// normalize the x axis: just use order within this game
 		const sorted = [...songSet].sort((a, b) => a.id - b.id);
 		new Chart(document.getElementById(canvasId), {
 			type: "scatter",
@@ -575,7 +575,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	makeChronoChart("chronoUtChart", utSongs, "#00ff9d", "Undertale");
 	makeChronoChart("chronoUtyChart", utySongs, "#ffff00", "UT Yellow");
 
-	// duration vs rating (fixed: no zero-duration songs)
+	// duration vs rating (fixed: no zero duration songs)
 	const songsWithDuration = publicSongs.filter(
 		(s) => s.duration && s.duration > 0,
 	);

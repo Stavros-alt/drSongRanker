@@ -20,7 +20,7 @@ def clean_name(name):
     name = re.sub(r'[a-f0-9]{10,}', '', name)
     # replace multiple hyphens with a single space
     name = re.sub(r'-+', ' ', name)
-    # common soundtrack naming fixes: "s " -> "'s "
+    # common soundtrack naming fixes: "s " becomes "'s "
     name = re.sub(r'(\w) s ', r"\1's ", name)
     # trim spaces
     name = name.strip()

@@ -1,5 +1,5 @@
 const tsusSongList = [
-    // Main Soundtrack (Songs 1-69) - IDs 4001 to 4069
+    // Main Soundtrack (Songs 1 to 69), IDs 4001 to 4069
     { "id": 4001, "name": "Our History", "file": "TS-UNDERSWAPsoundtrack/TS!UNDERSWAP Soundtrack - 001 - Our History [MLei48qtIvo].mp3", "rating": 1500, "comparisons": 0, "duration": 97.68, "region": "Ruined Home" },
     { "id": 4002, "name": "Starting Anew (Main Menu Theme)", "file": "TS-UNDERSWAPsoundtrack/TS!UNDERSWAP Soundtrack - 002 - Starting Anew [j8JbLmy0H2A].mp3", "rating": 1500, "comparisons": 0, "duration": 76.94, "region": "Ruined Home" },
     { "id": 4003, "name": "Fuzzy Friend", "file": "TS-UNDERSWAPsoundtrack/TS!UNDERSWAP Soundtrack - 003 - Fuzzy Friend [ajrMd8A_pGU].mp3", "rating": 1500, "comparisons": 0, "duration": 96.07, "region": "Ruined Home" },
@@ -74,7 +74,7 @@ const tsusSongList = [
     { "id": 4068, "name": "Death March", "file": "TS-UNDERSWAPsoundtrack/TS!Underswap OST - Death March [CYJV6nvCSCk].mp3", "rating": 1500, "comparisons": 0, "duration": 119.59, "region": "Crystal Springs" },
     { "id": 4069, "name": "Benevolent Interrogation", "file": "TS-UNDERSWAPsoundtrack/TS!Underswap Soundtrack: A Place to Call Home (Slower Version) [YqkwvZ_FEwM].mp3", "rating": 1500, "comparisons": 0, "duration": 152.76, "region": "Crystal Springs" },
 
-    // Extras (Songs 70+) - IDs 4101+ 
+    // Extras (Songs 70+), IDs 4101+ 
     { "id": 4101, "name": "Bugerpant: Origins", "file": "TS-UNDERSWAPsoundtrack/Bugerpant Origins - TS!Underswap OST [sHmgHXsA4ho].mp3", "rating": 1500, "comparisons": 0, "duration": 109.06, "region": "Extras", "hidden": true },
     { "id": 4102, "name": "Ready To Rumble (Trailer Mix)", "file": "TS-UNDERSWAPsoundtrack/TS!Underswap OST Extras - Ready to Rumble (Trailer Mix) [54Ta9oUp9jI].mp3", "rating": 1500, "comparisons": 0, "duration": 108.12, "region": "Extras", "hidden": true },
     { "id": 4103, "name": "The Name Game", "file": "TS-UNDERSWAPsoundtrack/TS!Underswap's Hidden Message - the_name_game.ogg [fD_95R5opFI].mp3", "rating": 1500, "comparisons": 0, "duration": 79.18, "region": "Extras", "hidden": true },
