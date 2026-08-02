@@ -2713,13 +2713,15 @@ document.addEventListener("DOMContentLoaded", () => {
 		}
 
 		// mixed votes don't exist in the database. yet.
-		const winnerDeltarune = winnerId < 1000;
-		const loserDeltarune = loserId < 1000;
+		// the db tables are per game, so a cross game vote would create
+		// a fake unknown song in the winner's table. block all of them.
+		const gameRange = (id) =>
+			id < 1000 ? "dr" : id < 2000 ? "ut" : id < 4000 ? "uty" : "tsus";
 
-		if (winnerDeltarune !== loserDeltarune) return;
+		if (gameRange(winnerId) !== gameRange(loserId)) return;
 
 		let rpcName;
-		if (winnerDeltarune) rpcName = "handle_vote";
+		if (winnerId < 1000) rpcName = "handle_vote";
 		else if (winnerId > 1000 && winnerId < 2000) rpcName = "handle_ut_vote";
 		else if (winnerId >= 2000 && winnerId < 4000) rpcName = "handle_uty_vote";
 		else if (winnerId >= 4000) rpcName = "handle_tsus_vote";
@@ -4197,7 +4199,7 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
 		select.appendChild(durationGroup);
 
-		// Custom Lists Optgroup
+		// custom lists optgroup
 		const listNames = Object.keys(state.customLists || {});
 		if (listNames.length > 0) {
 			const optgroup = document.createElement("optgroup");

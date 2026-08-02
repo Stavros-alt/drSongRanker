@@ -195,7 +195,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		quickStatsRow.appendChild(box);
 	});
 
-	// helper: compute section averages
+	// section averages
 	function computeSectionAverages(songSet, sectionLabels) {
 		const stats = {};
 		sectionLabels.forEach((l) => {
