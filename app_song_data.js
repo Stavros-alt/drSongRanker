@@ -1577,6 +1577,8 @@ const songList = [
 		rating: 1500,
 		comparisons: 0,
 		duration: 184.0,
+		felfebFile:
+			"audio/felfeb/feb-dr/Cutie Mew Mew Magic (With Lyrics) - The Deltarune Musical [7z_BHxiCFs8].mp3",
 	},
 	{
 		id: 284,
