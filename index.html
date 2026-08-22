@@ -11,7 +11,7 @@
     <link rel="icon" type="image/x-icon" href="Art/favicon.ico" />
     <meta name="darkreader-lock" />
 
-    <!-- common metadata garbage -->
+    <!-- opengraph metadata -->
     <meta property="og:type" content="website" />
     <meta
       property="og:url"
@@ -27,7 +27,7 @@
       content="https://stavros-alt.github.io/drSongRanker/Art/funGang.jpeg"
     />
 
-    <!-- twitter boilerplate -->
+    <!-- twitter card metadata -->
     <meta property="twitter:card" content="summary_large_image" />
     <meta
       property="twitter:url"
@@ -170,7 +170,7 @@
               padding-right: 15px;
               width: auto;
               flex-grow: 1;
-              max-width: 300px;
+              max-width: 220px;
               text-align: center;
             "
           >
@@ -205,19 +205,95 @@
           <button
             id="edit-list-btn"
             class="filter-btn"
-            title="Edit Current List"
+            title="Edit current custom list"
             style="margin-left: 5px; flex-shrink: 0; display: none"
           >
-            ✎
+            ✎ Edit
           </button>
           <button
             id="create-list-btn"
             class="filter-btn"
-            title="Create New List"
+            title="Create a custom playlist. Pick any songs across chapters or games"
             style="margin-left: 5px; flex-shrink: 0"
           >
-            +
+            + Custom List
           </button>
+          <div style="position: relative; margin-left: 0; flex-shrink: 0">
+            <button
+              id="filter-help-btn"
+              class="filter-btn"
+              aria-label="How filtering works"
+              title="How filtering works"
+              style="
+                width: 26px;
+                min-width: 26px;
+                height: 26px;
+                padding: 0;
+                border-radius: 50%;
+                font-weight: 700;
+                line-height: 1;
+                color: #aaa;
+                border-color: #555;
+              "
+            >
+              ?
+            </button>
+            <div
+              id="filter-help-tooltip"
+              role="tooltip"
+              style="
+                display: none;
+                position: fixed;
+                z-index: 9999;
+                width: 300px;
+                max-width: calc(100vw - 20px);
+                background: #111;
+                border: 2px solid #fff;
+                padding: 14px;
+                font-size: 0.78em;
+                line-height: 1.5;
+                color: #ccc;
+                text-align: left;
+                box-shadow: 4px 4px 0 #000;
+              "
+            >
+              <div style="color: #fff; font-weight: 700; margin-bottom: 6px">
+                How to filter
+              </div>
+              <div style="margin-bottom: 8px">
+                <strong style="color: var(--accent-color)"
+                  >Mix Chapters...</strong
+                >
+                combines Deltarune chapters.
+                <strong style="color: var(--accent-color)"
+                  >Mix Franchises...</strong
+                >
+                and
+                <strong style="color: var(--accent-color)"
+                  >Mix DR Chapters...</strong
+                >
+                in Combined mode combine games.
+              </div>
+              <div style="margin-bottom: 8px">
+                For any exact mix use <strong>+ Custom List</strong> next to the
+                filter.
+              </div>
+              <div
+                style="
+                  border-top: 1px solid #333;
+                  padding-top: 8px;
+                  margin-top: 8px;
+                  color: #888;
+                  font-size: 0.92em;
+                "
+              >
+                <strong style="color: #fff">Combined mode:</strong> click the
+                <strong style="color: #fff">VS</strong> in the center three
+                times quickly to unlock it. It is very buggy and very
+                unfinished, so use it at your own risk.
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="search-container">
@@ -1514,7 +1590,7 @@
     <script src="cursor.js"></script>
     <script src="app.js?v=blockmixed"></script>
     <script>
-      // konami code. everyone knows this. why am i commenting it.
+      // konami code
       const konamiCode = [
         "ArrowUp",
         "ArrowUp",
@@ -1534,7 +1610,6 @@
       });
 
       function checkKonami(key) {
-        // handle "UP", "Return", etc from mobile keyboards if necessary, but we are using clicking.
         let k = key;
         if (
           k === "ArrowUp" ||
@@ -1589,6 +1664,46 @@
         nesOverlay.style.display = "block";
         // optional: maybe close settings?nah.
       });
+
+      // filter help tooltip
+      const filterHelpBtn = document.getElementById("filter-help-btn");
+      const filterHelpTip = document.getElementById("filter-help-tooltip");
+      if (filterHelpBtn && filterHelpTip) {
+        function positionFilterTip() {
+          const rect = filterHelpBtn.getBoundingClientRect();
+          const tipWidth = 300;
+          let left = rect.left + rect.width / 2 - tipWidth / 2;
+          left = Math.max(
+            10,
+            Math.min(left, window.innerWidth - tipWidth - 10),
+          );
+          filterHelpTip.style.left = left + "px";
+          filterHelpTip.style.top = rect.bottom + 8 + "px";
+        }
+        filterHelpBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const isHidden =
+            filterHelpTip.style.display === "none" ||
+            filterHelpTip.style.display === "";
+          if (isHidden) {
+            positionFilterTip();
+            filterHelpTip.style.display = "block";
+          } else {
+            filterHelpTip.style.display = "none";
+          }
+        });
+        document.addEventListener("click", (e) => {
+          if (!filterHelpTip.contains(e.target) && e.target !== filterHelpBtn) {
+            filterHelpTip.style.display = "none";
+          }
+        });
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape") filterHelpTip.style.display = "none";
+        });
+        window.addEventListener("resize", () => {
+          if (filterHelpTip.style.display === "block") positionFilterTip();
+        });
+      }
     </script>
   </body>
 </html>

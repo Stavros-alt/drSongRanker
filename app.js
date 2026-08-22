@@ -168,8 +168,8 @@ document.addEventListener("DOMContentLoaded", () => {
 	const previousRanking = [];
 	let activePreviewTimeout = null;
 	let currentChapterFilter = "all";
-	let votesSinceLastRefresh = 0; // stop hammering the api
-	let currentActiveAudio = null; // tracking what's actually making noise.
+	let votesSinceLastRefresh = 0; // rate limit vote sync
+	let currentActiveAudio = null; // track current audio element
 	let vsClickCount = 0;
 	let vsClickTimer = null;
 	const gasterInterval = null;
@@ -190,22 +190,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
 			// only show the placebo button if it hasn't been "scattered" yet
 			const isScattered =
-				localStorage.getItem("drSongRankerGasterExperimentScattered") ===
-				"true";
+				localStorage.getItem("drSongRankerGasterExperimentScattered") === "true";
 			if (gasterExperimentContainer) {
-				gasterExperimentContainer.style.display = isScattered
-					? "none"
-					: "block";
+				gasterExperimentContainer.style.display = isScattered ? "none" : "block";
 			}
 		} else if (savedSpecial === "cyber") {
 			document.body.classList.add("theme-cyber");
 			if (cyberThemeBtn) cyberThemeBtn.classList.add("active");
 			if (gasterExperimentContainer)
 				gasterExperimentContainer.style.display = "none";
-		} else {
-			if (gasterExperimentContainer)
-				gasterExperimentContainer.style.display = "none";
-		}
+		} else if (gasterExperimentContainer)
+			gasterExperimentContainer.style.display = "none";
 	}
 	applySpecialTheme();
 
@@ -262,7 +257,7 @@ document.addEventListener("DOMContentLoaded", () => {
 				// the button does the switching now.
 				if (combinedToggle) combinedToggle.style.display = "inline-block";
 
-				// auto switching after discovery feels pushy. nah, keep it manual.
+				// keep it manual no auto switch after discovery
 				vsClickCount = 0;
 			}
 		});
@@ -298,10 +293,7 @@ document.addEventListener("DOMContentLoaded", () => {
 				localStorage.setItem("drSongRankerTheme", "random");
 				const randomColor =
 					accentColors[Math.floor(Math.random() * accentColors.length)];
-				document.documentElement.style.setProperty(
-					"--accent-color",
-					randomColor,
-				);
+				document.documentElement.style.setProperty("--accent-color", randomColor);
 			} else {
 				localStorage.setItem("drSongRankerTheme", color);
 				document.documentElement.style.setProperty("--accent-color", color);
@@ -398,10 +390,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	if (gasterFakeExperimentBtn) {
 		gasterFakeExperimentBtn.addEventListener("click", () => {
-			// APRIL FOOLS PRANK: SCATTERING.
-			console.log(
-				"Experiment initiated. Result: CRYSTALIZED VOID. SCATTERING...",
-			);
+			// april fools scatter
+			console.log("Experiment initiated. Result: CRYSTALIZED VOID. SCATTERING...");
 
 			gasterFakeExperimentBtn.classList.add("gaster-scatter");
 			localStorage.setItem("drSongRankerGasterExperimentScattered", "true");
@@ -490,7 +480,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		});
 	}
 
-	// start it up. hopefully no one uses this.
+	// start it up
 	applyModdingOverlay();
 
 	function getContrastColor(hexColor) {
@@ -559,13 +549,13 @@ document.addEventListener("DOMContentLoaded", () => {
 		showRatings: globalState.showRatings,
 		showAgreement: globalState.showAgreement || false,
 		preventDuplicates:
-			globalState.preventDuplicates !== undefined
-				? globalState.preventDuplicates
-				: true,
+			globalState.preventDuplicates === undefined
+				? true
+				: globalState.preventDuplicates,
 		recentMatches: [],
 		volume: parseFloat(localStorage.getItem("drSongRankerVolume") || "0.5"),
 		felfebMode:
-			globalState.felfebMode !== undefined ? globalState.felfebMode : true,
+			globalState.felfebMode === undefined ? true : globalState.felfebMode,
 
 		useSystemCursor: globalState.useSystemCursor || false,
 		selectedFranchises: globalState.selectedFranchises || [
@@ -575,7 +565,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			"tsus",
 		],
 		selectedDRChapters: globalState.selectedDRChapters || [1, 2, 3, 4, 5],
-		hasSeenFinishScreen: false, // don't spam them with this every second
+		hasSeenFinishScreen: false, // avoid showing finish screen repeatedly
 		hideLeaderboard: globalState.hideLeaderboard || false,
 		hideMatchupRankings: globalState.hideMatchupRankings || false,
 		hideAccuracy: globalState.hideAccuracy || false,
@@ -628,7 +618,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		);
 	}
 
-	// export all ranking data as json. because people keep losing their progress.
+	// export all ranking data as json
 	function exportData() {
 		const allKeys = [
 			"drSongRankerState",
@@ -664,7 +654,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		URL.revokeObjectURL(url);
 	}
 
-	// import ranking data from json. fingers crossed.
+	// import ranking data from json
 	function importData(file) {
 		const reader = new FileReader();
 		reader.onload = (e) => {
@@ -812,8 +802,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 					const dedupKey = `${fi}-${s.id}`;
 					// skip if this song was already accounted for in the native game
-					if (gameDedup[nativeGame] && gameDedup[nativeGame].has(dedupKey))
-						continue;
+					if (gameDedup[nativeGame] && gameDedup[nativeGame].has(dedupKey)) continue;
 
 					if (!perGame[nativeGame]) perGame[nativeGame] = {};
 					if (!perGame[nativeGame][s.id]) {
@@ -912,7 +901,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			for (const e of entries) {
 				for (const v of e[1].voterNames) uniqueVoters.add(v);
 			}
-			personCountEl.textContent = `${uniqueVoters.size} participant${uniqueVoters.size !== 1 ? "s" : ""} · ${sorted.length} songs ranked`;
+			personCountEl.textContent = `${uniqueVoters.size} participant${uniqueVoters.size === 1 ? "" : "s"} · ${sorted.length} songs ranked`;
 		}
 
 		resultsEl.style.display = "block";
@@ -998,7 +987,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		const countEl = document.getElementById("merge-file-count");
 		const listEl = document.getElementById("merge-file-list");
 		if (countEl)
-			countEl.textContent = `${mergedFiles.length} file${mergedFiles.length !== 1 ? "s" : ""} loaded`;
+			countEl.textContent = `${mergedFiles.length} file${mergedFiles.length === 1 ? "" : "s"} loaded`;
 		if (listEl) {
 			listEl.innerHTML = mergedFiles
 				.map((f) => `<div style="padding: 2px 0;">📄 ${f.name}</div>`)
@@ -1090,19 +1079,15 @@ document.addEventListener("DOMContentLoaded", () => {
 		let sourceList = [];
 		if (state.currentGame === "combined") {
 			const drList =
-				typeof songList !== "undefined" ? songList : window.songList || [];
+				typeof songList === "undefined" ? window.songList || [] : songList;
 			const utList =
-				typeof utSongList !== "undefined"
-					? utSongList
-					: window.utSongList || [];
+				typeof utSongList === "undefined" ? window.utSongList || [] : utSongList;
 			const utyList =
-				typeof utySongList !== "undefined"
-					? utySongList
-					: window.utySongList || [];
+				typeof utySongList === "undefined" ? window.utySongList || [] : utySongList;
 			const tsusList =
-				typeof tsusSongList !== "undefined"
-					? tsusSongList
-					: window.tsusSongList || [];
+				typeof tsusSongList === "undefined"
+					? window.tsusSongList || []
+					: tsusSongList;
 
 			if (state.selectedFranchises.includes("deltarune")) {
 				const drChapters = state.selectedDRChapters || [1, 2, 3, 4, 5];
@@ -1117,29 +1102,24 @@ document.addEventListener("DOMContentLoaded", () => {
 			if (state.selectedFranchises.includes("undertale"))
 				sourceList.push(...utList);
 			if (state.selectedFranchises.includes("uty")) sourceList.push(...utyList);
-			if (state.selectedFranchises.includes("tsus"))
-				sourceList.push(...tsusList);
+			if (state.selectedFranchises.includes("tsus")) sourceList.push(...tsusList);
 
 			// fallback to deltarune if nothing checked
 			if (sourceList.length === 0) sourceList = drList;
 		} else if (state.currentGame === "deltarune") {
 			sourceList =
-				typeof songList !== "undefined" ? songList : window.songList || [];
+				typeof songList === "undefined" ? window.songList || [] : songList;
 		} else if (state.currentGame === "undertale") {
 			sourceList =
-				typeof utSongList !== "undefined"
-					? utSongList
-					: window.utSongList || [];
+				typeof utSongList === "undefined" ? window.utSongList || [] : utSongList;
 		} else if (state.currentGame === "uty") {
 			sourceList =
-				typeof utySongList !== "undefined"
-					? utySongList
-					: window.utySongList || [];
+				typeof utySongList === "undefined" ? window.utySongList || [] : utySongList;
 		} else {
 			sourceList =
-				typeof tsusSongList !== "undefined"
-					? tsusSongList
-					: window.tsusSongList || [];
+				typeof tsusSongList === "undefined"
+					? window.tsusSongList || []
+					: tsusSongList;
 		}
 
 		const drSaved = localStorage.getItem("drSongRankerState");
@@ -1173,12 +1153,12 @@ document.addEventListener("DOMContentLoaded", () => {
 			}
 			state.boostedSongId = parsed.boostedSongId || null;
 			state.felfebMode =
-				parsed.felfebMode !== undefined ? parsed.felfebMode : state.felfebMode;
+				parsed.felfebMode === undefined ? state.felfebMode : parsed.felfebMode;
 
 			state.useSystemCursor =
-				parsed.useSystemCursor !== undefined
-					? parsed.useSystemCursor
-					: state.useSystemCursor;
+				parsed.useSystemCursor === undefined
+					? state.useSystemCursor
+					: parsed.useSystemCursor;
 			state.hasSeenFinishScreen = parsed.hasSeenFinishScreen || false;
 
 			state.songs = sourceList.map((baseSong) => {
@@ -1482,8 +1462,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			if (utToggle) utToggle.classList.remove("active");
 			if (utyToggle) utyToggle.classList.remove("active");
 			if (mainTitle)
-				mainTitle.textContent =
-					"Deltarune vs Undertale vs UTY: Which is better?";
+				mainTitle.textContent = "Deltarune vs Undertale vs UTY: Which is better?";
 		} else if (state.currentGame === "undertale") {
 			if (drToggle) drToggle.classList.remove("active");
 			if (combinedToggle) combinedToggle.classList.remove("active");
@@ -1504,8 +1483,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			if (utToggle) utToggle.classList.remove("active");
 			if (utyToggle) utyToggle.classList.remove("active");
 			if (tsusToggle) tsusToggle.classList.add("active");
-			if (mainTitle)
-				mainTitle.textContent = "Which TS!Underswap song is better?";
+			if (mainTitle) mainTitle.textContent = "Which TS!Underswap song is better?";
 		}
 
 		if (drToggle && state.currentGame !== "deltarune")
@@ -1541,8 +1519,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	}
 	checkSecretsGlobal();
 
-	const isIOS =
-		/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+	const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
 	// volume logic. make it loud.
 	function initVolume() {
@@ -1806,7 +1783,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		});
 	}
 
-	// hide the accuracy bar. anon from discord asked for this.
+	// hide the accuracy bar
 	if (hideAccuracyToggle) {
 		hideAccuracyToggle.checked = state.hideAccuracy;
 		hideAccuracyToggle.addEventListener("change", (e) => {
@@ -1882,11 +1859,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		// state.songs has everything for the current game mode, not just deltarune
 		state.songs.forEach((song) => {
 			// hidden tracks only show if unlocked or if we're specifically editing a list that had them
-			if (
-				song.hidden &&
-				!state.secretsUnlocked &&
-				!selectedIds.includes(song.id)
-			)
+			if (song.hidden && !state.secretsUnlocked && !selectedIds.includes(song.id))
 				return;
 
 			const div = document.createElement("div");
@@ -1986,8 +1959,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			const ch = parseInt(filter);
 			return pool.filter(
 				(s) =>
-					(!s.hidden || state.secretsUnlocked) &&
-					getChaptersForSong(s).includes(ch),
+					(!s.hidden || state.secretsUnlocked) && getChaptersForSong(s).includes(ch),
 			);
 		} else if (
 			[
@@ -2015,9 +1987,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			// filter out songs shorter than the limit
 			return pool.filter(
 				(s) =>
-					(!s.hidden || state.secretsUnlocked) &&
-					s.duration &&
-					s.duration >= limit,
+					(!s.hidden || state.secretsUnlocked) && s.duration && s.duration >= limit,
 			);
 		} else if (filter === "felfeb") {
 			// only songs with felfeb versions. the musical lives on.
@@ -2059,23 +2029,19 @@ document.addEventListener("DOMContentLoaded", () => {
 			if (track >= 50 && track <= 72) return ["wild_east"];
 			if (track >= 73 && track <= 94) return ["steamworks"];
 			if (track >= 95 && track <= 125) return ["new_home"];
-			if (track === 126) return ["new_home"]; // final encounter. finally done with asgore.
+			if (track === 126) return ["new_home"]; // final encounter
 			if (track === 127)
-				return ["ruins", "snowdin", "dunes", "steamworks", "new_home"]; // enemy retreating. because it plays everywhere i guess.
-			if (track === 128) return ["snowdin"]; // apprehension. genocide martlet is a nightmare.
-			if (track === 129 || track === 130) return ["wild_east"]; // orange skies and trial by fury. starlo and ceroba are exhausting.
-			if (track === 131) return ["steamworks"]; // end of the line. axis is just... ugh.
-			if (track >= 132) return ["new_home"]; // remedy, retribution, honest day's work, adjourned. zenith martlet. don't even talk to me.
+				return ["ruins", "snowdin", "dunes", "steamworks", "new_home"]; // enemy retreating plays in all areas
+			if (track === 128) return ["snowdin"]; // apprehension
+			if (track === 129 || track === 130) return ["wild_east"]; // orange skies and trial by fury
+			if (track === 131) return ["steamworks"]; // end of the line
+			if (track >= 132) return ["new_home"]; // remedy retribution honest day adjourned and zenith
 			return [];
 		}
 		if (song.id < 1000) {
 			const ch = [];
 			if (song.id <= 40) ch.push(1);
-			if (
-				(song.id >= 41 && song.id <= 87) ||
-				song.id === 38 ||
-				song.id === 40
-			) {
+			if ((song.id >= 41 && song.id <= 87) || song.id === 38 || song.id === 40) {
 				ch.push(2);
 			}
 			if (song.id >= 88 && song.id <= 125) ch.push(3);
@@ -2149,8 +2115,7 @@ document.addEventListener("DOMContentLoaded", () => {
 					Math.floor(availableSongs.length * 0.25),
 				);
 				const uncertaintyPool = sortedByVotes.slice(0, uncertaintyPoolSize);
-				song1 =
-					uncertaintyPool[Math.floor(Math.random() * uncertaintyPool.length)];
+				song1 = uncertaintyPool[Math.floor(Math.random() * uncertaintyPool.length)];
 			} else if (roll < 0.9) {
 				// 30% for top rated
 				const sortedByRating = [...availableSongs].sort(
@@ -2161,8 +2126,7 @@ document.addEventListener("DOMContentLoaded", () => {
 				song1 = topPool[Math.floor(Math.random() * topPool.length)];
 			} else {
 				// 10% pure chaos
-				song1 =
-					availableSongs[Math.floor(Math.random() * availableSongs.length)];
+				song1 = availableSongs[Math.floor(Math.random() * availableSongs.length)];
 			}
 
 			const sortedOpponents = [...availableSongs]
@@ -2211,10 +2175,8 @@ document.addEventListener("DOMContentLoaded", () => {
 			const sortedByRating = [...availableSongs].sort(
 				(a, b) => getRating(b) - getRating(a),
 			);
-			const rankA =
-				sortedByRating.findIndex((s) => s.id === currentSongA.id) + 1;
-			const rankB =
-				sortedByRating.findIndex((s) => s.id === currentSongB.id) + 1;
+			const rankA = sortedByRating.findIndex((s) => s.id === currentSongA.id) + 1;
+			const rankB = sortedByRating.findIndex((s) => s.id === currentSongB.id) + 1;
 
 			songARank.textContent = `#${rankA}`;
 			songBRank.textContent = `#${rankB}`;
@@ -2285,8 +2247,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		}
 
 		if (winner === "A") songACard.style.borderColor = "var(--accent-color)";
-		else if (winner === "B")
-			songBCard.style.borderColor = "var(--accent-color)";
+		else if (winner === "B") songBCard.style.borderColor = "var(--accent-color)";
 
 		if (nextMatchupBtn) nextMatchupBtn.style.display = "block";
 	}
@@ -2408,13 +2369,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			const winnerChange = newWinnerRating - getRating(winnerSong);
 			const loserChange = newLoserRating - getRating(loserSong);
 
-			recordMatchHistory(
-				winnerSong,
-				loserSong,
-				false,
-				winnerChange,
-				loserChange,
-			);
+			recordMatchHistory(winnerSong, loserSong, false, winnerChange, loserChange);
 
 			if (isFelfebRanker()) {
 				winnerSong.felfebRating = newWinnerRating;
@@ -2444,16 +2399,13 @@ document.addEventListener("DOMContentLoaded", () => {
 		if (votesSinceLastRefresh >= 15) {
 			fetchAndDisplayAllTimeStats();
 			votesSinceLastRefresh = 0;
-		} else {
-			if (voteStat) {
-				const currentText = voteStat.textContent || "";
-				const match = currentText.match(/\d+/);
-				if (match) {
-					const newTotal = parseInt(match[0]) + 1;
-					voteStat.textContent =
-						(isFelfebRanker() ? "Total Felfeb Votes: " : "Total Votes: ") +
-						newTotal;
-				}
+		} else if (voteStat) {
+			const currentText = voteStat.textContent || "";
+			const match = currentText.match(/\d+/);
+			if (match) {
+				const newTotal = parseInt(match[0]) + 1;
+				voteStat.textContent =
+					(isFelfebRanker() ? "Total Felfeb Votes: " : "Total Votes: ") + newTotal;
 			}
 		}
 
@@ -2552,16 +2504,12 @@ document.addEventListener("DOMContentLoaded", () => {
 			// winner
 			if (winnerSong.id < 1000) {
 				if (patch(drState, winnerSong)) drUpdated = true;
-			} else {
-				if (patch(utState, winnerSong)) utUpdated = true;
-			}
+			} else if (patch(utState, winnerSong)) utUpdated = true;
 
 			// loser
 			if (loserSong.id < 1000) {
 				if (patch(drState, loserSong)) drUpdated = true;
-			} else {
-				if (patch(utState, loserSong)) utUpdated = true;
-			}
+			} else if (patch(utState, loserSong)) utUpdated = true;
 
 			if (drUpdated && drState) {
 				drState.comparisons = (drState.comparisons || 0) + 1;
@@ -2743,9 +2691,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	async function fetchAndDisplayAllTimeStats() {
 		try {
 			if (currentChapterFilter === "felfeb" || isFelfebRanker()) {
-				const { data, error } = await supabaseClient.rpc(
-					"get_total_felfeb_votes",
-				);
+				const { data, error } = await supabaseClient.rpc("get_total_felfeb_votes");
 				if (error) throw error;
 				if (voteStat) voteStat.textContent = `Total Felfeb Votes: ${data || 0}`;
 				return;
@@ -2861,10 +2807,8 @@ document.addEventListener("DOMContentLoaded", () => {
 						...tsusRes.data,
 					].sort((a, b) => {
 						const sortKey = isCentralityMode ? "centrality" : "rating";
-						const va =
-							a[sortKey] != null ? a[sortKey] : isCentralityMode ? 50 : 0;
-						const vb =
-							b[sortKey] != null ? b[sortKey] : isCentralityMode ? 50 : 0;
+						const va = a[sortKey] == null ? (isCentralityMode ? 50 : 0) : a[sortKey];
+						const vb = b[sortKey] == null ? (isCentralityMode ? 50 : 0) : b[sortKey];
 						return vb - va;
 					});
 				} else {
@@ -2908,8 +2852,8 @@ document.addEventListener("DOMContentLoaded", () => {
 				// sort by the active ranking mode
 				if (isCentralityMode) {
 					cachedCommunitySongs.sort((a, b) => {
-						const va = a.centrality != null ? a.centrality : 50;
-						const vb = b.centrality != null ? b.centrality : 50;
+						const va = a.centrality == null ? 50 : a.centrality;
+						const vb = b.centrality == null ? 50 : b.centrality;
 						return vb - va;
 					});
 				}
@@ -2955,9 +2899,9 @@ document.addEventListener("DOMContentLoaded", () => {
 				const details = document.createElement("small");
 				const score =
 					state.communityRankingMode === "centrality"
-						? song.centrality != null
-							? song.centrality
-							: 50
+						? song.centrality == null
+							? 50
+							: song.centrality
 						: song.rating;
 				details.textContent = Math.round(score);
 				details.style.display = state.showRatings ? "inline" : "none";
@@ -3033,21 +2977,21 @@ document.addEventListener("DOMContentLoaded", () => {
 				let opponentName = "Unknown Song";
 				// brute force name lookup since ids aren't consistent across games
 				const drMatch =
-					typeof window.songList !== "undefined"
-						? window.songList.find((s) => s.id == match.opponent_id)
-						: null;
+					typeof window.songList === "undefined"
+						? null
+						: window.songList.find((s) => s.id == match.opponent_id);
 				const utMatch =
-					typeof utSongList !== "undefined"
-						? utSongList.find((s) => s.id == match.opponent_id)
-						: null;
+					typeof utSongList === "undefined"
+						? null
+						: utSongList.find((s) => s.id == match.opponent_id);
 				const utyMatch =
-					typeof utySongList !== "undefined"
-						? utySongList.find((s) => s.id == match.opponent_id)
-						: null;
+					typeof utySongList === "undefined"
+						? null
+						: utySongList.find((s) => s.id == match.opponent_id);
 				const tsusMatch =
-					typeof tsusSongList !== "undefined"
-						? tsusSongList.find((s) => s.id == match.opponent_id)
-						: null;
+					typeof tsusSongList === "undefined"
+						? null
+						: tsusSongList.find((s) => s.id == match.opponent_id);
 
 				if (drMatch) opponentName = drMatch.name;
 				else if (utMatch) opponentName = utMatch.name;
@@ -3090,10 +3034,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	function displayRankings() {
 		rankingList.innerHTML = "";
 
-		const filteredSongs = filterSongsByChapter(
-			state.songs,
-			currentChapterFilter,
-		);
+		const filteredSongs = filterSongsByChapter(state.songs, currentChapterFilter);
 		// tiebreak tied songs by community rating. uty/tsus don't have a felfeb global set so they always use the main map.
 		const hasFelfebGlobal =
 			state.felfebMode &&
@@ -3123,14 +3064,14 @@ document.addEventListener("DOMContentLoaded", () => {
 			const sortedGlobal = [...filteredGlobal].sort((a, b) => {
 				const isCentrality = state.communityRankingMode === "centrality";
 				const va = isCentrality
-					? a.centrality != null
-						? a.centrality
-						: 50
+					? a.centrality == null
+						? 50
+						: a.centrality
 					: a.rating;
 				const vb = isCentrality
-					? b.centrality != null
-						? b.centrality
-						: 50
+					? b.centrality == null
+						? 50
+						: b.centrality
 					: b.rating;
 				return vb - va;
 			});
@@ -3335,9 +3276,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			const limit = parseInt(filter.split("_")[1]);
 			return songs.filter(
 				(s) =>
-					(!s.hidden || state.secretsUnlocked) &&
-					s.duration &&
-					s.duration >= limit,
+					(!s.hidden || state.secretsUnlocked) && s.duration && s.duration >= limit,
 			);
 		}
 
@@ -3553,9 +3492,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	function resetState() {
 		if (
-			confirm(
-				"THIS WILL ERASE ALL YOUR VOTES AND RANKINGS FOREVER. ARE YOU SURE?",
-			)
+			confirm("THIS WILL ERASE ALL YOUR VOTES AND RANKINGS FOREVER. ARE YOU SURE?")
 		) {
 			localStorage.removeItem("drSongRankerState");
 			localStorage.removeItem("utSongRankerState");
@@ -3697,8 +3634,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			const next = state.communityRankingMode === "elo" ? "centrality" : "elo";
 			state.communityRankingMode = next;
 			saveState();
-			communityModeBtn.textContent =
-				next === "centrality" ? "Centrality" : "Elo";
+			communityModeBtn.textContent = next === "centrality" ? "Centrality" : "Elo";
 			// bust cache, mode changed
 			cachedCommunityGame = null;
 			cachedCommunitySongs = [];
@@ -3715,8 +3651,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			saveState();
 			state.currentGame = "combined";
 			if (mainTitle)
-				mainTitle.textContent =
-					"DELTARUNE VS UNDERTALE VS UTY: WHICH IS BETTER?";
+				mainTitle.textContent = "DELTARUNE VS UNDERTALE VS UTY: WHICH IS BETTER?";
 			currentChapterFilter = "combined_all";
 			state.activeRankerList = "combined_all";
 			if (mainFilterSelect) mainFilterSelect.value = "combined_all";
@@ -3875,8 +3810,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			currentChapterFilter = currentFilter;
 		} else {
 			// combined_all doesn't exist outside combined mode, so fall back
-			const defaultVal =
-				state.currentGame === "combined" ? "combined_all" : "all";
+			const defaultVal = state.currentGame === "combined" ? "combined_all" : "all";
 			mainFilterSelect.value = defaultVal;
 			currentChapterFilter = defaultVal;
 			state.activeRankerList = defaultVal;
@@ -3895,9 +3829,7 @@ document.addEventListener("DOMContentLoaded", () => {
 				});
 				// reset select so it doesn't stay on "Mix Franchises..."
 				mainFilterSelect.value =
-					state.activeRankerList === "all"
-						? "combined_all"
-						: state.activeRankerList;
+					state.activeRankerList === "all" ? "combined_all" : state.activeRankerList;
 				return;
 			}
 
@@ -3990,7 +3922,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	resetBtn.addEventListener("click", resetState);
 	previewBtns.forEach((btn) => {
 		btn.addEventListener("click", () => {
-			// stop playlist if previewing. why did i even make a playlist.
+			// stop playlist if previewing
 			if (isPlaylistPlaying) {
 				playlistAudio.pause();
 				isPlaylistPlaying = false;
@@ -4151,10 +4083,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		}
 
 		// felfeb filter. uty doesn't have any so skip it.
-		if (
-			state.currentGame !== "undertale_yellow" &&
-			state.currentGame !== "uty"
-		) {
+		if (state.currentGame !== "undertale_yellow" && state.currentGame !== "uty") {
 			standardOptions.push({ val: "felfeb", text: "Felfeb Songs" });
 		}
 
@@ -4179,9 +4108,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			option.textContent = label;
 
 			// force insert it
-			const mixChaptersOpt = select.querySelector(
-				'option[value="mix_chapters"]',
-			);
+			const mixChaptersOpt = select.querySelector('option[value="mix_chapters"]');
 			if (mixChaptersOpt) {
 				select.insertBefore(option, mixChaptersOpt);
 			} else {
@@ -4291,9 +4218,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			label = `${game.toUpperCase()} ${label}`;
 		}
 		const color =
-			idx >= 0
-				? SECTION_COLORS[game][idx % SECTION_COLORS[game].length]
-				: "#666";
+			idx >= 0 ? SECTION_COLORS[game][idx % SECTION_COLORS[game].length] : "#666";
 		return { label, color, game, idx };
 	}
 
@@ -4312,14 +4237,14 @@ document.addEventListener("DOMContentLoaded", () => {
 			isCommunity && state.communityRankingMode === "centrality";
 		const sortedData = [...filteredData].sort((a, b) => {
 			const va = isCentrality
-				? a.centrality != null
-					? a.centrality
-					: 50
+				? a.centrality == null
+					? 50
+					: a.centrality
 				: getRating(a);
 			const vb = isCentrality
-				? b.centrality != null
-					? b.centrality
-					: 50
+				? b.centrality == null
+					? 50
+					: b.centrality
 				: getRating(b);
 			return vb - va;
 		});
@@ -4390,9 +4315,7 @@ document.addEventListener("DOMContentLoaded", () => {
 				const gb = gameOrder[b[1].game] ?? 99;
 				if (ga !== gb) return ga - gb;
 				// unknown sections (EXTRA) go last
-				return (
-					(a[1].idx >= 0 ? a[1].idx : 99) - (b[1].idx >= 0 ? b[1].idx : 99)
-				);
+				return (a[1].idx >= 0 ? a[1].idx : 99) - (b[1].idx >= 0 ? b[1].idx : 99);
 			});
 			html += `<div style="position: absolute; bottom: 34px; left: 25px; right: 25px; display: flex; flex-wrap: wrap; gap: 10px 16px; font-family: 'Roboto Mono', monospace; font-size: 11px; color: #aaa;">`;
 			sortedLegend.forEach(([label, info]) => {
@@ -4458,14 +4381,11 @@ document.addEventListener("DOMContentLoaded", () => {
 		}
 	});
 
-	// endless stream of noise.
-
 	let playlist = [];
 	let currentPlaylistIndex = 0;
 	let isPlaylistPlaying = false;
 
 	function generateAndStartPlaylist() {
-		// where is this coming from.
 		let sourceSongs = [];
 		if (communityRankingBtn.classList.contains("active")) {
 			if (cachedCommunitySongs.length > 0) {
@@ -4475,12 +4395,10 @@ document.addEventListener("DOMContentLoaded", () => {
 				return;
 			}
 		} else {
-			sourceSongs = [...state.songs].sort(
-				(a, b) => getRating(b) - getRating(a),
-			);
+			sourceSongs = [...state.songs].sort((a, b) => getRating(b) - getRating(a));
 		}
 
-		// apply the filter. why did i even have that conditional check? i'm actually losing it.
+		// apply the filter
 		sourceSongs = filterSongsByChapter(sourceSongs, currentChapterFilter);
 
 		if (sourceSongs.length === 0) {
@@ -4488,7 +4406,6 @@ document.addEventListener("DOMContentLoaded", () => {
 			return;
 		}
 
-		// finally.
 		playlist = sourceSongs;
 		currentPlaylistIndex = 0;
 
@@ -4501,14 +4418,12 @@ document.addEventListener("DOMContentLoaded", () => {
 	}
 
 	function playSongFromCurrentList(index) {
-		// i am literally copying logic from generateAndStartPlaylist because refactoring is too much work today.
+		// build source list same as playlist generation
 		let sourceSongs = [];
 		if (communityRankingBtn.classList.contains("active")) {
 			sourceSongs = [...cachedCommunitySongs];
 		} else {
-			sourceSongs = [...state.songs].sort(
-				(a, b) => getRating(b) - getRating(a),
-			);
+			sourceSongs = [...state.songs].sort((a, b) => getRating(b) - getRating(a));
 		}
 
 		// filter the songs. exclude hidden unless the active list requests them
@@ -4637,8 +4552,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement("a");
 		a.href = url;
-		const prefix =
-			state.currentGame === "deltarune" ? "deltarune" : "undertale";
+		const prefix = state.currentGame === "deltarune" ? "deltarune" : "undertale";
 		a.download = `${prefix}_playlist_${currentChapterFilter}.m3u`;
 		a.click();
 		URL.revokeObjectURL(url);
@@ -4777,9 +4691,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		const items = rankingList.getElementsByTagName("li");
 
 		Array.from(items).forEach((item) => {
-			const songName = item
-				.querySelector(".song-name")
-				.textContent.toLowerCase();
+			const songName = item.querySelector(".song-name").textContent.toLowerCase();
 			if (songName.includes(searchTerm)) {
 				item.style.display = "";
 			} else {

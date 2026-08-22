@@ -335,13 +335,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 				{
 					label: getScoreLabel() + " Average",
 					data: drAvgs,
-					backgroundColor: [
-						"#bf44ff",
-						"#44ccff",
-						"#ff4444",
-						"#4466ff",
-						"#ffdd00",
-					],
+					backgroundColor: ["#bf44ff", "#44ccff", "#ff4444", "#4466ff", "#ffdd00"],
 					borderColor: "#fff",
 					borderWidth: 1,
 				},
@@ -372,13 +366,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 				{
 					label: getScoreLabel() + " Average",
 					data: utAvgs,
-					backgroundColor: [
-						"#bf44ff",
-						"#44ccff",
-						"#4466ff",
-						"#ff8800",
-						"#ffdd00",
-					],
+					backgroundColor: ["#bf44ff", "#44ccff", "#4466ff", "#ff8800", "#ffdd00"],
 					borderColor: "#fff",
 					borderWidth: 1,
 				},
@@ -653,7 +641,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		},
 	});
 
-	// radar chart. keeping it because it looks cool.
+	// radar chart
 	const radarLabels = [
 		"Ch 1",
 		"Ch 2",
@@ -748,7 +736,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 			}
 		}
 
-		// fine, i'll add the other games too just in case.
+		// also include other games
 		const utStr = localStorage.getItem("utSongRankerState");
 		if (utStr) {
 			const utState = JSON.parse(utStr);
@@ -809,7 +797,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 				}
 			}
 
-			// i hope this color doesn't look terrible.
+			// radar chart colors
 			new Chart(canvasElement, {
 				type: "radar",
 				data: {
