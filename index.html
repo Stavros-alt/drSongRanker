@@ -157,9 +157,10 @@
           style="
             justify-content: center;
             display: flex;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
             align-items: center;
             margin-top: 10px;
+            gap: 5px;
           "
         >
           <select
@@ -167,11 +168,13 @@
             class="filter-btn active"
             style="
               cursor: pointer;
-              padding-right: 15px;
+              padding-right: 5px;
               width: auto;
-              flex-grow: 1;
+              flex: 1 1 0;
+              min-width: 0;
               max-width: 220px;
               text-align: center;
+              text-overflow: ellipsis;
             "
           >
             <option value="all">All Songs (Original)</option>
@@ -206,7 +209,7 @@
             id="edit-list-btn"
             class="filter-btn"
             title="Edit current custom list"
-            style="margin-left: 5px; flex-shrink: 0; display: none"
+            style="margin-left: 0; flex-shrink: 0; display: none"
           >
             ✎ Edit
           </button>
@@ -214,11 +217,19 @@
             id="create-list-btn"
             class="filter-btn"
             title="Create a custom playlist. Pick any songs across chapters or games"
-            style="margin-left: 5px; flex-shrink: 0"
+            style="margin-left: 0; flex-shrink: 0"
           >
             + Custom List
           </button>
-          <div style="position: relative; margin-left: 0; flex-shrink: 0">
+          <div
+            style="
+              position: relative;
+              margin-left: 0;
+              flex-shrink: 0;
+              display: flex;
+              align-items: center;
+            "
+          >
             <button
               id="filter-help-btn"
               class="filter-btn"
@@ -306,6 +317,13 @@
 
         <div class="ranking-actions">
           <button id="play-list-btn" class="action-btn">Play This List</button>
+          <button
+            id="weighted-shuffle-btn"
+            class="action-btn"
+            title="Weighted shuffle. Higher ranked songs play more often based on current sort (Elo or Centrality)."
+          >
+            Weighted Shuffle
+          </button>
           <button id="export-list-btn" class="action-btn">
             Export Playlist
           </button>
@@ -1588,7 +1606,7 @@
     <script src="uty_song_data.js"></script>
     <script src="tsus_song_data.js"></script>
     <script src="cursor.js"></script>
-    <script src="app.js?v=blockmixed"></script>
+    <script src="app.js?v=weightedshuffle"></script>
     <script>
       // konami code
       const konamiCode = [

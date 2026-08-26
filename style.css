@@ -1390,6 +1390,7 @@ footer {
 	gap: 10px;
 	padding: 10px;
 	border-bottom: var(--border-width) solid #222;
+	flex-wrap: wrap;
 }
 
 .ranking-actions.global-layout {

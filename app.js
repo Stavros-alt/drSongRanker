@@ -84,6 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	const playerCloseBtn = document.getElementById("player-close-btn");
 	const playlistAudio = document.getElementById("playlist-audio");
 	const playListBtn = document.getElementById("play-list-btn");
+	const weightedShuffleBtn = document.getElementById("weighted-shuffle-btn");
 	const exportListBtn = document.getElementById("export-list-btn");
 	const exportModal = document.getElementById("export-modal");
 	const closeExportBtn = document.getElementById("close-export-btn");
@@ -4384,6 +4385,29 @@ document.addEventListener("DOMContentLoaded", () => {
 	let playlist = [];
 	let currentPlaylistIndex = 0;
 	let isPlaylistPlaying = false;
+	let isWeightedPlaylist = false;
+
+	function getWeightForShuffle(song, isCommunity) {
+		if (isCommunity) {
+			if (state.communityRankingMode === "centrality") {
+				let w = song.centrality;
+				if (w == null) w = 50;
+				return Math.max(0.5, w);
+			}
+			let w = song.rating;
+			if (w == null) w = 1500;
+			return Math.max(1, w);
+		}
+		const w = getRating(song);
+		return Math.max(1, w);
+	}
+
+	function weightedShuffle(songs, getWeight) {
+		return [...songs]
+			.map((s) => ({ s, key: Math.random() ** (1 / getWeight(s)) }))
+			.sort((a, b) => b.key - a.key)
+			.map((x) => x.s);
+	}
 
 	function generateAndStartPlaylist() {
 		let sourceSongs = [];
@@ -4408,11 +4432,41 @@ document.addEventListener("DOMContentLoaded", () => {
 
 		playlist = sourceSongs;
 		currentPlaylistIndex = 0;
+		isWeightedPlaylist = false;
 
 		// show the buttons again.
 		playerPrevBtn.style.visibility = "visible";
 		playerNextBtn.style.visibility = "visible";
 
+		musicPlayerBar.classList.remove("hidden");
+		playSongInPlaylist(currentPlaylistIndex);
+	}
+
+	function generateAndStartWeightedPlaylist() {
+		const isCommunity = communityRankingBtn.classList.contains("active");
+		let sourceSongs = [];
+		if (isCommunity) {
+			if (cachedCommunitySongs.length > 0) {
+				sourceSongs = [...cachedCommunitySongs];
+			} else {
+				alert("Community data not loaded yet. Please wait.");
+				return;
+			}
+		} else {
+			sourceSongs = [...state.songs];
+		}
+		sourceSongs = filterSongsByChapter(sourceSongs, currentChapterFilter);
+		if (sourceSongs.length === 0) {
+			alert("No songs found for this filter.");
+			return;
+		}
+		playlist = weightedShuffle(sourceSongs, (s) =>
+			getWeightForShuffle(s, isCommunity),
+		);
+		currentPlaylistIndex = 0;
+		isWeightedPlaylist = true;
+		playerPrevBtn.style.visibility = "visible";
+		playerNextBtn.style.visibility = "visible";
 		musicPlayerBar.classList.remove("hidden");
 		playSongInPlaylist(currentPlaylistIndex);
 	}
@@ -4442,7 +4496,19 @@ document.addEventListener("DOMContentLoaded", () => {
 	}
 
 	function playSongInPlaylist(index) {
-		if (index < 0 || index >= playlist.length) return;
+		if (playlist.length === 0) return;
+		if (index < 0) index = 0;
+		if (index >= playlist.length) {
+			if (isWeightedPlaylist) {
+				const isCommunity = communityRankingBtn.classList.contains("active");
+				playlist = weightedShuffle([...playlist], (s) =>
+					getWeightForShuffle(s, isCommunity),
+				);
+				index = 0;
+			} else {
+				return;
+			}
+		}
 
 		stopAllMusic(); // don't want overlay.
 		currentPlaylistIndex = index;
@@ -4482,6 +4548,11 @@ document.addEventListener("DOMContentLoaded", () => {
 	}
 
 	playListBtn.addEventListener("click", generateAndStartPlaylist);
+	if (weightedShuffleBtn)
+		weightedShuffleBtn.addEventListener(
+			"click",
+			generateAndStartWeightedPlaylist,
+		);
 
 	playerPrevBtn.addEventListener("click", () =>
 		playSongInPlaylist(currentPlaylistIndex - 1),
@@ -4683,6 +4754,12 @@ document.addEventListener("DOMContentLoaded", () => {
 	playlistAudio.addEventListener("ended", () => {
 		playSongInPlaylist(currentPlaylistIndex + 1);
 	});
+
+	if (playlistAudio) {
+		playlistAudio.addEventListener("error", () => {
+			playSongInPlaylist(currentPlaylistIndex + 1);
+		});
+	}
 
 	// search.
 

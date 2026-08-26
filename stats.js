@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 	function getScore(s) {
 		if (rankingMode === "centrality") {
-			return s.centrality != null ? s.centrality : 50;
+			return s.centrality == null ? 50 : s.centrality;
 		}
 		return s.rating;
 	}
@@ -80,9 +80,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 		const sortKey = rankingMode === "centrality" ? "centrality" : "rating";
 		return merged.sort((a, b) => {
 			const va =
-				a[sortKey] != null ? a[sortKey] : rankingMode === "centrality" ? 50 : 0;
+				a[sortKey] == null ? (rankingMode === "centrality" ? 50 : 0) : a[sortKey];
 			const vb =
-				b[sortKey] != null ? b[sortKey] : rankingMode === "centrality" ? 50 : 0;
+				b[sortKey] == null ? (rankingMode === "centrality" ? 50 : 0) : b[sortKey];
 			return vb - va;
 		});
 	}
@@ -797,7 +797,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 				}
 			}
 
-			// radar chart colors
+			// radar chart. looks cool and actually helps
 			new Chart(canvasElement, {
 				type: "radar",
 				data: {
