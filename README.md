@@ -55,6 +55,7 @@ No environment variables. To reset, clear these keys or use Settings then Save D
 ## Features
 
 * Custom soul cursor color and Monster Soul invert
+* Undertale tab uses the undertale battle theme. The heart in UI Themes pins it on every tab.
 * Red, green, blue overlay themes and dark background toggle
 * Chapter and franchise filtering, custom playlists
 * Group Merge in Settings then Save Data then Group Merge. Load multiple exported JSON files and it averages ratings per song.

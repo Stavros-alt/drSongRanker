@@ -20,6 +20,7 @@ __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
+.ruff_cache/
 .venv
 env/
 venv/

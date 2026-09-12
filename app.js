@@ -121,8 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	const customBgPicker = document.getElementById("custom-bg-picker");
 	const customBgLabel = document.querySelector(".custom-bg-label");
 	const bgBtns = document.querySelectorAll(".bg-option");
-	const gasterThemeBtn = document.getElementById("gaster-theme-btn");
-	const cyberThemeBtn = document.getElementById("cyber-theme-btn");
+	const undertaleThemeBtn = document.getElementById("undertale-theme-btn");
 
 	// soul cursor color picker
 	const customSoulPicker = document.getElementById("custom-soul-picker");
@@ -155,13 +154,6 @@ document.addEventListener("DOMContentLoaded", () => {
 	const personalVoteStat = document.getElementById("personal-vote-stat");
 	const exportLimitInput = document.getElementById("export-limit");
 
-	const gasterExperimentContainer = document.getElementById(
-		"gaster-experiment-container",
-	);
-	const gasterFakeExperimentBtn = document.getElementById(
-		"gaster-fake-experiment-btn",
-	);
-
 	// global variables
 
 	let currentSongA = null;
@@ -173,37 +165,41 @@ document.addEventListener("DOMContentLoaded", () => {
 	let currentActiveAudio = null; // track current audio element
 	let vsClickCount = 0;
 	let vsClickTimer = null;
-	const gasterInterval = null;
 
 	// accent colors
 	const accentColors = ["#00ff9d", "#00f2ff", "#ff00ff"];
 
-	function applySpecialTheme() {
-		const savedSpecial = localStorage.getItem("drSongRankerSpecialTheme");
-
-		document.body.classList.remove("theme-gaster", "theme-cyber");
-		if (gasterThemeBtn) gasterThemeBtn.classList.remove("active");
-		if (cyberThemeBtn) cyberThemeBtn.classList.remove("active");
-
-		if (savedSpecial === "gaster") {
-			document.body.classList.add("theme-gaster");
-			if (gasterThemeBtn) gasterThemeBtn.classList.add("active");
-
-			// only show the placebo button if it hasn't been "scattered" yet
-			const isScattered =
-				localStorage.getItem("drSongRankerGasterExperimentScattered") === "true";
-			if (gasterExperimentContainer) {
-				gasterExperimentContainer.style.display = isScattered ? "none" : "block";
-			}
-		} else if (savedSpecial === "cyber") {
-			document.body.classList.add("theme-cyber");
-			if (cyberThemeBtn) cyberThemeBtn.classList.add("active");
-			if (gasterExperimentContainer)
-				gasterExperimentContainer.style.display = "none";
-		} else if (gasterExperimentContainer)
-			gasterExperimentContainer.style.display = "none";
+	function gameForTheme() {
+		try {
+			const g = JSON.parse(localStorage.getItem("drSongRankerGlobalState"));
+			if (g && typeof g.currentGame === "string") return g.currentGame;
+		} catch (err) {
+			// corrupt save falls back to default game
+		}
+		return "deltarune";
 	}
-	applySpecialTheme();
+
+	function applySpecialTheme(game) {
+		let savedSpecial = localStorage.getItem("drSongRankerSpecialTheme");
+		// drop retired themes from before this change.
+		if (savedSpecial === "gaster" || savedSpecial === "cyber") {
+			localStorage.removeItem("drSongRankerSpecialTheme");
+			savedSpecial = null;
+		}
+
+		document.body.classList.remove("theme-undertale");
+		if (undertaleThemeBtn) undertaleThemeBtn.classList.remove("active");
+
+		// sticky picks win. with nothing picked the theme follows the game tab.
+		const wantUndertale =
+			savedSpecial === "undertale" || (!savedSpecial && game === "undertale");
+		if (wantUndertale) {
+			document.body.classList.add("theme-undertale");
+			if (savedSpecial === "undertale" && undertaleThemeBtn)
+				undertaleThemeBtn.classList.add("active");
+		}
+	}
+	applySpecialTheme(gameForTheme());
 
 	function loadTheme() {
 		const savedColor = localStorage.getItem("drSongRankerTheme");
@@ -304,11 +300,11 @@ document.addEventListener("DOMContentLoaded", () => {
 			customColorLabel.classList.remove("active");
 			btn.classList.add("active");
 
-			// picking a color overrides special themes
+			// picking a color clears any sticky theme
 			if (state.specialTheme) {
 				state.specialTheme = null;
 				localStorage.removeItem("drSongRankerSpecialTheme");
-				applySpecialTheme();
+				applySpecialTheme(state.currentGame);
 				saveState();
 			}
 		});
@@ -327,7 +323,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		if (state.specialTheme) {
 			state.specialTheme = null;
 			localStorage.removeItem("drSongRankerSpecialTheme");
-			applySpecialTheme();
+			applySpecialTheme(state.currentGame);
 			saveState();
 		}
 	});
@@ -342,11 +338,11 @@ document.addEventListener("DOMContentLoaded", () => {
 			customBgLabel.classList.remove("active");
 			btn.classList.add("active");
 
-			// picking a background overrides special themes
+			// picking a background clears any sticky theme
 			if (state.specialTheme) {
 				state.specialTheme = null;
 				localStorage.removeItem("drSongRankerSpecialTheme");
-				applySpecialTheme();
+				applySpecialTheme(state.currentGame);
 				saveState();
 			}
 		});
@@ -365,60 +361,26 @@ document.addEventListener("DOMContentLoaded", () => {
 		if (state.specialTheme) {
 			state.specialTheme = null;
 			localStorage.removeItem("drSongRankerSpecialTheme");
-			applySpecialTheme();
+			applySpecialTheme(state.currentGame);
 			saveState();
 		}
 	});
 
-	if (gasterThemeBtn) {
-		gasterThemeBtn.addEventListener("click", () => {
-			if (state.specialTheme === "gaster") {
+	if (undertaleThemeBtn) {
+		undertaleThemeBtn.addEventListener("click", () => {
+			if (state.specialTheme === "undertale") {
 				state.specialTheme = null;
 				localStorage.removeItem("drSongRankerSpecialTheme");
 			} else {
-				state.specialTheme = "gaster";
-				localStorage.setItem("drSongRankerSpecialTheme", "gaster");
+				state.specialTheme = "undertale";
+				localStorage.setItem("drSongRankerSpecialTheme", "undertale");
 
 				colorBtns.forEach((b) => b.classList.remove("active"));
 				bgBtns.forEach((b) => b.classList.remove("active"));
 				customColorLabel.classList.remove("active");
 				customBgLabel.classList.remove("active");
 			}
-			applySpecialTheme();
-			saveState();
-		});
-	}
-
-	if (gasterFakeExperimentBtn) {
-		gasterFakeExperimentBtn.addEventListener("click", () => {
-			// april fools scatter
-			console.log("Experiment initiated. Result: CRYSTALIZED VOID. SCATTERING...");
-
-			gasterFakeExperimentBtn.classList.add("gaster-scatter");
-			localStorage.setItem("drSongRankerGasterExperimentScattered", "true");
-
-			setTimeout(() => {
-				if (gasterExperimentContainer)
-					gasterExperimentContainer.style.display = "none";
-			}, 500);
-		});
-	}
-
-	if (cyberThemeBtn) {
-		cyberThemeBtn.addEventListener("click", () => {
-			if (state.specialTheme === "cyber") {
-				state.specialTheme = null;
-				localStorage.removeItem("drSongRankerSpecialTheme");
-			} else {
-				state.specialTheme = "cyber";
-				localStorage.setItem("drSongRankerSpecialTheme", "cyber");
-
-				colorBtns.forEach((b) => b.classList.remove("active"));
-				bgBtns.forEach((b) => b.classList.remove("active"));
-				customColorLabel.classList.remove("active");
-				customBgLabel.classList.remove("active");
-			}
-			applySpecialTheme();
+			applySpecialTheme(state.currentGame);
 			saveState();
 		});
 	}
@@ -635,7 +597,6 @@ document.addEventListener("DOMContentLoaded", () => {
 			"drSongRankerSpecialTheme",
 			"drSongRankerSecretsUnlocked",
 			"drSongRankerPreventDuplicatesForcedOn_v2",
-			"drSongRankerGasterExperimentScattered",
 		];
 		const data = { version: 1, exportDate: new Date().toISOString() };
 		for (const key of allKeys) {
@@ -706,7 +667,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	// group merge: compile friends' saves into average rankings
 
 	let mergedFiles = []; // array of { name, data } where data is parsed JSON
-	let mergedResults = {}; // game -> { songId: { name, ratings: [], voters: [] } }
+	let mergedResults = {}; // per game map of song ids to names ratings voters
 
 	// storage keys per game
 	const MERGE_STATE_KEYS = {
@@ -739,7 +700,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		// collected per game: map of songId to { name, ratings: [r1, r2, ...], voterNames: [n1, n2, ...] }
 		const perGame = {};
 		// dedup per game so the combined key doesn't double count
-		const gameDedup = {}; // game -> Set of `${fileIdx}-${songId}`
+		const gameDedup = {}; // per game set of file plus song ids already counted
 
 		for (let fi = 0; fi < mergedFiles.length; fi++) {
 			const file = mergedFiles[fi];
@@ -2063,7 +2024,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 	function presentNewPair() {
 		const pool = getFilteredSongs();
-		// if we are in 'hidden' mode, obviously we want to see them.
+		// hidden mode skips the lock check below.
 		let availableSongs = pool;
 		if (state.activeRankerList !== "hidden") {
 			availableSongs = pool.filter((s) => !s.hidden || state.secretsUnlocked);
@@ -3575,12 +3536,20 @@ document.addEventListener("DOMContentLoaded", () => {
 		saveState();
 	}
 
+	// sticky retired themes fall back to follow mode.
+	if (state.specialTheme === "gaster" || state.specialTheme === "cyber") {
+		state.specialTheme = null;
+		localStorage.removeItem("drSongRankerSpecialTheme");
+	}
+	applySpecialTheme(state.currentGame);
+
 	if (drToggle) {
 		drToggle.addEventListener("click", () => {
 			if (state.currentGame === "deltarune") return;
 			saveState(); // save old game state first
 			state.currentGame = "deltarune";
 			loadState();
+			applySpecialTheme(state.currentGame);
 			saveState(); // save new currentGame to globalState
 			updateMainFilterOptions();
 			updateProgress();
@@ -3597,6 +3566,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			saveState(); // save old game state first
 			state.currentGame = "undertale";
 			loadState();
+			applySpecialTheme(state.currentGame);
 			saveState(); // save new currentGame to globalState
 			updateMainFilterOptions();
 			updateProgress();
@@ -3657,6 +3627,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			state.activeRankerList = "combined_all";
 			if (mainFilterSelect) mainFilterSelect.value = "combined_all";
 			loadState();
+			applySpecialTheme(state.currentGame);
 			saveState();
 			updateMainFilterOptions();
 			updateProgress();
@@ -3673,6 +3644,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			saveState();
 			state.currentGame = "uty";
 			loadState();
+			applySpecialTheme(state.currentGame);
 			saveState();
 			updateMainFilterOptions();
 			updateProgress();
@@ -3689,6 +3661,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			saveState();
 			state.currentGame = "tsus";
 			loadState();
+			applySpecialTheme(state.currentGame);
 			saveState();
 			updateMainFilterOptions();
 			updateProgress();
@@ -4287,9 +4260,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 		let html = `<h3 style="margin-top:0; margin-bottom: 20px; border-bottom: 2px solid ${accentColor}; padding-bottom: 8px; text-transform: uppercase; color: ${accentColor}; font-size: 30px;">${titleText}</h3>`;
 
-		// less gap, more room for titles. because text needs a home.
+		// less gap, more room for titles.
 		html += `<div style="column-count: ${cols}; column-gap: 15px; height: ${targetHeight}px; font-size: ${fontSize}px; line-height: 1.1;">`;
-		// making room for the numbers i just shoved outside the list.
+		// rank numbers live outside the list, padding clears space for them.
 		const listPaddingLeft = fontSize > 20 ? "60px" : "45px";
 		html += `<ul style="padding-left: ${listPaddingLeft}; margin: 0; color: #fff; height: 100%; list-style-type: none;">`;
 		const legendMap = new Map();
@@ -4662,7 +4635,7 @@ document.addEventListener("DOMContentLoaded", () => {
 					if (!response.ok)
 						throw new Error(`http error! status: ${response.status}`);
 					const blob = await response.blob();
-					// just the filename. i'm not recreating the entire soundtrack folder structure.
+					// flat zip, filename only, no folders.
 					const filename = cleanPath.split("/").pop();
 					folder.file(filename, blob);
 					addedCount++;
