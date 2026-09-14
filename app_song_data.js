@@ -667,7 +667,8 @@ const songList = [
 	{
 		id: 83,
 		name: "Chill Jailbreak Alarm To Study And Relax To",
-		file: "DELTARUNESoundtrack/./083 Chill Jailbreak Alarm To Study And Relax To.mp3",
+		file:
+			"DELTARUNESoundtrack/./083 Chill Jailbreak Alarm To Study And Relax To.mp3",
 		rating: 1500,
 		comparisons: 0,
 		duration: 24.03,
@@ -1595,6 +1596,8 @@ const songList = [
 		rating: 1500,
 		comparisons: 0,
 		duration: 192.0,
+		felfebFile:
+			"audio/felfeb/feb-dr/Flower Man (With Lyrics) - The Deltarune Musical [-96osrks4cM].mp3",
 	},
 	{
 		id: 286,
@@ -1631,7 +1634,8 @@ const songList = [
 	{
 		id: 290,
 		name: "Field of Hopes and Dreams (Credits Version)",
-		file: "DELTARUNESoundtrack/290 Field of Hopes and Dreams (Credits Version).mp3",
+		file:
+			"DELTARUNESoundtrack/290 Field of Hopes and Dreams (Credits Version).mp3",
 		rating: 1500,
 		comparisons: 0,
 		duration: 99.0,
