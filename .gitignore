@@ -15,6 +15,9 @@ node_modules/
 # build artifacts
 build/
 
+# local db archive, half a gig, never commit
+archive-2026-09-22/
+
 # python junk
 __pycache__/
 *.py[cod]
