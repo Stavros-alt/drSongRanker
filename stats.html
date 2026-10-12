@@ -16,6 +16,22 @@
         padding: 20px;
       }
 
+      .stats-head {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+
+      .stats-head h1 {
+        margin: 0;
+      }
+
+      .back-link {
+        color: #aaa;
+        font-size: 0.85em;
+      }
+
       .chart-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -53,6 +69,12 @@
         height: 400px;
       }
 
+      .chart-card.tall {
+        height: auto;
+        min-height: 400px;
+        max-height: 640px;
+      }
+
       .chart-container {
         flex-grow: 1;
         min-height: 0;
@@ -77,7 +99,7 @@
       /* quick stats row */
       .quick-stats {
         display: grid;
-        grid-template-columns: repeat(5, 1fr);
+        grid-template-columns: repeat(3, 1fr);
         gap: 15px;
         margin-top: 30px;
       }
@@ -96,10 +118,16 @@
       }
 
       .stat-box .stat-value {
-        font-size: 2.5em;
+        font-size: 2em;
         font-weight: bold;
         color: #00f2ff;
         line-height: 1.2;
+      }
+
+      .stat-box .stat-sub {
+        font-size: 0.8em;
+        color: #aaa;
+        margin-top: 4px;
       }
 
       .stat-box .stat-label {
@@ -130,103 +158,360 @@
         color: var(--accent-color, #00ff9d);
         font-weight: bold;
       }
+
+      /* game tabs and search */
+      .board-controls {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-top: 30px;
+      }
+
+      .game-tab {
+        background: #000;
+        border: 2px solid #555;
+        color: #fff;
+        font-family: var(--ui-font, "Roboto Mono", monospace);
+        font-size: 0.8em;
+        padding: 6px 12px;
+        cursor: pointer;
+      }
+
+      .game-tab.active {
+        border-color: var(--accent-color, #00ff9d);
+        color: var(--accent-color, #00ff9d);
+        font-weight: bold;
+      }
+
+      .board-search {
+        flex: 1 1 180px;
+        background: #000;
+        border: 2px solid #555;
+        color: #fff;
+        font-family: var(--ui-font, "Roboto Mono", monospace);
+        font-size: 0.85em;
+        padding: 6px 10px;
+      }
+
+      .board-search:focus {
+        border-color: var(--accent-color, #00ff9d);
+        outline: none;
+      }
+
+      .board-count {
+        color: #666;
+        font-size: 0.8em;
+        width: 100%;
+      }
+
+      /* leaderboard table */
+      .table-wrap {
+        overflow-y: auto;
+        flex-grow: 1;
+        min-height: 0;
+      }
+
+      table.board {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85em;
+      }
+
+      table.board th {
+        position: sticky;
+        top: 0;
+        background: #000;
+        color: #aaa;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.75em;
+        text-align: left;
+        padding: 8px;
+        border-bottom: 2px solid #fff;
+        cursor: pointer;
+        white-space: nowrap;
+        z-index: 1;
+      }
+
+      table.board th:hover {
+        color: #fff;
+      }
+
+      table.board td {
+        padding: 7px 8px;
+        border-bottom: 1px solid #222;
+        vertical-align: top;
+      }
+
+      table.board tr:hover td {
+        background: #111;
+      }
+
+      .rank-num {
+        color: #666;
+        min-width: 3ch;
+      }
+
+      .score-good {
+        color: var(--accent-color, #00ff9d);
+      }
+
+      .diff-up {
+        color: var(--accent-color, #00ff9d);
+      }
+
+      .diff-down {
+        color: #ff4444;
+      }
+
+      .sec-dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        margin-right: 6px;
+        vertical-align: baseline;
+      }
+
+      .show-more-btn {
+        background: #000;
+        border: 2px solid #fff;
+        color: #fff;
+        font-family: var(--ui-font, "Roboto Mono", monospace);
+        font-size: 0.85em;
+        padding: 8px;
+        cursor: pointer;
+        margin-top: 10px;
+        width: 100%;
+      }
+
+      .show-more-btn:hover {
+        border-color: var(--accent-color, #00ff9d);
+      }
+
+      /* gap lists */
+      .gap-cols {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        overflow-y: auto;
+        min-height: 0;
+        flex-grow: 1;
+      }
+
+      @media (max-width: 700px) {
+        .gap-cols {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .gap-cols h3 {
+        font-size: 0.85em;
+        color: #aaa;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin: 0 0 8px 0;
+      }
+
+      .gap-cols ol {
+        margin: 0;
+        padding-left: 22px;
+        font-size: 0.85em;
+      }
+
+      .gap-cols li {
+        margin-bottom: 8px;
+        line-height: 1.4;
+      }
+
+      .gap-cols .gap-song {
+        color: #fff;
+      }
+
+      .gap-cols .gap-num {
+        color: #666;
+        font-size: 0.85em;
+      }
+
+      /* taste list */
+      .taste-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        font-size: 0.9em;
+        overflow-y: auto;
+        min-height: 0;
+        flex-grow: 1;
+      }
+
+      .taste-list li {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 0;
+        border-bottom: 1px solid #222;
+      }
+
+      .taste-bar {
+        height: 8px;
+        background: var(--accent-color, #00ff9d);
+        flex-shrink: 0;
+      }
+
+      /* section tabs */
+      .sec-tabs {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 10px;
+        flex-shrink: 0;
+        flex-wrap: wrap;
+      }
+
+      .sec-tabs .game-tab {
+        padding: 4px 8px;
+        font-size: 0.75em;
+      }
+
+      /* battled list */
+      .battled-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        font-size: 0.85em;
+        overflow-y: auto;
+        min-height: 0;
+        flex-grow: 1;
+      }
+
+      .battled-list li {
+        padding: 7px 0;
+        border-bottom: 1px solid #222;
+        line-height: 1.4;
+      }
+
+      .battled-list .battle-count {
+        color: #ff8800;
+      }
+
+      .empty-note {
+        text-align: center;
+        color: #666;
+        margin-top: 40px;
+        line-height: 1.6;
+      }
     </style>
   </head>
 
   <body>
     <div class="stats-container">
-      <div
-        style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap"
-      >
+      <div class="stats-head">
         <h1 style="margin: 0">Global Stats Dashboard</h1>
         <button id="ranking-mode-toggle" class="ranking-mode-btn">
           <span id="ranking-mode-label">Elo</span>
           <span class="toggle-switch"></span>
           <span>Centrality</span>
         </button>
+        <button id="hidden-toggle" class="ranking-mode-btn">
+          <span id="hidden-toggle-label">show hidden</span>
+        </button>
+        <a class="back-link" href="index.html">back to ranker</a>
       </div>
       <p>Private Analytics View</p>
 
-      <!-- quick stats -->
+      <!-- hero numbers -->
       <div class="quick-stats" id="quick-stats-row"></div>
 
+      <!-- leaderboard controls -->
+      <div class="board-controls" id="board-controls">
+        <button class="game-tab active" data-game="all">All</button>
+        <button class="game-tab" data-game="DR">Deltarune</button>
+        <button class="game-tab" data-game="UT">Undertale</button>
+        <button class="game-tab" data-game="UTY">UT Yellow</button>
+        <button class="game-tab" data-game="TSUS">TS!Underswap</button>
+        <input
+          id="board-search"
+          class="board-search"
+          type="text"
+          placeholder="search songs..."
+          autocomplete="off"
+        />
+        <div class="board-count" id="board-count"></div>
+      </div>
+
       <div class="chart-grid">
-        <!-- Row 0: Personal Stats -->
-        <div class="chart-card col-span-3">
-          <h2>Your Completed Rankings (Deltarune Chapters)</h2>
-          <div class="chart-container">
-            <canvas id="personalRadarChart"></canvas>
+        <!-- leaderboard -->
+        <div class="chart-card tall col-span-3">
+          <h2 id="board-title">Leaderboard</h2>
+          <div class="table-wrap">
+            <table class="board" id="board-table">
+              <thead>
+                <tr>
+                  <th data-sort="rank">#</th>
+                  <th data-sort="name">Song</th>
+                  <th data-sort="section">Section</th>
+                  <th data-sort="score">Score</th>
+                  <th data-sort="battles">Battles</th>
+                  <th data-sort="you">You</th>
+                  <th data-sort="diff">Gap</th>
+                </tr>
+              </thead>
+              <tbody id="board-body"></tbody>
+            </table>
+          </div>
+          <button class="show-more-btn" id="board-more">show more</button>
+        </div>
+
+        <!-- taste gaps -->
+        <div class="chart-card tall col-span-2">
+          <h2>You Against The World</h2>
+          <div class="sec-tabs" id="gap-tabs">
+            <button class="game-tab active" data-gapgame="all">All</button>
+            <button class="game-tab" data-gapgame="DR">DR</button>
+            <button class="game-tab" data-gapgame="UT">UT</button>
+            <button class="game-tab" data-gapgame="UTY">UTY</button>
+            <button class="game-tab" data-gapgame="TSUS">TSUS</button>
+          </div>
+          <div class="gap-cols" id="gap-cols">
+            <div>
+              <h3>you rate higher</h3>
+              <ol id="gap-love"></ol>
+            </div>
+            <div>
+              <h3>world rates higher</h3>
+              <ol id="gap-cold"></ol>
+            </div>
           </div>
         </div>
 
-        <!-- Row 1: Radar, Top 10, Bottom 10 -->
+        <!-- taste profile -->
+        <div class="chart-card tall">
+          <h2>Your Taste Profile</h2>
+          <ul class="taste-list" id="taste-list"></ul>
+        </div>
+
+        <!-- section averages with game switch -->
         <div class="chart-card">
-          <h2>Global Chapter Balance (Radar)</h2>
+          <h2>Section Averages</h2>
+          <div class="sec-tabs" id="sec-tabs">
+            <button class="game-tab active" data-secgame="DR">DR</button>
+            <button class="game-tab" data-secgame="UT">UT</button>
+            <button class="game-tab" data-secgame="UTY">UTY</button>
+            <button class="game-tab" data-secgame="TSUS">TSUS</button>
+          </div>
           <div class="chart-container">
-            <canvas id="radarChart"></canvas>
+            <canvas id="sectionChart"></canvas>
           </div>
         </div>
 
-        <div class="chart-card">
-          <h2>Top 10 Highest Rated</h2>
-          <div class="chart-container">
-            <canvas id="votesChart"></canvas>
-          </div>
-        </div>
-
-        <div class="chart-card">
-          <h2>Bottom 10 Lowest Rated</h2>
-          <div class="chart-container">
-            <canvas id="bottom10Chart"></canvas>
-          </div>
-        </div>
-
-        <!-- Row 2: Rating Distribution (wide) -->
-        <div class="chart-card col-span-3">
+        <!-- distribution -->
+        <div class="chart-card col-span-2">
           <h2>Rating Distribution</h2>
           <div class="chart-container">
-            <canvas id="ratingDistChart"></canvas>
+            <canvas id="distChart"></canvas>
           </div>
         </div>
 
-        <!-- Row 3: Average Rating by Game + DR by Chapter + UT by Area -->
-        <div class="chart-card">
-          <h2>Average Rating by Game</h2>
-          <div class="chart-container">
-            <canvas id="avgByGameChart"></canvas>
-          </div>
-        </div>
-
-        <div class="chart-card">
-          <h2>Deltarune by Chapter</h2>
-          <div class="chart-container">
-            <canvas id="drChapterChart"></canvas>
-          </div>
-        </div>
-
-        <div class="chart-card">
-          <h2>Undertale by Area</h2>
-          <div class="chart-container">
-            <canvas id="utAreaChart"></canvas>
-          </div>
-        </div>
-
-        <!-- Row 4: UTY by Region (span 2) + Most Volatile -->
-        <div class="chart-card">
-          <h2>UTY by Region</h2>
-          <div class="chart-container">
-            <canvas id="utyRegionChart"></canvas>
-          </div>
-        </div>
-
-        <div class="chart-card col-span-2">
-          <h2>Most Volatile (Biggest Rating Outliers)</h2>
-          <div class="chart-container">
-            <canvas id="volatilityChart"></canvas>
-          </div>
-        </div>
-
-        <!-- Row 5: The Curve (full width) -->
+        <!-- the curve -->
         <div class="chart-card col-span-3">
           <h2>The Curve (All Songs Sorted)</h2>
           <div class="chart-container">
@@ -234,29 +519,7 @@
           </div>
         </div>
 
-        <!-- Row 6: Chronological Quality per game -->
-        <div class="chart-card">
-          <h2>Chronological: Deltarune</h2>
-          <div class="chart-container">
-            <canvas id="chronoDrChart"></canvas>
-          </div>
-        </div>
-
-        <div class="chart-card">
-          <h2>Chronological: Undertale</h2>
-          <div class="chart-container">
-            <canvas id="chronoUtChart"></canvas>
-          </div>
-        </div>
-
-        <div class="chart-card">
-          <h2>Chronological: UTY</h2>
-          <div class="chart-container">
-            <canvas id="chronoUtyChart"></canvas>
-          </div>
-        </div>
-
-        <!-- Row 7: Duration vs Rating + Most Battled -->
+        <!-- duration -->
         <div class="chart-card col-span-2">
           <h2>Does Length Matter? (Duration vs Rating)</h2>
           <div class="chart-container">
@@ -264,11 +527,10 @@
           </div>
         </div>
 
-        <div class="chart-card">
-          <h2>Most Battled (Top Comparisons)</h2>
-          <div class="chart-container">
-            <canvas id="battlesChart"></canvas>
-          </div>
+        <!-- most battled -->
+        <div class="chart-card tall">
+          <h2>Most Battled</h2>
+          <ol class="battled-list" id="battled-list"></ol>
         </div>
       </div>
     </div>
@@ -278,6 +540,6 @@
     <script src="uty_song_data.js"></script>
     <script src="tsus_song_data.js"></script>
     <script src="cursor.js"></script>
-    <script src="stats.js?v=centrality"></script>
+    <script src="stats.js?v=revamp1"></script>
   </body>
 </html>

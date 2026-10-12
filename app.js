@@ -2011,14 +2011,13 @@ document.addEventListener("DOMContentLoaded", () => {
 			if (song.id >= 252 && song.id <= 291) ch.push(5);
 			return ch;
 		} else {
-			// Undertale areas. Ruins (1 to 14), Snowdin (15 to 24), Waterfall (25 to 46), Hotland/CORE (47 to 70), New Home (71+)
+			/* area source lives in ut song data, edit there */
 			const track = song.id - 1000;
-			if (track <= 14) return [1];
-			if (track >= 15 && track <= 24) return [2];
-			if (track >= 25 && track <= 46) return [3];
-			if (track >= 47 && track <= 70) return [4];
-			if (track >= 71) return [5];
-			return [];
+			const ch =
+				(typeof UT_AREA_BY_TRACK !== "undefined" &&
+					UT_AREA_BY_TRACK[track]) ||
+				5;
+			return [ch];
 		}
 	}
 

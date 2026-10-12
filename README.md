@@ -30,6 +30,8 @@ All state is in localStorage.
 * `combinedSongRankerState` Combined mode ratings
 * `drSongRankerCustomLists` custom playlists created with + Custom List
 * `drSongRankerSecretsUnlocked` hidden tracks toggle
+* `drSongRankerStatsMode` stats page score mode, elo or centrality
+* `drSongRankerStatsHideHidden` stats page hidden tracks filter
 * `drSongRankerVolume` player volume
 
 No environment variables. To reset, clear these keys or use Settings then Save Data then Reset.
