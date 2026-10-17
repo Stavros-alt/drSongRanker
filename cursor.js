@@ -23,9 +23,18 @@ document.addEventListener("DOMContentLoaded", () => {
 		}
 	});
 
+	// translate property skips layout. left/top fallback for old browsers.
+	const useTranslateProp =
+		typeof CSS !== "undefined" &&
+		CSS.supports &&
+		CSS.supports("translate: 0px 0px");
+
 	function updateCursorPosition(x, y) {
-		cursor.style.left = `${x}px`;
-		cursor.style.top = `${y}px`;
+		if (useTranslateProp) cursor.style.translate = `${x}px ${y}px`;
+		else {
+			cursor.style.left = `${x}px`;
+			cursor.style.top = `${y}px`;
+		}
 	}
 
 	try {

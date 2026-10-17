@@ -169,12 +169,15 @@ body {
 	-webkit-mask-repeat: no-repeat;
 	mask-repeat: no-repeat;
 	position: fixed;
+	top: 0;
+	left: 0;
 	pointer-events: none;
 	z-index: 9999;
 	transform: translate(-3px, -2px);
 	/* hotspot adjustment */
 	transition:
 		transform 0.1s ease,
+		translate 0.1s ease,
 		background-color 0.1s ease;
 }
 
@@ -899,6 +902,9 @@ button:active {
 	counter-increment: rank-counter;
 	cursor: pointer;
 	transition: background 0.1s;
+	/* offscreen rows skip rendering. big scroll win on weak hardware. */
+	content-visibility: auto;
+	contain-intrinsic-size: auto 46px;
 }
 
 #ranking-list li:hover {

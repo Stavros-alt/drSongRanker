@@ -377,7 +377,7 @@
           title="Volume"
         />
       </div>
-      <audio id="playlist-audio"></audio>
+      <audio id="playlist-audio" preload="none"></audio>
     </div>
 
     <!-- share modal that nobody asked for -->
@@ -816,8 +816,8 @@
       </div>
     </div>
 
-    <audio id="audioA"></audio>
-    <audio id="audioB"></audio>
+    <audio id="audioA" preload="none"></audio>
+    <audio id="audioB" preload="none"></audio>
 
     <div id="easter-egg-container"></div>
 
@@ -1568,14 +1568,12 @@
       <button id="close-nes">X</button>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script src="app_song_data.js?v=felfebflower"></script>
     <script src="ut_song_data.js"></script>
     <script src="uty_song_data.js"></script>
     <script src="tsus_song_data.js"></script>
     <script src="cursor.js"></script>
-    <script src="app.js?v=weightedshuffle"></script>
+    <script src="app.js?v=lazyvendor"></script>
     <script>
       // konami code
       const konamiCode = [

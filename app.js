@@ -74,6 +74,21 @@ document.addEventListener("DOMContentLoaded", () => {
 	const shareModal = document.getElementById("share-modal");
 	const closeShareBtn = document.getElementById("close-share-btn");
 	const downloadShareBtn = document.getElementById("download-share-btn");
+	// share/export libs load on first use. keeps them off the critical path.
+	const vendorPromises = {};
+	function loadVendorLib(name, src) {
+		if (window[name]) return Promise.resolve();
+		if (!vendorPromises[name]) {
+			vendorPromises[name] = new Promise((resolve, reject) => {
+				const s = document.createElement("script");
+				s.src = src;
+				s.onload = () => resolve();
+				s.onerror = () => reject(new Error(name + " failed to load"));
+				document.head.appendChild(s);
+			});
+		}
+		return vendorPromises[name];
+	}
 	const shareCountInput = document.getElementById("share-count-input");
 	const sharePreview = document.getElementById("share-preview");
 	const musicPlayerBar = document.getElementById("music-player-bar");
@@ -2162,10 +2177,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 		audioA.src = encodeFilePath(currentSongA.file);
 		audioB.src = encodeFilePath(currentSongB.file);
-
-		audioA.load();
-		audioB.load();
-
+		// no eager load(). matchup audio buffers on first play instead.
+		// saves megabytes per matchup on slow connections.
 		arena.classList.remove("slide-in");
 		setTimeout(() => {
 			songACard.classList.remove("selected", "loser");
@@ -3518,8 +3531,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			chooseBMobileBtn.textContent = `I prefer ${currentSongB.name}`;
 		audioA.src = encodeFilePath(currentSongA.file);
 		audioB.src = encodeFilePath(currentSongB.file);
-		audioA.load();
-		audioB.load();
+		// same as matchup setup. buffers on first play.
 
 		if (undoBtn) undoBtn.disabled = true;
 	}
@@ -4323,17 +4335,30 @@ document.addEventListener("DOMContentLoaded", () => {
 		shareModal.style.display = "none";
 	});
 
-	downloadShareBtn.addEventListener("click", () => {
+	downloadShareBtn.addEventListener("click", async () => {
 		// prepare for capture.
 		// html2canvas struggles with transforms. temporarily undo them.
 		const originalStyle = sharePreview.style.cssText;
+		const originalText = downloadShareBtn.textContent;
+		try {
+			downloadShareBtn.textContent = "LOADING...";
+			await loadVendorLib(
+				"html2canvas",
+				"https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js",
+			);
+		} catch {
+			downloadShareBtn.textContent = originalText;
+			alert("Image library failed to load. check connection and retry.");
+			return;
+		}
+		downloadShareBtn.textContent = originalText;
 		sharePreview.style.transform = "none";
 		sharePreview.style.position = "fixed";
 		sharePreview.style.top = "0";
 		sharePreview.style.left = "0";
 		sharePreview.style.zIndex = "-9999";
 
-		html2canvas(sharePreview, {
+		window.html2canvas(sharePreview, {
 			backgroundColor: "#000000",
 			width: 600,
 			height: 800,
@@ -4619,10 +4644,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
 		exportZipBtn.disabled = true;
 		const originalText = exportZipBtn.textContent;
+		try {
+			exportZipBtn.textContent = "LOADING...";
+			await loadVendorLib(
+				"JSZip",
+				"https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js",
+			);
+		} catch {
+			exportZipBtn.textContent = originalText;
+			exportZipBtn.disabled = false;
+			alert("ZIP library failed to load. check connection and retry.");
+			return;
+		}
 		exportZipBtn.textContent = "ZIPPING...";
 
 		try {
-			const zip = new JSZip();
+			const zip = new window.JSZip();
 			const folder = zip.folder("deltarune_mp3s");
 			let addedCount = 0;
 
