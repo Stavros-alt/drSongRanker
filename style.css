@@ -148,11 +148,11 @@ body {
 	padding: 0;
 	min-height: 100vh;
 	min-height: 100dvh;
-	/* band-aid for tiny screens */
+	/* patch for tiny screens */
 	display: flex;
 	flex-direction: column;
 	overflow-x: hidden;
-	/* cursor: none; Removed global hide */
+	/* global hide removed */
 }
 
 /* vanity cursor */
@@ -175,10 +175,9 @@ body {
 	z-index: 9999;
 	transform: translate(-3px, -2px);
 	/* hotspot adjustment */
-	transition:
-		transform 0.1s ease,
-		translate 0.1s ease,
-		background-color 0.1s ease;
+	will-change: translate;
+	/* position must snap. no transition on translate/transform or it lags behind the mouse. */
+	transition: background-color 0.1s ease;
 }
 
 /* soul colors. mask-image is a lifesaver. hue-rotate was a mistake. */
@@ -232,7 +231,7 @@ body {
 	animation: pulse-monster 1s infinite;
 }
 
-/* custom soul flipped upside down. same trick as monster, but keeps your color. */
+/* custom soul flipped. same trick as monster, keeps the color. */
 .custom-cursor.inverted {
 	transform: translate(-22px, -21px) rotate(180deg);
 }
@@ -280,7 +279,6 @@ body {
 }
 
 /* mouse privilege */
-/* mouse privilege */
 @media (hover: hover) and (pointer: fine) {
 	.custom-cursor {
 		display: block;
@@ -314,7 +312,6 @@ body.system-cursor [style*="cursor: pointer"] {
 	cursor: pointer !important;
 }
 
-/* holding it all together with duct tape */
 .main-container {
 	display: flex;
 	flex-direction: row;
@@ -365,7 +362,6 @@ body.system-cursor [style*="cursor: pointer"] {
 	color: var(--accent-color);
 }
 
-/* preferences that nobody uses */
 #settings-modal {
 	display: none;
 	position: absolute;
