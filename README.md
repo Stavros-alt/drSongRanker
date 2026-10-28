@@ -2,7 +2,7 @@
 
 Elo based ranker for Deltarune, Undertale, Undertale Yellow, and TS Underswap. Pick between two songs at a time and it builds a personal ranking. Global vote counts sync to Supabase. Everything else stays in localStorage.
 
-This exists because sorting hundreds of tracks by hand is tedious. Elo gets a usable top 10 in a couple hundred comparisons. You do not need to reach 100 percent.
+This exists because sorting hundreds of tracks by hand is tedious. Elo gets a usable top 10 in a couple hundred comparisons. Reaching 100 percent is not needed.
 
 ## Setup
 
