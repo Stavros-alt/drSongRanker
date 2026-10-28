@@ -470,7 +470,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		return yiq >= 128 ? "black" : "white";
 	}
 
-	const STATE_VERSION = 4;
+	const STATE_VERSION = 5;
 
 	const DEFAULT_GLOBAL_STATE = {
 		currentGame: "deltarune",
@@ -482,6 +482,8 @@ document.addEventListener("DOMContentLoaded", () => {
 		showAgreement: false,
 		preventDuplicates: true,
 		combinedDiscovered: false,
+		nutdealerArmed: false,
+		nutdealerHintSeen: false,
 		felfebMode: true,
 		useSystemCursor: false,
 		communityRankingMode: "elo",
@@ -576,6 +578,8 @@ document.addEventListener("DOMContentLoaded", () => {
 				showRatings: state.showRatings,
 				preventDuplicates: state.preventDuplicates,
 				combinedDiscovered: globalState.combinedDiscovered,
+				nutdealerArmed: globalState.nutdealerArmed,
+				nutdealerHintSeen: globalState.nutdealerHintSeen,
 				felfebMode: state.felfebMode,
 
 				useSystemCursor: state.useSystemCursor,
@@ -595,6 +599,84 @@ document.addEventListener("DOMContentLoaded", () => {
 			}),
 		);
 	}
+
+	const nutdealerToggle = document.getElementById("nutdealer-toggle");
+	const nutdealerHint = document.getElementById("nutdealer-hint");
+	const nutdealerHintText = document.getElementById("nutdealer-hint-text");
+	let nutdealerSwapCount = 0;
+	let nutdealerLastSwap = null;
+	let nutdealerTypeTimer = null;
+	const nutdealerFullText = "The game between... There is a game between.";
+
+	// undertale textbox clone. types out once then waits for close.
+	function showNutdealerHint() {
+		if (!nutdealerHint || !nutdealerHintText) return;
+		nutdealerHint.style.display = "grid";
+		nutdealerHintText.textContent = "";
+		let i = 0;
+		if (nutdealerTypeTimer) clearInterval(nutdealerTypeTimer);
+		nutdealerTypeTimer = setInterval(() => {
+			i += 1;
+			nutdealerHintText.textContent = nutdealerFullText.slice(0, i);
+			if (i >= nutdealerFullText.length && nutdealerTypeTimer) {
+				clearInterval(nutdealerTypeTimer);
+				nutdealerTypeTimer = null;
+			}
+		}, 30);
+	}
+
+	// click or keypress finishes typing first, closes second.
+	function closeNutdealerHint() {
+		if (!nutdealerHint || nutdealerHint.style.display === "none") return;
+		if (nutdealerTypeTimer) {
+			if (nutdealerHintText) nutdealerHintText.textContent = nutdealerFullText;
+			clearInterval(nutdealerTypeTimer);
+			nutdealerTypeTimer = null;
+			return;
+		}
+		nutdealerHint.style.display = "none";
+	}
+
+	// 1 in 50 roll. armed by undertale tab. seen once ever.
+	function maybeRollNutdealerHint() {
+		if (!globalState.nutdealerArmed) return;
+		if (globalState.nutdealerHintSeen) return;
+		if (nutdealerHint && nutdealerHint.style.display !== "none") return;
+		if (Math.random() >= 0.02) return;
+		globalState.nutdealerHintSeen = true;
+		saveState();
+		showNutdealerHint();
+	}
+
+	// 6 alternating undertale deltarune switches unlocks button.
+	function trackNutdealerSwap(game) {
+		if (game !== "deltarune" && game !== "undertale") {
+			nutdealerSwapCount = 0;
+			nutdealerLastSwap = null;
+			return;
+		}
+		if (nutdealerLastSwap === game) return;
+		if (nutdealerLastSwap === null) nutdealerSwapCount = 1;
+		else nutdealerSwapCount += 1;
+		nutdealerLastSwap = game;
+		if (nutdealerSwapCount >= 6) {
+			if (nutdealerToggle) nutdealerToggle.style.display = "inline-block";
+			nutdealerSwapCount = 0;
+			nutdealerLastSwap = null;
+		}
+	}
+	if (nutdealerToggle) {
+		nutdealerToggle.addEventListener("click", () => {
+			window.location.href = "https://stavros-alt.github.io/nutdealer/";
+		});
+	}
+	if (nutdealerHint) {
+		nutdealerHint.addEventListener("click", closeNutdealerHint);
+	}
+	document.addEventListener("keydown", (e) => {
+		if (e.key === "z" || e.key === "Z" || e.key === "Enter")
+			closeNutdealerHint();
+	});
 
 	// export all ranking data as json
 	function exportData() {
@@ -2367,6 +2449,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		}
 
 		state.comparisons++;
+		maybeRollNutdealerHint();
 
 		// only fetch total votes every 15 votes to save on db costs
 		votesSinceLastRefresh++;
@@ -3559,6 +3642,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			if (state.currentGame === "deltarune") return;
 			saveState(); // save old game state first
 			state.currentGame = "deltarune";
+			trackNutdealerSwap("deltarune");
 			loadState();
 			applySpecialTheme(state.currentGame);
 			saveState(); // save new currentGame to globalState
@@ -3576,6 +3660,8 @@ document.addEventListener("DOMContentLoaded", () => {
 			if (state.currentGame === "undertale") return;
 			saveState(); // save old game state first
 			state.currentGame = "undertale";
+			globalState.nutdealerArmed = true;
+			trackNutdealerSwap("undertale");
 			loadState();
 			applySpecialTheme(state.currentGame);
 			saveState(); // save new currentGame to globalState
@@ -3632,6 +3718,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			if (state.currentGame === "combined") return;
 			saveState();
 			state.currentGame = "combined";
+			trackNutdealerSwap("combined");
 			if (mainTitle)
 				mainTitle.textContent = "DELTARUNE VS UNDERTALE VS UTY: WHICH IS BETTER?";
 			currentChapterFilter = "combined_all";
@@ -3654,6 +3741,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			if (state.currentGame === "uty") return;
 			saveState();
 			state.currentGame = "uty";
+			trackNutdealerSwap("uty");
 			loadState();
 			applySpecialTheme(state.currentGame);
 			saveState();
@@ -3671,6 +3759,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			if (state.currentGame === "tsus") return;
 			saveState();
 			state.currentGame = "tsus";
+			trackNutdealerSwap("tsus");
 			loadState();
 			applySpecialTheme(state.currentGame);
 			saveState();

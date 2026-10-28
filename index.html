@@ -43,7 +43,7 @@
       content="https://stavros-alt.github.io/drSongRanker/Art/funGang.jpeg"
     />
 
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="style.css?v=nutdealer2" />
   </head>
 
   <body>
@@ -60,6 +60,7 @@
       <div class="arena-container">
         <div class="game-toggle">
           <button id="dr-toggle" class="game-btn active">Deltarune</button>
+          <button id="nutdealer-toggle" class="game-btn" style="display: none">NUTDEALER</button>
           <button id="ut-toggle" class="game-btn">Undertale</button>
           <button id="combined-toggle" class="game-btn">Combined</button>
           <button id="uty-toggle" class="game-btn">U.T. Yellow</button>
@@ -1542,6 +1543,12 @@
       </div>
     </div>
 
+    <!-- nutdealer hint -->
+    <div id="nutdealer-hint" style="display: none">
+      <span id="nutdealer-hint-asterisk">*</span>
+      <span id="nutdealer-hint-text"></span>
+    </div>
+
     <!-- mobile controller thing -->
     <div id="nes-controller-overlay">
       <!-- dpad for the konami code -->
@@ -1573,7 +1580,7 @@
     <script src="uty_song_data.js"></script>
     <script src="tsus_song_data.js"></script>
     <script src="cursor.js"></script>
-    <script src="app.js?v=lazyvendor"></script>
+    <script src="app.js?v=nutdealer"></script>
     <script>
       // konami code
       const konamiCode = [
