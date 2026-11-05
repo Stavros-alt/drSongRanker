@@ -63,6 +63,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	); // discord anon wanted this
 	const audioA = document.getElementById("audioA");
 	const audioB = document.getElementById("audioB");
+	const weirdRouteJingle = document.getElementById("weird-route-jingle");
 	const previewBtns = document.querySelectorAll(".preview-btn");
 	const fullPlayBtns = document.querySelectorAll(".full-play-btn");
 	const editListBtn = document.getElementById("edit-list-btn");
@@ -646,6 +647,27 @@ document.addEventListener("DOMContentLoaded", () => {
 		globalState.nutdealerHintSeen = true;
 		saveState();
 		showNutdealerHint();
+	}
+
+	// weird route sting. 1 in 20 when pick sits under a third.
+	// click gesture covers autoplay policy. volume follows ranker.
+	function maybePlayWeirdRouteJingle(pickPercent, totalVotes) {
+		if (!(totalVotes >= 5)) return;
+		if (!(pickPercent < 100 / 3)) return;
+		if (Math.random() >= 0.05) return;
+		playWeirdRouteJingle();
+	}
+
+	// shared player. called after threshold checks pass.
+	// reuses the preloaded element so the hot attack never clips.
+	function playWeirdRouteJingle() {
+		if (!weirdRouteJingle) return;
+		try {
+			weirdRouteJingle.pause();
+			weirdRouteJingle.currentTime = 0;
+			weirdRouteJingle.volume = state.volume ?? 0.5;
+			weirdRouteJingle.play().catch(() => {});
+		} catch {}
 	}
 
 	// 6 alternating undertale deltarune switches unlocks button.
@@ -2271,7 +2293,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		if (undoBtn) undoBtn.disabled = !state.history;
 	}
 
-	async function displayAgreementStats(winner) {
+	async function displayAgreementStats(winner, preFetched) {
 		// lock buttons while agreement loads
 		chooseABtn.disabled = true;
 		chooseBBtn.disabled = true;
@@ -2279,7 +2301,8 @@ document.addEventListener("DOMContentLoaded", () => {
 		if (chooseBMobileBtn) chooseBMobileBtn.disabled = true;
 		skipBtn.disabled = true;
 
-		const songAStats = await fetchMatchupStats(currentSongA, currentSongB);
+		const songAStats =
+			preFetched || (await fetchMatchupStats(currentSongA, currentSongB));
 
 		const total = songAStats.wins + songAStats.losses;
 		let percentA = 50;
@@ -2467,8 +2490,23 @@ document.addEventListener("DOMContentLoaded", () => {
 		}
 
 		if (state.showAgreement && winner) {
-			await displayAgreementStats(winner);
-		} else {
+			const stats = await fetchMatchupStats(currentSongA, currentSongB);
+			const total = stats.wins + stats.losses;
+			const pick = winner === "A" ? stats.wins : stats.losses;
+			maybePlayWeirdRouteJingle(total > 0 ? (pick / total) * 100 : 50, total);
+			await displayAgreementStats(winner, stats);
+		} else if (winner) {
+			// agreement hidden. pre roll so the query runs on 1 in 20 votes.
+			try {
+				if (Math.random() < 0.05) {
+					const stats = await fetchMatchupStats(currentSongA, currentSongB);
+					const total = stats.wins + stats.losses;
+					if (total >= 5) {
+						const pick = winner === "A" ? stats.wins : stats.losses;
+						if ((pick / total) * 100 < 100 / 3) playWeirdRouteJingle();
+					}
+				}
+			} catch {}
 			// reenable buttons if not showing agreement
 			chooseABtn.disabled = false;
 			chooseBBtn.disabled = false;
