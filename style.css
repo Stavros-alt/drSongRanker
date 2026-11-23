@@ -39,7 +39,6 @@ body.theme-undertale .song-card {
 
 body.theme-undertale .song-card:hover {
 	border-color: var(--accent-color);
-	box-shadow: 0 0 12px #ff7f2766;
 }
 
 body.theme-undertale button {
@@ -90,7 +89,6 @@ body.theme-undertale .ranking-container {
 
 body.theme-undertale .vs {
 	color: var(--accent-color);
-	text-shadow: 0 0 15px #ff7f2788;
 }
 
 body.theme-undertale .ranking-toggle-btn.active {
@@ -435,7 +433,6 @@ body.system-cursor [style*="cursor: pointer"] {
 }
 
 .color-btn:hover {
-	transform: scale(1.1);
 	border-color: var(--accent-color);
 }
 
@@ -452,7 +449,6 @@ body.system-cursor [style*="cursor: pointer"] {
 
 .custom-color-label:hover {
 	border-color: var(--accent-color);
-	transform: scale(1.1);
 }
 
 /* the ring of death */
@@ -499,7 +495,6 @@ body.system-cursor [style*="cursor: pointer"] {
 	background: #00ff00;
 	border-color: #00ff00;
 	color: #000;
-	box-shadow: 0 0 18px #00ff00;
 }
 
 #nutdealer-hint {
@@ -582,16 +577,13 @@ h1 {
 /* mouse hovering stuff */
 @media (hover: hover) {
 	.song-card:hover {
-		transform: translate(-4px, -4px);
 		border-color: var(--accent-color);
-		box-shadow: 4px 4px 0 var(--accent-color);
 	}
 
 	button:hover {
 		background: var(--accent-color);
 		color: #000;
 		border-color: var(--accent-color);
-		box-shadow: 0 0 10px var(--accent-color);
 	}
 
 	.preview-btn:hover,
@@ -657,7 +649,7 @@ button {
 	font-size: 1em;
 	padding: 12px 24px;
 	cursor: pointer;
-	transition: all 0.1s;
+	transition: background 0.1s, color 0.1s, border-color 0.1s;
 	text-transform: uppercase;
 	font-weight: 700;
 }
@@ -666,7 +658,6 @@ button:hover {
 	background: var(--accent-color);
 	color: #000;
 	border-color: var(--accent-color);
-	box-shadow: 0 0 10px var(--accent-color);
 }
 
 button:active {
@@ -1010,7 +1001,7 @@ button:active {
 	font-size: 0.7em;
 	cursor: none;
 	/* cursor.js handles this */
-	transition: all 0.1s;
+	transition: border-color 0.1s, color 0.1s;
 	min-width: 25px;
 	flex-shrink: 0;
 }
@@ -1028,7 +1019,7 @@ button:active {
 	padding: 2px 6px;
 	font-size: 0.7em;
 	cursor: none;
-	transition: all 0.1s;
+	transition: border-color 0.1s, color 0.1s;
 	min-width: 25px;
 	flex-shrink: 0;
 	margin-left: 5px;
@@ -1616,10 +1607,8 @@ footer {
 }
 
 .discord-btn:hover {
-	transform: scale(1.05);
 	background: #5b6eae;
 	color: #fff;
-	box-shadow: 0 0 10px #7289da;
 }
 
 /* Mobile Optimizations for Suggestion Modal */
@@ -1734,7 +1723,6 @@ footer {
 	background: var(--accent-color);
 	color: #000;
 	border-color: var(--accent-color);
-	box-shadow: 0 0 10px var(--accent-color);
 }
 
 /* D-Pad Positioning */
@@ -1871,7 +1859,7 @@ footer {
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	box-shadow: 4px 4px 0 rgba(50, 0, 50, 0.5);
+	box-shadow: 4px 4px 0 #fff;
 	padding: 0;
 	font-size: 14px;
 	z-index: 5000;
@@ -1920,8 +1908,6 @@ footer {
 
 .secret-btn:hover {
 	color: #fff;
-	text-shadow: 0 0 5px #fff;
-	transform: scale(1.1);
 }
 
 /* toast notification for secrets */

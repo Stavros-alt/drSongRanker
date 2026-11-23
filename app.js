@@ -3004,7 +3004,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 				const boostBtn = document.createElement("button");
 				boostBtn.className = "boost-rank-btn";
-				boostBtn.innerHTML = state.boostedSongId === song.id ? "⚡" : "↑";
+				boostBtn.innerHTML = state.boostedSongId === song.id ? "▲" : "↑";
 				boostBtn.title = "Boost probability in next matches";
 				if (state.boostedSongId === song.id) li.classList.add("boosted");
 
@@ -3016,7 +3016,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 				const historyBtn = document.createElement("button");
 				historyBtn.className = "history-rank-btn";
-				historyBtn.innerHTML = "📜";
+				historyBtn.innerHTML = "≡";
 				historyBtn.title = "View global match history";
 				historyBtn.addEventListener("click", (e) => {
 					e.stopPropagation();
@@ -3207,7 +3207,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 			const boostBtn = document.createElement("button");
 			boostBtn.className = "boost-rank-btn";
-			boostBtn.innerHTML = state.boostedSongId === song.id ? "⚡" : "↑";
+			boostBtn.innerHTML = state.boostedSongId === song.id ? "▲" : "↑";
 			boostBtn.title = "Boost probability in next matches";
 			if (state.boostedSongId === song.id) li.classList.add("boosted");
 
@@ -3219,7 +3219,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 			const historyBtn = document.createElement("button");
 			historyBtn.className = "history-rank-btn";
-			historyBtn.innerHTML = "📜";
+			historyBtn.innerHTML = "≡";
 			historyBtn.title = "View match history";
 			historyBtn.addEventListener("click", (e) => {
 				e.stopPropagation();
