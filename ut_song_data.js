@@ -1448,7 +1448,8 @@ const utSongList = [
 // done adding songs.
 window.utSongList = utSongList;
 /* ut area per track, wiki locations roughly.
-1 ruins 2 snowdin 3 waterfall 4 hotland 5 new home, unknowns to 5. */
+1 ruins 2 snowdin 3 waterfall 4 hotland 5 new home, unknowns to 5.
+202 to 214 are 10th anniversary stream tracks. */
 const UT_AREA_BY_TRACK = {
 1:1,2:1,3:1,4:1,5:1,6:1,7:1,8:1,9:1,10:1,11:1,12:1,
 13:5,14:1,15:2,16:2,17:2,18:2,19:2,20:2,21:2,22:2,23:2,24:2,
@@ -1464,4 +1465,5 @@ const UT_AREA_BY_TRACK = {
 211:4,212:3,213:2,214:2,301:5,302:5,303:5,304:5,305:5,306:2,307:5,308:5,
 309:5,310:5,311:5,312:3,313:2,314:2,315:2,316:5,317:5,318:2,401:4,402:1,
 403:2,405:4,406:2,407:4,408:1,409:3,410:5,411:2,412:2,413:3,414:3,
+202:1,203:2,204:5,205:4,206:4,207:2,208:2,209:2,210:2,211:4,212:3,213:2,214:2,
 };
